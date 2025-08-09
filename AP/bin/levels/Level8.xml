@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="9" version="4.0">
+  <airport traffic="0.0020" copterRate="0" propRate="1" linerRate="0" top="-9000" width="26000" left="-13000" height="18000">
+    <gates>
+    <gate height="0" id="1" width="0" x="1300" course="0" y="300" free="true" />
+    <gate height="0" id="2" width="0" x="1800" course="0" y="1700" free="false" />
+    <gate height="0" id="3" width="0" x="500" course="0" y="-1700" free="false" />
+    <gate height="0" id="4" width="0" x="-1700" course="0" y="-1700" free="true" />
+    </gates>
+    <runways>
+        <runway x="-600" height="4300" course="-85" y="-700" width="700" length="4300">
+          <gates>
+            <gate ref="1" />
+            <gate ref="3" />
+            <gate ref="4" />
+          </gates>
+        </runway>
+        <runway x="100" height="5900" course="160" y="200" width="700" length="5900">
+          <gates>
+            <gate ref="2" />
+            <gate ref="1" />
+            <gate ref="3" />
+            <gate ref="4" />
+          </gates>
+        </runway>
+    </runways>
+    <aprons>
+		<apron x="800" height="1700" course="70" y="-1000" width="4100" />
+		<apron x="-1800" height="2600" course="-110" y="-1600" width="1200" />
+		<apron x="1900" height="1600" course="70" y="1800" width="1500" />
+		<apron x="-1000" height="700" course="-20" y="-1200" width="1100" />    </aprons>
+  </airport>
+  <weather>
+	<wind maxSpeed="60" minSpeed="40" variability="0.004" />
+	<clouds probability="0.003"/>
+  </weather>
+  <hints>
+	<hint>
+Today is partly cloudy. The wind could bring some fog. 
+Being in conditions of poor visibility pilots try to be careful and reduce the descent rate.
+	</hint>
+  </hints>
+</level>

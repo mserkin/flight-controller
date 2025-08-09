@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="22" version="2.0">
+  <airport traffic="0.002" copterRate="0" propRate="1" linerRate="0" top="-11500" left="-13300" width="28000" height="20000">
+    <gates>
+      <gate x="0" free="false" id="1" y="-1800" />
+      <gate x="3200" free="false" id="2" y="-300" />
+      <gate x="4100" free="true" id="3" y="-1800" />
+      <gate x="1000" free="true" id="4" y="-300" />
+      <gate x="1900" free="false" id="6" y="-1800" />
+      <gate x="-900" free="true" id="7" y="-300" />
+      <gate x="-2300" free="true" id="8" y="-1800" />
+      <gate x="-3200" free="true" id="9" y="-300" />
+    </gates>
+    <runways>
+      <runway x="-1600" length="7600" y="-1300" course="-150">
+        <gates>
+          <gate ref="7" />
+          <gate ref="8" />
+          <gate ref="9" />
+          <gate ref="1" />
+        </gates>
+      </runway>
+      <runway x="2700" length="7600" y="-1200" course="-150">
+        <gates>
+          <gate ref="2" />
+          <gate ref="6" />
+          <gate ref="4" />
+          <gate ref="3" />
+        </gates>
+      </runway>
+      <runway x="1200" length="8900" y="-2900" course="-90">
+        <gates>
+          <gate ref="1" />
+          <gate ref="6" />
+          <gate ref="8" />
+          <gate ref="3" />
+        </gates>
+      </runway>
+      <runway x="-700" length="8600" y="800" course="-90">
+        <gates>
+          <gate ref="4" />
+          <gate ref="7" />
+          <gate ref="2" />
+          <gate ref="9" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="-500" height="4500" y="-1100" width="1600" course="30" />
+      <apron x="1700" height="1300" y="-1000" width="4700" course="-60" />
+      <apron x="1100" height="500" y="-1100" width="4300" course="120" />
+      <apron x="3600" height="1200" y="-1000" width="4400" course="-60" />
+      <apron x="-2700" height="1200" y="-1100" width="4500" course="-60" />
+    </aprons>
+  </airport>
+  <weather>
+    <wind maxSpeed="50" minSpeed="60" variability="0,001" />
+    <clouds probability="0" />
+  </weather>
+</level>

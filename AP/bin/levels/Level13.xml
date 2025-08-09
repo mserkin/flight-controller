@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="11" version="3.0">
+  <airport traffic="0.0020" copterRate="0" propRate="1" linerRate="0" height="18000" width="26000" left="-12000" top="-10000">
+    <gates>
+      <gate free="true" course="0" width="0" x="-1000" id="1" y="1100" height="0" />
+      <gate free="true" course="0" width="0" x="1700" id="2" y="200" height="0" />
+      <gate free="false" course="0" width="0" x="-1100" id="3" y="-1400" height="0" />
+      <gate free="true" course="0" width="0" x="0" id="4" y="-700" height="0" />
+      <gate free="true" course="0" width="0" x="3200" id="5" y="1100" height="0" />
+    </gates>
+    <runways>
+      <runway x="700" height="4700" course="-150" y="200" width="700" length="4700">
+        <gates>
+          <gate ref="1" />
+          <gate ref="4" />
+          <gate ref="2" />
+        </gates>
+      </runway>
+      <runway x="2600" length="3900" course="-150" y="700" width="700" height="3900">
+        <gates>
+          <gate ref="5" />		  
+          <gate ref="2" />
+        </gates>
+      </runway>
+      <runway x="600" height="4000" course="120" y="-1700" width="700" length="4000" backcourseLights="1400">
+        <gates>
+          <gate ref="3" />
+          <gate ref="4" />
+        </gates>
+      </runway>
+      <runway x="-900" height="5000" course="120" y="0" width="700" length="5000" backcourseLights="1400">
+        <gates>
+          <gate ref="1" />
+          <gate ref="3" />
+          <gate ref="4" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="100" course="30" y="-700" width="1300" height="1600" />
+      <apron x="-900" course="30" y="1000" width="1300" height="1500" />
+      <apron x="2400" course="30" y="600" width="3000" height="1200" />
+      <apron x="-1200" course="-60" y="-1300" width="1900" height="1200" />
+    </aprons>
+  </airport>
+  <weather>
+    <wind minSpeed="40" maxSpeed="70" variability="0.0015" />
+    <clouds probability="0" />
+  </weather>
+</level>

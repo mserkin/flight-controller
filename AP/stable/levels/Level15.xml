@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="13" version="3.0">
+  <airport traffic="0.0025" copterRate="0.5" propRate="0.5" linerRate="0" height="18000" width="26000" left="-12000" top="-10000">
+    <gates>
+      <gate height="0" id="1" width="0" x="-1700" course="0" y="-400" free="true" />
+      <gate height="0" id="2" width="0" x="0" course="0" y="-100" free="false" />
+      <gate height="0" id="3" width="0" x="1700" course="0" y="200" free="true" />
+      <gate height="0" id="4" width="0" x="-2000" course="0" y="1200" free="false" />
+      <gate height="0" id="5" width="0" x="-300" course="0" y="1500" free="true" />
+      <gate height="0" id="6" width="0" x="1400" course="0" y="1800" free="false" />
+    </gates>
+	<helipads>  
+		<helipad x="500" y="-2800" free="true" id="7"/>
+		<helipad x="-1700" y="-2300" free="false" id="8"/>
+		<helipad x="2400" y="-1600" free="false" id="9"/>
+	</helipads>
+    <runways>
+-      <runway x="-200" height="6100" course="100" y="-900" width="700" length="6100">
+        <gates>
+          <gate ref="1" />
+          <gate ref="3" /> 
+          <gate ref="2" />
+        </gates>
+      </runway>
+-      <runway x="-100" height="5200" course="100" y="700" width="700" length="5200">
+        <gates>
+          <gate ref="4" />
+          <gate ref="6" />
+          <gate ref="5" />
+          <gate ref="3" />
+          <gate ref="1" />
+          <gate ref="2" />
+        </gates>
+      </runway>
+      <runway x="-900" height="4000" course="-170" y="0" width="700" length="4000">
+        <gates>
+          <gate ref="4" />
+          <gate ref="1" />
+          <gate ref="5" />
+          <gate ref="2" />
+        </gates>
+	  </runway>
+      <runway x="800" height="4400" course="-170" y="300" width="700" length="4400">
+        <gates>
+          <gate ref="6" />
+          <gate ref="3" />
+          <gate ref="5" />
+          <gate ref="2" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="-200" height="2700" course="10" y="800" width="4500" />
+    </aprons>
+  </airport>
+  <weather>
+	<wind minSpeed="0" maxSpeed="50" variability="0.0025" />
+	<clouds probability="0"/>
+  </weather>
+</level>

@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="4" version="4.0">
+  <airport traffic="0.0010" copterRate="0" propRate="1" top="-6000" left="-10000" width="20000" height="12000">
+    <gates>
+      <gate x="-2000" y="0" free="false" id="1" />
+      <gate x="-1200" y="0" free="false" id="2" />
+      <gate x="-400" y="0" free="true" id="3" />
+      <gate x="400" y="0" free="true" id="4" />
+      <gate x="1200" y="0" free="false" id="5" />
+      <gate x="2000" y="0" free="false" id="6" />
+    </gates>
+    <runways>
+      <runway x="500" y="-1000" course="90" length="6000">
+        <gates>
+          <gate ref="4" />
+          <gate ref="3" />
+          <gate ref="5" />
+          <gate ref="2" />
+          <gate ref="6" />
+          <gate ref="1" />
+        </gates>
+      </runway>
+      <runway x="-500" y="1000" course="270" length="6000">
+        <gates>
+          <gate ref="3" />
+          <gate ref="4" />
+          <gate ref="2" />
+          <gate ref="5" />
+          <gate ref="1" />
+          <gate ref="6" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="0" y="0" width="5000" height="1300" course="0" />
+    </aprons>
+  </airport>
+  <weather>
+	<wind maxSpeed="1" minSpeed="0" variability="0.000" />
+	<clouds probability="0"/>
+  </weather>
+  <hints>
+	<hint>
+This airport has two runways. You can use both of them. 
+	</hint>
+  </hints>
+</level>

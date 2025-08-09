@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="10" version="3.0">
+  <airport traffic="0.0020" copterRate="0" propRate="0.7" linerRate="0.3" height="18000" width="26000" left="-12000" top="-10000">
+    <gates>
+      <gate height="0" id="1" width="0" x="-1700" course="0" y="0" free="false" />
+      <gate height="0" id="2" width="0" x="-500" course="0" y="0" free="false" />
+      <gate height="0" id="3" width="0" x="700" course="0" y="0" free="false" />
+      <gate height="0" id="4" width="0" x="1900" course="0" y="0" free="false" />
+    </gates>
+    <runways>
+      <runway x="600" height="5700" course="-90" y="-1000" width="700" length="5700">
+        <gates>
+          <gate ref="3" />
+          <gate ref="2" />
+          <gate ref="4" />
+          <gate ref="1" />
+        </gates>
+      </runway>
+      <runway x="-500" height="6000" course="90" y="1000" width="700" length="6000">
+        <gates>
+          <gate ref="2" />
+          <gate ref="3" />
+          <gate ref="1" />
+          <gate ref="4" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="100" height="1300" course="0" y="0" width="4800" />
+    </aprons>
+  </airport>
+  <weather>
+	<wind minSpeed="0" maxSpeed="30" variability="0.003" />
+	<clouds probability="0"/>
+  </weather>
+</level>

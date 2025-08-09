@@ -1,0 +1,61 @@
+	//Вывод на экран - ScreenManager
+	private function addToStage(AClip: MovieClip, ARect: Rect, AnAngle: Angle) 
+	private function convertToModelLength(ALength: Number): Number 
+	private function convertToModelPoint(APoint: Point): Point 
+	private function convertToModelRect(ARect: Rect): Rect 
+	private function convertToModelSize(ASize: Size): Size 
+	private function convertToScreenPoint(APoint: Point): Point
+	private function convertToScreenRect(ARect: Rect): Rect 
+	private function convertToScreenLength(ALength: Number): Number	
+	private function convertToScreenSize(ASize: Size): Size
+	private function displayText(AText: String, ASize: Number, AColor: int, APoint: Point)
+	private function scaleScene()
+
+	//Ввод/формирование кадра - FrameBuilder
+	public function buildFrame() 
+	private function displayProgress()
+	private function displayPlanes() 
+	private function displayRunways() 
+	private function displayTitles() 
+	private function displayDebug()
+	private function init() 
+ 	private function displayLevelConfig(AConfig: XML)
+	private function printTitle(AText: String, AColor: int) 
+	
+	//Рисование самолета - PlaneView
+	private function createPlaneFrameImage(APlane: Plane): MovieClip
+	private function createPlaneImage(APlane: Plane): MovieClip
+	private function createPlaneShadowImage(APlane: Plane): MovieClip
+	private function displayArrivalMark(APlane: Plane, AScreenRect: Rect) 
+	private function displayGauge(APlane: Plane, APlaneScreenRect: Rect) 
+	private function displayHeadlight(APlane: Plane, APlaneScreenRect: Rect) 
+	private function displayPath(APlane: Plane)
+	private function displayPlane(APlane: Plane, APlaneScreenRect: Rect) 
+	private function displayPlaneBody(APlane: Plane, APlaneScreenRect: Rect) 
+	private function displayPlaneShadow(APlane: Plane, APlaneScreenRect: Rect) 
+	
+	//Рисование ВПП - RunwayView
+	private function displayApproachLights(ARunway: Runway, ARunwayScreenRect: Rect, AHorProj: Number, AVertProj: Number)
+	private function displayRunwayGraphic(AGraphicType: int)
+	private function displayWindLights(ARunway: Runway, ASide: int, ARunwayScreenRect: Rect, AHorProj: Number, AVertProj: Number)
+
+	//Рисование аэродрома (кроме ВПП) - AirportView
+	private function displayAprons() 
+	private function displayGates()
+	private function displayClouds()
+	private function getGateImage(AGate: Gate, AnImageSizeObject: Object)
+
+	//Рисование меню  - MenuView
+	private function displayBoxMenu()
+	private function displayLevelMenu()
+	private function getMenuParameters(IsBoxMenu: Boolean)
+	private function getMenuIconNumberByCoords(IsBoxMenu: Boolean, AnX: Number, AnY: Number): int
+	private function checkBoxCompleted(ABoxNumber: int)
+	
+	//Рисование пользовательского интерфейса - UIView
+	private function displayButtons() 
+	private function displayFrame() 
+	private function displayLevelNumber()
+	private function displayOverheadPanel() 
+	private function displayWindIndicator()
+	

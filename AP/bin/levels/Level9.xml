@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="10" version="4.0">
+  <airport traffic="0.0030" copterRate="0" propRate="0.2" linerRate="0.4" height="18000" width="26000" left="-15000" top="-9500">
+    <gates>
+      <gate height="0" id="1" width="0" x="-3400" course="0" y="-2800" free="true" />
+      <gate height="0" id="2" width="0" x="-3400" course="0" y="-800" free="false" />
+      <gate height="0" id="3" width="0" x="-1700" course="0" y="-800" free="false" />
+      <gate height="0" id="4" width="0" x="-3400" course="0" y="300" free="false" />
+      <gate height="0" id="5" width="0" x="-1700" course="0" y="300" free="false" />
+      <gate height="0" id="6" width="0" x="300" course="0" y="300" free="true" />
+      <gate height="0" id="7" width="0" x="-3400" course="0" y="2300" free="true" />
+    </gates>
+    <runways>
+      <runway x="-4400" height="6500" course="180" y="-300" width="700" length="6500">
+        <gates>
+          <gate ref="2" />
+          <gate ref="4" />
+          <gate ref="1" />
+          <gate ref="7" />
+        </gates>
+      </runway>
+      <runway x="-700" height="4700" course="180" y="-200" width="700" length="4700">
+        <gates>
+          <gate ref="3" />
+          <gate ref="5" />
+          <gate ref="6" />
+        </gates>
+      </runway>
+      <runway x="-2500" height="5500" course="90" y="-1800" width="700" length="5500">
+        <gates>
+          <gate ref="1" />
+          <gate ref="2" />
+          <gate ref="3" />
+        </gates>
+      </runway>
+      <runway x="-2300" height="6100" course="90" y="1300" width="700" length="6100">
+        <gates>
+          <gate ref="7" />
+          <gate ref="5" />
+          <gate ref="4" />
+          <gate ref="6" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="-3400" height="1300" course="-90" y="-1900" width="3200" />
+      <apron x="-3700" height="1900" course="-90" y="1400" width="3200" />
+      <apron x="-1500" height="1600" course="0" y="-1100" width="2000" />
+      <apron x="-900" height="1200" course="0" y="400" width="3200" />
+    </aprons>
+  </airport>
+  <weather>
+	<wind minSpeed="0" maxSpeed="60" variability="0.002" />
+	<clouds probability="0.002"/>
+  </weather>
+  <hints>
+	<hint clipId="HintPanelAnimation5">
+It's time to practice at the international airport. Liners and supersonic aircrafts are flying here. They are faster so they need longer distance to stop.
+	</hint>
+	<hint clipId="HintPanelAnimation5">
+Use the long runways for supersonics and the medium-length runways for liners.
+	</hint>
+  </hints>
+</level>

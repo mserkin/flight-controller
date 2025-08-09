@@ -1,0 +1,50 @@
+<NotepadPlus>
+    <Session activeView="0">
+        <mainView activeIndex="42">
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1710" startPos="115" endPos="115" selMode="0" lang="&#x041E;&#x0431;&#x044B;&#x0447;&#x043D;&#x044B;&#x0439; &#x0422;&#x0435;&#x043A;&#x0441;&#x0442;" encoding="-1" filename="S:\Projects\AP\bin\WBS.asc" />
+            <File firstVisibleLine="83" xOffset="0" scrollWidth="1533" startPos="2133" endPos="2133" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\input\Core.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1314" startPos="324" endPos="324" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\views\MenuView.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1533" startPos="0" endPos="0" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\views\HintPanelView.as" />
+            <File firstVisibleLine="52" xOffset="0" scrollWidth="1533" startPos="2133" endPos="2133" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\views\InfoPanelView.as" />
+            <File firstVisibleLine="208" xOffset="0" scrollWidth="1530" startPos="7074" endPos="7074" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\views\AircraftView.as" />
+            <File firstVisibleLine="29" xOffset="0" scrollWidth="1208" startPos="1819" endPos="1819" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\views\AirfieldView.as" />
+            <File firstVisibleLine="36" xOffset="0" scrollWidth="1404" startPos="1819" endPos="1819" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\views\AirportView.as" />
+            <File firstVisibleLine="147" xOffset="0" scrollWidth="1350" startPos="3868" endPos="3868" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\views\FrameBuilder.as" />
+            <File firstVisibleLine="36" xOffset="0" scrollWidth="1647" startPos="2133" endPos="2133" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\controllers\GameController.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1224" startPos="490" endPos="490" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\controllers\EditController.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="756" startPos="79" endPos="79" selMode="0" lang="&#x041E;&#x0431;&#x044B;&#x0447;&#x043D;&#x044B;&#x0439; &#x0422;&#x0435;&#x043A;&#x0441;&#x0442;" encoding="-1" filename="S:\Projects\AP\bin\ap\controllers\IController.as" />
+            <File firstVisibleLine="26" xOffset="0" scrollWidth="800" startPos="1339" endPos="1339" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\IAirfield.as" />
+            <File firstVisibleLine="74" xOffset="0" scrollWidth="816" startPos="2535" endPos="2535" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\basic\Angle.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="693" startPos="94" endPos="94" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\basic\Points.as" />
+            <File firstVisibleLine="56" xOffset="0" scrollWidth="1533" startPos="1805" endPos="1805" selMode="0" lang="&#x041E;&#x0431;&#x044B;&#x0447;&#x043D;&#x044B;&#x0439; &#x0422;&#x0435;&#x043A;&#x0441;&#x0442;" encoding="-1" filename="S:\Projects\AP\bin\ap\basic\Point.as" />
+            <File firstVisibleLine="69" xOffset="0" scrollWidth="824" startPos="2037" endPos="2037" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\basic\ModelObject.as" />
+            <File firstVisibleLine="43" xOffset="0" scrollWidth="1272" startPos="1472" endPos="1472" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\basic\Rect.as" />
+            <File firstVisibleLine="44" xOffset="0" scrollWidth="1533" startPos="1235" endPos="1235" selMode="0" lang="&#x041E;&#x0431;&#x044B;&#x0447;&#x043D;&#x044B;&#x0439; &#x0422;&#x0435;&#x043A;&#x0441;&#x0442;" encoding="-1" filename="S:\Projects\AP\bin\ap\basic\Size.as" />
+            <File firstVisibleLine="90" xOffset="0" scrollWidth="864" startPos="3221" endPos="3221" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\instrumental\ScreenManager.as" />
+            <File firstVisibleLine="104" xOffset="0" scrollWidth="1350" startPos="5258" endPos="5268" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\enumerations\AircraftState.as" />
+            <File firstVisibleLine="9" xOffset="290" scrollWidth="1243" startPos="1534" endPos="1534" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\enumerations\DisplayMode.as" />
+            <File firstVisibleLine="71" xOffset="0" scrollWidth="1206" startPos="5168" endPos="5168" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\enumerations\AircraftType.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="640" startPos="92" endPos="113" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\basic\PointsEventDispatcher.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="728" startPos="37" endPos="26" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\instrumental\Instruments.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="640" startPos="39" endPos="39" selMode="0" lang="&#x041E;&#x0431;&#x044B;&#x0447;&#x043D;&#x044B;&#x0439; &#x0422;&#x0435;&#x043A;&#x0441;&#x0442;" encoding="-1" filename="S:\Projects\AP\bin\ap\enumerations\Colors.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1533" startPos="9" endPos="9" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\instrumental\CustomDispatcher.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1024" startPos="39" endPos="21" selMode="0" lang="&#x041E;&#x0431;&#x044B;&#x0447;&#x043D;&#x044B;&#x0439; &#x0422;&#x0435;&#x043A;&#x0441;&#x0442;" encoding="-1" filename="S:\Projects\AP\bin\ap\instrumental\ObjectLoadEvent.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="712" startPos="43" endPos="43" selMode="0" lang="&#x041E;&#x0431;&#x044B;&#x0447;&#x043D;&#x044B;&#x0439; &#x0422;&#x0435;&#x043A;&#x0441;&#x0442;" encoding="-1" filename="S:\Projects\AP\bin\ap\instrumental\Profiler.as" />
+            <File firstVisibleLine="51" xOffset="0" scrollWidth="927" startPos="1819" endPos="1819" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\configuration\Starter.as" />
+            <File firstVisibleLine="146" xOffset="0" scrollWidth="1533" startPos="4229" endPos="4229" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\Airport.as" />
+            <File firstVisibleLine="329" xOffset="0" scrollWidth="1533" startPos="10319" endPos="10319" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\Aircraft.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1476" startPos="336" endPos="342" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\Copter.as" />
+            <File firstVisibleLine="19" xOffset="0" scrollWidth="1467" startPos="0" endPos="0" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\Plane.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1080" startPos="403" endPos="403" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\Cloud.as" />
+            <File firstVisibleLine="95" xOffset="0" scrollWidth="928" startPos="2728" endPos="2728" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\Helipad.as" />
+            <File firstVisibleLine="118" xOffset="0" scrollWidth="1056" startPos="3497" endPos="3497" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\Gate.as" />
+            <File firstVisibleLine="215" xOffset="0" scrollWidth="936" startPos="5969" endPos="5969" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\Runway.as" />
+            <File firstVisibleLine="35" xOffset="0" scrollWidth="972" startPos="1550" endPos="1550" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\model\Wind.as" />
+            <File firstVisibleLine="45" xOffset="0" scrollWidth="1638" startPos="1514" endPos="4567" selMode="0" lang="&#x041E;&#x0431;&#x044B;&#x0447;&#x043D;&#x044B;&#x0439; &#x0422;&#x0435;&#x043A;&#x0441;&#x0442;" encoding="-1" filename="S:\Projects\AP\docs\responsibilities.as" />
+            <File firstVisibleLine="25" xOffset="0" scrollWidth="1791" startPos="2228" endPos="2228" selMode="0" lang="&#x041E;&#x0431;&#x044B;&#x0447;&#x043D;&#x044B;&#x0439; &#x0422;&#x0435;&#x043A;&#x0441;&#x0442;" encoding="-1" filename="S:\Projects\AP\docs\arch_todo.as" />
+            <File firstVisibleLine="38" xOffset="0" scrollWidth="1368" startPos="2133" endPos="2133" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\controllers\ControlDispatcher.as" />
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="621" startPos="283" endPos="283" selMode="0" lang="Flash actionscript" encoding="-1" filename="S:\Projects\AP\bin\ap\controllers\GameProgress.as" />
+        </mainView>
+        <subView activeIndex="0" />
+    </Session>
+</NotepadPlus>

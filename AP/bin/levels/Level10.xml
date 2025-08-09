@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="8" version="3.0">
+  <airport traffic="0.0020" copterRate="0" propRate="1" linerRate="0" height="18000" width="26000" left="-12400" top="-9600">
+    <gates>
+      <gate x="-500" y="-2100" width="0" height="0" course="0" free="true" id="1" />
+      <gate x="2300" y="-1200" width="0" height="0" course="0" free="true" id="2" />
+      <gate x="300" y="-100" width="0" height="0" course="0" free="true" id="3" />
+      <gate x="2300" y="1000" width="0" height="0" course="0" free="true" id="4" />
+      <gate x="-500" y="1800" width="0" height="0" course="0" free="false" id="5" />
+    </gates>
+    <runways>
+      <runway x="-1600" y="-100" width="700" height="5700" course="0" length="5700">
+        <gates>
+          <gate ref="1" />
+          <gate ref="5" />
+        </gates>
+      </runway>
+      <runway x="0" y="-1100" width="700" height="6000" course="60" length="6000">
+        <gates>
+          <gate ref="2" />
+          <gate ref="3" />
+          <gate ref="1" />
+        </gates>
+      </runway>
+      <runway x="0" y="900" width="700" height="6000" course="120" length="6000">
+        <gates>
+          <gate ref="4" />
+          <gate ref="3" />
+          <gate ref="5" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="500" y="-2500" width="3900" height="800" course="180" />
+      <apron x="-300" y="1500" width="2800" height="900" course="0" />
+      <apron x="-100" y="-1700" width="2300" height="800" course="0" />
+      <apron x="500" y="2300" width="3700" height="800" course="0" />
+      <apron x="300" y="-100" width="2400" height="1200" course="-90" />
+      <apron x="2200" y="-1200" width="2000" height="1300" course="-30" />
+      <apron x="2200" y="1000" width="2000" height="1300" course="-150" />
+    </aprons>
+  </airport>
+  <weather>
+    <wind minSpeed="60" maxSpeed="70" variability="0" />
+    <clouds probability="0" />
+  </weather>
+</level>

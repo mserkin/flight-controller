@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="8" version="4.0">
+  <airport traffic="0.0020" copterRate="0" propRate="1" linerRate="0" height="18000" width="26000" left="-12000" top="-10000">
+    <gates>
+      <gate height="0" id="1" width="0" x="900" course="0" y="-1700" free="false" />
+      <gate height="0" id="2" width="0" x="-2100" course="0" y="-200" free="false" />
+      <gate height="0" id="3" width="0" x="0" course="0" y="600" free="false" />
+      <gate height="0" id="4" width="0" x="1900" course="0" y="1300" free="true" />
+      <gate height="0" id="5" width="0" x="-600" course="0" y="2400" free="true" />
+    </gates>
+    <runways>
+      <runway x="-1000" height="6000" course="-160" y="0" width="700" length="6000">
+        <gates>
+          <gate ref="5" />
+          <gate ref="3" />
+          <gate ref="1" />
+          <gate ref="2" />
+        </gates>
+      </runway>
+      <runway x="500" height="6000" course="-70" y="-400" width="700" length="6000">
+        <gates>
+          <gate ref="4" />
+          <gate ref="3" />
+          <gate ref="2" />
+          <gate ref="1" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="-2000" height="1700" course="20" y="-100" width="1500" />
+      <apron x="400" height="1600" course="-70" y="-500" width="4100" />
+      <apron x="-700" height="1600" course="-70" y="2400" width="1700" />
+      <apron x="1900" height="1700" course="20" y="1300" width="2100" />
+    </aprons>
+  </airport>
+  <weather>
+	<wind minSpeed="20" maxSpeed="50" variability="0.004" />
+	<clouds probability="0"/>
+  </weather>
+  <hints>
+	<hint>
+The wind is unstable today. Look at the wind indicator from time to time.
+	</hint>
+  </hints>
+</level>

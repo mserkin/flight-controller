@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="25" version="3.0">
+  <airport traffic="0.004" copterRate="0.15" propRate="0.30" linerRate="0.30" height="20000" width="29000" left="-13500" top="-11000">
+    <gates>
+      <gate height="0" id="1" width="0" x="-1300" course="0" y="-1500" free="true" />
+      <gate height="0" id="2" width="0" x="1000" course="0" y="-1500" free="true" />
+      <gate height="0" id="3" width="0" x="3300" course="0" y="-1500" free="false" />
+      <gate height="0" id="4" width="0" x="-2700" course="0" y="200" free="true" />
+      <gate height="0" id="5" width="0" x="-400" course="0" y="300" free="false" />
+      <gate height="0" id="6" width="0" x="1900" course="0" y="300" free="true" />
+      <gate height="0" id="7" width="0" x="4200" course="0" y="300" free="true" />
+      <gate height="0" id="8" width="0" x="0" course="0" y="3300" free="false" />
+      <gate height="0" id="9" width="0" x="1400" course="0" y="3300" free="true" />
+    </gates>
+	<helipads>
+		<helipad x="-4200" y="-1500" free="false" id="10"/>
+		<helipad x="-5600" y="200" free="true" id="11"/>
+	</helipads>
+    <runways>
+      <runway x="-2700" height="5700" course="40" y="-1300" width="700" length="5700">
+        <gates>
+          <gate ref="4" />
+          <gate ref="1" />
+        </gates>
+      </runway>
+      <runway x="-300" height="7000" course="40" y="-1200" width="700" length="7000">
+        <gates>
+          <gate ref="4" />
+          <gate ref="2" />
+          <gate ref="1" />
+          <gate ref="5" />
+        </gates>
+      </runway>
+      <runway x="1500" height="4800" course="40" y="-600" width="700" length="4800" courseLights="2500">
+        <gates>
+          <gate ref="2" />
+          <gate ref="6" />
+          <gate ref="3" />
+          <gate ref="5" />
+        </gates>
+      </runway>
+      <runway x="3900" height="6700" course="40" y="-900" width="700" length="6700" courseLights="3200">
+        <gates>
+          <gate ref="7" />
+          <gate ref="3" />
+          <gate ref="6" />
+        </gates>
+      </runway>
+      <runway x="1500" height="6600" course="90" y="-500" width="700" length="6600" courseLights="2500">
+        <gates>
+          <gate ref="1" />
+          <gate ref="7" />
+          <gate ref="2" />
+          <gate ref="6" />
+          <gate ref="5" />
+          <gate ref="3" />
+        </gates>
+      </runway>
+      <runway x="700" height="5400" course="90" y="2400" width="700" length="5400">
+        <gates>
+          <gate ref="8" />
+          <gate ref="9" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="-1200" height="1400" course="-50" y="-1400" width="1600" />
+      <apron x="-2700" height="1400" course="-50" y="200" width="1000" />
+      <apron x="700" height="3400" course="-140" y="-600" width="1900" />
+      <apron x="4500" height="1200" course="-50" y="-200" width="3400" />
+      <apron x="2300" height="2100" course="-50" y="-500" width="3500" />
+      <apron x="700" height="1200" course="0" y="3200" width="2400" />
+    </aprons>
+  </airport>
+  <weather>
+	<wind minSpeed="40" maxSpeed="70" variability="0.008" />
+	<clouds probability="0.002"/>
+  </weather>
+</level>

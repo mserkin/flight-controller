@@ -1,0 +1,6 @@
+ap.basic: 7/14
+ap.controllers: 4
+ap.enumerations: 3
+ap.instrumental: 2/4
+ap.model: 6
+ap.views: 4

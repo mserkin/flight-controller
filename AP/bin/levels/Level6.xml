@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="3" version="4.0">
+  <airport traffic="0.0020" copterRate="0" propRate="1" linerRate="0" height="18000" width="26000" left="-12000" top="-10000">
+    <gates>
+      <gate height="0" id="1" width="0" x="-2600" course="0" y="-100" free="true" />
+      <gate height="0" id="2" width="0" x="-500" course="0" y="-1300" free="true" />
+      <gate height="0" id="3" width="0" x="-500" course="0" y="1300" free="false" />
+      <gate height="0" id="4" width="0" x="1900" course="0" y="0" free="true" />
+    </gates>
+    <runways>
+      <runway x="0" height="6000" course="-120" y="-300" width="700" length="6000">
+        <gates>
+          <gate ref="2" />
+          <gate ref="3" />
+          <gate ref="4" />
+          <gate ref="1" />
+        </gates>
+      </runway>
+      <runway x="0" height="6000" course="-60" y="300" width="700" length="6000">
+        <gates>
+          <gate ref="3" />
+          <gate ref="2" />
+          <gate ref="4" />
+          <gate ref="1" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="-200" height="4000" course="-180" y="0" width="5900" />
+    </aprons>
+  </airport>
+  <weather>
+	<wind minSpeed="20" maxSpeed="40" variability="0" />
+	<clouds probability="0"/>
+  </weather>
+  <hints>
+	<hint clipId="HintPanelAnimation4">
+Today is a windy day. Do you see the wind indicator in the upper left corner? It shows the stength and the direction of the wind. 
+	</hint>
+	<hint clipId="HintPanelAnimation2">
+Each runway has two indicators on it ends. This indicators show the working direction of the runway. 
+	</hint>
+	<hint clipId="HintPanelAnimation3">
+Of course, you can try to land a plane in the opposite direction, but keep in mind that more distance is needed for a plane if it goes down the wind.	
+	</hint>
+  </hints>
+</level>

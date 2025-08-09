@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="1" version="4.0">
+  <airport traffic="0.000" copterRate="0" propRate="1" linerRate="0" left="-10000" top="-7000" width="20000" height="14000">
+    <gates>
+      <gate x="800" free="true" id="2" y="-1200" />
+      <gate x="0" free="true" id="3" y="-1200" />
+      <gate x="-800" free="true" id="4" y="-1200" />
+    </gates>
+    <runways>
+      <runway x="0" length="6000" y="0" course="90">
+        <gates>
+          <gate ref="3" />		
+          <gate ref="2" />
+          <gate ref="4" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="0" height="1500" y="-1050" width="3300" course="0" />
+    </aprons>
+  </airport>
+  <weather>
+	<wind maxSpeed="1" minSpeed="0" variability="0.00" />
+	<clouds probability="0.0"/>
+  </weather>
+  <hints>
+	<hint>
+Good morning, traffic controller! Your goal is to help arriving planes to land. 
+	</hint>
+	<hint clipId="HintPanelAnimation1">
+Do you see this plane? Tap it, and drag your finger across the screen to the edge of the runway. Let go your finger when the runway is highlighted.
+	</hint>
+  </hints>
+</level>

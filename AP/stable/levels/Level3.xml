@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<level targetLandings="3" version="4.0">
+  <airport traffic="0.000" copterRate="0" propRate="1" top="-7000" left="-10000" width="20000" height="14000">
+    <gates>
+      <gate x="800" free="false" id="2" y="-1200" />
+      <gate x="0" free="false" id="3" y="-1200" />
+      <gate x="-800" free="false" id="4" y="-1200" />
+    </gates>
+    <runways>
+      <runway x="0" length="6000" y="0" course="90">
+        <gates>
+          <gate ref="3" />
+          <gate ref="2" />
+          <gate ref="4" />
+        </gates>
+      </runway>
+    </runways>
+    <aprons>
+      <apron x="0" height="1500" y="-1050" width="3300" course="0" />
+    </aprons>
+  </airport>
+  <weather>
+	<wind maxSpeed="1" minSpeed="0" variability="0.000" />
+	<clouds probability="0"/>
+  </weather>
+  <hints>
+	<hint>
+Now you have to land several planes!
+	</hint>
+  </hints>
+</level>
