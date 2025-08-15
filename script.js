@@ -1,18 +1,18 @@
 //import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 //const loader = new SVGLoader();
 
-const width = window.innerWidth;
-const height = window.innerHeight;
+var canvasWidth = window.innerWidth;
+var canvasHeight = window.innerHeight;
 
 const xAxis = new THREE.Vector3(1, 0, 0);
 const yAxis = new THREE.Vector3(0, 1, 0);
 const zAxis = new THREE.Vector3(0, 0, 1);
 
-const renderer = new THREE.WebGLRenderer({antialias: true});
-renderer.setSize(width, height); 
+const renderer = new THREE.WebGLRenderer({antialias: true}); //THREE.WebGLRenderer( { stencil: true } );
 renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(canvasWidth, canvasHeight); 
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type =  THREE.PCFSoftShadowMap; //THREE.VSMShadowMap;
+renderer.shadowMap.type =  THREE.PCFSoftShadowMap; //THREE.PCFShadowMap; //THREE.VSMShadowMap;
 renderer.setAnimationLoop(render);
 document.body.appendChild(renderer.domElement);
 
@@ -21,26 +21,58 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 
 //===Lights===
-const light0 = new THREE.DirectionalLight(0xffffff, 1);
+const light0 = new THREE.DirectionalLight(0xffffff, 1.0);
 light0.position.set(0, 0, 0).normalize();
+//light0.position.copy(camera.position);
 light0.castShadow = false;
-
 scene.add(light0);
 
-const light1 = new THREE.DirectionalLight(0x808080, 1);
-light1.position.set(0, 10, 0).normalize();
+//const light1 = new THREE.AmbientLight(0x808080);
+//const light1 = new THREE.DirectionalLight(0xffffff, 1.0);
+//const light1 = new THREE.PointLight(0xffffff, 3, 0, 0);
+const light1 = new THREE.SpotLight(0xffffff, 1.0);
+
+light1.position.set(0, 5, 0); //.normalize();
+light1.lookAt(scene.position);
+
+const lightTarget = new THREE.Object3D(); 
+lightTarget.position.set(0, 0, 0);
+light1.target = lightTarget;
+
+//light1.target.position.set(0, 0, 0);
+//light1.target.position.set(0, 0, 0); //.applyQuaternion(light1.quaternion);
+//light1.target.updateMatrixWorld();
+
 light1.castShadow = true;
-light1.shadow.mapSize.width = 512;
-light1.shadow.mapSize.height = 512;
-light1.shadow.camera.top = 5;
-light1.shadow.camera.bottom = -5;
-light1.shadow.camera.left = -5;
-light1.shadow.camera.right = 5;
-light1.shadow.camera.near = 0.0;
-light1.shadow.camera.far = 100;
 light1.shadow.radius = 5;
-light1.shadow.blurSamples = 10;
+light1.shadow.blurSamples = 1;
+light1.shadow.mapSize.width = 512
+light1.shadow.mapSize.height = 512;
+
+//---for DirectionalLight (OrthographicCamera)---
+light1.shadow.camera.left = -5; //-5;
+light1.shadow.camera.right = 5; //5;
+light1.shadow.camera.top = 5; //5;
+light1.shadow.camera.bottom = -5; //-5;
+light1.shadow.bias = -0.0;
+//---for PointLight or SpotLight (PerspectiveCamera)---
+light1.shadow.camera.fov = 90; //90;
+light1.shadow.camera.aspect = 1; //1;
+light1.shadow.camera.near = 0.1; //0.5;
+light1.shadow.camera.far = 10; //500;
+
+//light1.shadow.camera.lookAt(scene.position);
+//light1.shadow.camera.updateProjectionMatrix();
+//light1.shadow.needsUpdate = true;
+//light1.shadow.updateMatrices(light1);
+
 scene.add(light1);
+//scene.add(lightTarget);
+
+//scene.traverse((child) => {if(child.material) child.material.needsUpdate=true});
+
+const helper = new THREE.CameraHelper(light1.shadow.camera);
+scene.add(helper);
 
 //===Camera===
 var camRadius = 15;
@@ -49,10 +81,9 @@ const camAngle = new THREE.Vector3();
 camAngle.x = 45;
 camAngle.y = 30;
 camAngle.z = 45;
-camera = new THREE.PerspectiveCamera(20, width / height, 0.1, 1000);
-camera.aspect = width / height; 
+camera = new THREE.PerspectiveCamera(20, canvasWidth / canvasHeight, 0.1, 1000);
+camera.aspect = canvasWidth / canvasHeight; 
 camera.updateProjectionMatrix();
-
 function cameraPositionUpdate() {
 	camera.position.x = camRadius * Math.sin(THREE.MathUtils.degToRad(camAngle.x)) * Math.cos(THREE.MathUtils.degToRad(camAngle.y));
 	camera.position.z = camRadius * Math.cos(THREE.MathUtils.degToRad(camAngle.x)) * Math.cos(THREE.MathUtils.degToRad(camAngle.y));
@@ -127,36 +158,84 @@ planeShape.lineTo(-0.3, 0);
 planeShape.lineTo(-0.3, -2);
 
 const extrudeSettings = {
-	steps: 2,
+	steps: 8,
 	depth: 0.5,
-	bevelEnabled: false,
-	bevelSize: 1,
-	bevelSegments: 2,
-	bevelThickness: 1,
-	bevelOffset: 0,
+	bevelEnabled: true,
+	bevelSize: 0.2,
+	bevelSegments: 8,
+	bevelThickness: 0.2,
+	bevelOffset: 0
 };
 const planeGeometry = new THREE.ExtrudeGeometry(planeShape, extrudeSettings);
 const planeMaterial = new THREE.MeshLambertMaterial({color: 0xA0A0A0});
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.castShadow = true;
+plane.position.y = 1.5;
 plane.position.z = -0.1;
 plane.rotation.x = Math.PI / 2;
-plane.position.y = 1;
 plane.scale.set(0.1,0.1,0.1);
 scene.add(plane);
 
 planeAngle = 0;
 planeRadius = 6;
-planeAltitude = 1;
+planeAltitude = 0.3;
+
+planeYaw = 0;
+planePitch = 0;
+planeRoll = 0;
+
 function planePositionUpdate() {
 	plane.position.x = planeRadius * Math.sin(THREE.MathUtils.degToRad(planeAngle)) * Math.cos(THREE.MathUtils.degToRad(planeAngle));
 	plane.position.z = planeRadius * Math.cos(THREE.MathUtils.degToRad(planeAngle)) * Math.cos(THREE.MathUtils.degToRad(planeAngle)) - planeRadius / 2;
+	
+	planeAltitude += planePitch / 1000;
 	plane.position.y = planeAltitude;
 
-    plane.rotation.z = THREE.MathUtils.degToRad(-planeAngle * 2 - 90);
+    plane.rotation.x = Math.PI / 2;;
+    plane.rotation.y = 0;
+    plane.rotation.z = 0;
+
+//    plane.rotation.z = THREE.MathUtils.degToRad(-planeAngle * 2 - 90);
+
+    plane.rotateOnWorldAxis(xAxis, THREE.MathUtils.degToRad(-planePitch)); //pitch
+    plane.rotateOnWorldAxis(zAxis, THREE.MathUtils.degToRad(-20)); //roll
+    plane.rotateOnWorldAxis(yAxis, THREE.MathUtils.degToRad(planeAngle * 2 + 90)); //yaw
+
 //    plane.rotation.y = THREE.MathUtils.degToRad(planeAngle);
-//    plane.rotateOnWorldAxis(zAxis, THREE.MathUtils.degToRad(-1));
 }
+
+//===Star===
+//const randomPoints = [];
+//for (let i = 0; i < 10; i++) {
+//	randomPoints.push(new THREE.Vector3((i - 4.5) * 5, THREE.MathUtils.randFloat(-5, 5), THREE.MathUtils.randFloat(-5, 5)));
+//}
+//const randomSpline = new THREE.CatmullRomCurve3(randomPoints);
+
+const starExtrudeSettings = {
+	steps: 8,
+	depth: 1,
+	bevelEnabled: true,
+	bevelThickness: 0.2,
+	bevelSize: 0.4,
+	bevelSegments: 1
+//	extrudePath: randomSpline
+};
+const starPoints = [];
+const starPointsCount = 7;
+for (let i = 0; i < starPointsCount * 2; i++) {
+	const n = i % 2 == 1 ? 1 : 2;
+	const a = i / starPointsCount * Math.PI;
+	starPoints.push(new THREE.Vector2(Math.cos(a) * n, Math.sin(a) * n));
+}
+const starShape = new THREE.Shape(starPoints);
+const starGeometry = new THREE.ExtrudeGeometry(starShape, starExtrudeSettings);
+const starMaterial0 = new THREE.MeshLambertMaterial({color: 0xc00000, wireframe: false});
+const starMaterial1 = new THREE.MeshLambertMaterial({color: 0xff8000, wireframe: false});
+const starMaterials = [starMaterial0, starMaterial1];
+
+const star = new THREE.Mesh(starGeometry, starMaterials);
+star.position.z = -0.5;
+scene.add(star);
 
 //===Field===
 const fieldMaterial0 = new THREE.MeshLambertMaterial({color: 0x009000});
@@ -183,8 +262,8 @@ var isPointerDown = false;
 
 document.addEventListener('pointerdown', onPointerDown);
 function onPointerDown(event) {
-	pointerDown.x = (event.clientX / window.innerWidth ) * 2 - 1;
-	pointerDown.y = -(event.clientY / window.innerHeight ) * 2 + 1;
+	pointerDown.x = (event.clientX / canvasWidth ) * 2 - 1;
+	pointerDown.y = -(event.clientY / canvasHeight ) * 2 + 1;
 	pointerPrev.x = pointerDown.x;
 	pointerPrev.y = pointerDown.y;
 	camAngleDown.x = camAngle.x;
@@ -204,8 +283,8 @@ function onPointerMove(event) {
 	var scale = 180;
 	pointerPrev.x = pointer.x;
 	pointerPrev.y = pointer.y;
-	pointer.x = (event.clientX / window.innerWidth ) * 2 - 1;
-	pointer.y = -(event.clientY / window.innerHeight ) * 2 + 1;
+	pointer.x = (event.clientX / canvasWidth ) * 2 - 1;
+	pointer.y = -(event.clientY / canvasHeight ) * 2 + 1;
 	if (isPointerDown) {
 		camAngle.x = camAngleDown.x - (pointer.x-pointerDown.x) * scale; if (camAngle.x < 0) camAngle.x += 360; if (camAngle.x > 360) camAngle.x -= 360;
 		camAngle.y = camAngleDown.y - (pointer.y-pointerDown.y) * scale; if (camAngle.y < 0) camAngle.y = 0; if (camAngle.y > 90) camAngle.y = 90;
@@ -220,12 +299,17 @@ function onMouseWheel(event) {
 	cameraPositionUpdate();
 }
 
-window.addEventListener( 'resize', onWindowResize );
+window.addEventListener( 'resize', onWindowResize);
 function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
- 	renderer.setSize(window.innerWidth, window.innerHeight);
+	canvasWidth = window.innerWidth;
+    canvasHeight = window.innerHeight;
+
+	renderer.setPixelRatio(window.devicePixelRatio);
+ 	renderer.setSize(canvasWidth, canvasHeight);
     renderer.render(scene, camera);
+
+    camera.aspect = canvasWidth / canvasHeight;
+    camera.updateProjectionMatrix();
 //	const aspect = window.innerWidth / window.innerHeight;
 //	camera.left = - frustumSize * aspect / 2;
 //	camera.right = frustumSize * aspect / 2;
@@ -246,12 +330,12 @@ var render = function () {
     	if (planeAngle >= 360) {
     		planeAngle -= 360;
     	}
-    	planeAltitude = Math.sin(THREE.MathUtils.degToRad(planeAngle * 4)) + 1.1;
+//    	planeAltitude = Math.sin(THREE.MathUtils.degToRad(planeAngle * 4)) + 1.1;
+    	planePitch = Math.sin(THREE.MathUtils.degToRad(planeAngle * 3)) * 30;
 		planePositionUpdate();
 	}, 1000 / 60);
 
     renderer.render(scene, camera);
-//    sleep(1);
 }
 
 render();
