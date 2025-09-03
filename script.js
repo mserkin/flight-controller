@@ -40,16 +40,16 @@ lightTarget.position.set(0, 0, 0);
 light1.target = lightTarget;
 
 light1.castShadow = true;
-light1.shadow.radius = 5;
+light1.shadow.radius = 10;
 light1.shadow.blurSamples = 1;
 light1.shadow.mapSize.width = 512
 light1.shadow.mapSize.height = 512;
 
 //---for DirectionalLight (OrthographicCamera)---
-light1.shadow.camera.left = -5; //-5;
-light1.shadow.camera.right = 5; //5;
-light1.shadow.camera.top = 5; //5;
-light1.shadow.camera.bottom = -5; //-5;
+light1.shadow.camera.left = -10; //-5;
+light1.shadow.camera.right = 10; //5;
+light1.shadow.camera.top = 10; //5;
+light1.shadow.camera.bottom = -10; //-5;
 light1.shadow.bias = -0.0;
 //---for PointLight or SpotLight (PerspectiveCamera)---
 light1.shadow.camera.fov = 60; //90;
@@ -67,15 +67,15 @@ scene.add(light1);
 
 //scene.traverse((child) => {if(child.material) child.material.needsUpdate=true});
 
-const helper = new THREE.CameraHelper(light1.shadow.camera);
-scene.add(helper);
+//const helper = new THREE.CameraHelper(light1.shadow.camera);
+//scene.add(helper);
 
 //===Camera===
-var camRadius = 15;
+var camRadius = 8;
 const camAngleDown = new THREE.Vector3();
 const camAngle = new THREE.Vector3();
-camAngle.x = 45;
-camAngle.y = 30;
+camAngle.x = -45;
+camAngle.y = 45;
 camAngle.z = 45;
 const camera = new THREE.PerspectiveCamera(90, canvasWidth / canvasHeight, 0.1, 1000);
 //const camera = new THREE.OrthographicCamera(10 / - 2, 10 / 2, 10 / 2, 10 / - 2, 1, 1000);
@@ -102,8 +102,9 @@ const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 scene.add(sphere);
 
 //===SVG===
-const svgPath = 'M978 316c8,1 14,8 14,17l0 102c0,5 -3,9 -7,9l-4 1c0,0 -1,0 -1,0 -2,0 -4,-1 -5,-2 -1,-1 -2,-3 -2,-5l0 -1 -270 38c-54,0 -109,0 -163,0 -2,15 -3,31 -5,47l-23 175 119 22c0,-1 0,-4 2,-4 5,0 10,5 10,11l0 64c0,3 -2,6 -5,6l-3 0c-3,0 -3,-1 -4,-4l-113 16 -16 -36 -1 6c0,1 0,2 -1,2l-3 82c0,2 -2,3 -3,3 -2,0 -3,-1 -3,-3l-2 -82c0,-1 -1,-2 -1,-3l-1 -4 -16 34 -113 -16c0,1 -1,2 -1,3 -1,1 -2,1 -4,1 0,0 -1,0 -1,0l-3 0c-3,0 -5,-3 -5,-6l0 -64c0,-6 4,-11 10,-11l0 0c2,0 4,2 4,4l119 -22 -23 -188c-1,-11 -2,-23 -3,-34l-168 0 -270 -38 0 1c0,2 -1,4 -2,5 -1,1 -3,2 -5,2 0,0 -1,0 -1,0l-4 -1c-4,-1 -7,-5 -7,-9l0 -102c0,-9 6,-17 14,-17 3,0 6,2 6,5l0 4 268 -18 162 0c0,-13 1,-26 2,-38l5 -69c0,-10 9,-17 18,-17l10 0 0 -3 -2 0c-1,0 -2,0 -2,-1 0,-1 0,-2 0,-2l5 -9 -6 0c-2,0 -3,-1 -3,-2l-79 0 0 -3 79 0c1,-1 2,-2 3,-2l10 0 8 -11c1,-1 3,-1 4,0l6 11 10 0c2,0 3,1 3,2l79 0 0 3 -79 0c-1,1 -2,2 -3,2l-5 0 5 9c0,1 0,2 0,2 0,1 -1,1 -2,1l-2 0 0 3 10 0c10,0 18,8 19,17l5 71c1,12 1,25 2,36l164 0 268 18 0 -4c0,-3 3,-5 6,-5z';
+const svgPath1 = 'M978 316c8,1 14,8 14,17l0 102c0,5 -3,9 -7,9l-4 1c0,0 -1,0 -1,0 -2,0 -4,-1 -5,-2 -1,-1 -2,-3 -2,-5l0 -1 -270 38c-54,0 -109,0 -163,0 -2,15 -3,31 -5,47l-23 175 119 22c0,-1 0,-4 2,-4 5,0 10,5 10,11l0 64c0,3 -2,6 -5,6l-3 0c-3,0 -3,-1 -4,-4l-113 16 -16 -36 -1 6c0,1 0,2 -1,2l-3 82c0,2 -2,3 -3,3 -2,0 -3,-1 -3,-3l-2 -82c0,-1 -1,-2 -1,-3l-1 -4 -16 34 -113 -16c0,1 -1,2 -1,3 -1,1 -2,1 -4,1 0,0 -1,0 -1,0l-3 0c-3,0 -5,-3 -5,-6l0 -64c0,-6 4,-11 10,-11l0 0c2,0 4,2 4,4l119 -22 -23 -188c-1,-11 -2,-23 -3,-34l-168 0 -270 -38 0 1c0,2 -1,4 -2,5 -1,1 -3,2 -5,2 0,0 -1,0 -1,0l-4 -1c-4,-1 -7,-5 -7,-9l0 -102c0,-9 6,-17 14,-17 3,0 6,2 6,5l0 4 268 -18 162 0c0,-13 1,-26 2,-38l5 -69c0,-10 9,-17 18,-17l10 0 0 -3 -2 0c-1,0 -2,0 -2,-1 0,-1 0,-2 0,-2l5 -9 -6 0c-2,0 -3,-1 -3,-2l-79 0 0 -3 79 0c1,-1 2,-2 3,-2l10 0 8 -11c1,-1 3,-1 4,0l6 11 10 0c2,0 3,1 3,2l79 0 0 3 -79 0c-1,1 -2,2 -3,2l-5 0 5 9c0,1 0,2 0,2 0,1 -1,1 -2,1l-2 0 0 3 10 0c10,0 18,8 19,17l5 71c1,12 1,25 2,36l164 0 268 18 0 -4c0,-3 3,-5 6,-5z';
 const svgPath2 = 'M500 1c-53,0 -52,150 -53,182 -2,36 -4,81 -5,134 -19,14 -50,38 -87,66l0 -41c0,-10 -8,-19 -19,-19l-7 0c-10,0 -19,9 -19,19l0 75c-22,17 -45,35 -68,52l0 -37c0,-10 -8,-19 -19,-19l-7 0c-10,0 -19,8 -19,19l0 72c-74,57 -136,107 -144,118 0,0 -9,35 -7,46 1,11 10,9 18,0 5,-5 100,-47 184,-84l0 2c0,4 3,8 8,8l3 0c4,0 8,-3 8,-8l0 -10c9,-4 18,-8 26,-12l0 2c0,4 3,8 8,8l3 0c4,0 8,-3 8,-8l0 -10c8,-4 16,-7 22,-10l0 2c0,4 3,8 8,8l3 0c4,0 8,-3 8,-8l0 -10c14,-6 23,-10 24,-10 2,-1 6,-2 12,-3l0 4c0,8 6,14 14,14l6 0c8,0 14,-6 14,-14l0 -12c8,-2 15,-3 20,-4 1,56 2,118 5,185 0,0 4,56 13,118l-151 116c0,0 -31,51 -11,55 0,0 89,-35 103,-39 10,-3 57,-21 80,-30 1,4 2,8 4,12 4,19 8,34 8,34l4 0 0 27c0,3 3,6 6,6 3,0 6,-3 6,-6l0 -27 4 0c0,0 4,-15 8,-34 1,-4 3,-8 4,-12 22,9 69,27 80,30 13,4 103,39 103,39 20,-4 -11,-55 -11,-55l-151 -116c9,-62 13,-118 13,-118 3,-67 4,-129 5,-185 5,1 12,3 20,4l0 12c0,8 6,14 14,14l6 0c8,0 14,-6 14,-14l0 -4c6,1 10,3 12,3 1,1 10,4 24,10l0 10c0,4 3,8 8,8l3 0c4,0 8,-3 8,-8l0 -2c7,3 14,6 22,10l0 10c0,4 3,8 8,8l3 0c4,0 8,-3 8,-8l0 -2c8,4 17,8 26,12l0 10c0,4 3,8 8,8l3 0c4,0 8,-3 8,-8l0 -2c84,37 179,79 184,84 9,9 17,11 18,0 1,-11 -7,-46 -7,-46 -8,-11 -70,-61 -144,-118l0 -72c0,-10 -8,-19 -19,-19l-7 0c-10,0 -19,8 -19,19l0 37c-23,-18 -46,-35 -68,-52l0 -75c0,-10 -8,-19 -19,-19l-7 0c-10,0 -19,8 -19,19l0 41c-37,-28 -68,-52 -87,-66 -1,-53 -3,-98 -5,-134 -1,-29 0,-182 -53,-182z';
+const svgPath3 = "M797 673l-227 -174 10 -197 -37 0c-5,-132 -21,-242 -43,-302 -22,59 -38,170 -43,302l-37 0 10 197 -227 174 -37 -127 0 318 19 -34 259 -41 2 43 -106 136 14 32 111 -58 35 45 35 -45 111 58 14 -32 -106 -136 2 -43 259 41 19 34 0 -318 -37 127z"
 //const svgCode = '<svg viewBox="0 0 11100 8000"><path d="M10893 1895c86,6 153,90 153,190l0 1125c0,52 -33,96 -78,103l-47 8c-4,1 -8,1 -13,1 -20,0 -40,-8 -54,-23 -15,-15 -23,-34 -23,-55l0 -11 -2975 418c-1,0 1,0 0,0l-1798 0c-17,170 -37,343 -60,515l-252 1926 1311 238c23,4 -2,-41 21,-41 60,1 111,57 111,123l0 704c0,35 -24,64 -56,69l-32 5c-30,5 -36,-15 -42,-43l-1242 174 -180 -391 -8 64c-1,9 -4,17 -8,25l-37 900c-1,20 -17,35 -36,35 -20,0 -36,-16 -36,-35l-25 -898c-5,-9 -8,-18 -9,-28l-6 -49 -174 377 -1242 -174c-2,11 -8,21 -16,29 -11,10 -25,15 -39,15 -3,0 -6,0 -9,-1l-32 -5c-32,-5 -57,-35 -57,-69l0 -704c0,-65 48,-119 108,-123l3 0c24,0 43,18 43,41l0 0 1311 -238 -250 -2069c-14,-126 -27,-251 -38,-372l-1844 0 -2975 -418 0 11c0,21 -8,41 -23,55 -15,15 -34,23 -54,23 -4,0 -8,0 -13,-1l-47 -8c-45,-8 -78,-51 -78,-103l0 -1125c0,-100 67,-183 153,-190 33,-3 62,24 62,58l0 40 2947 -193 1780 0c5,-141 12,-282 22,-423l51 -759c5,-106 99,-191 203,-191l110 0 0 -30 -22 0c-9,0 -17,-5 -21,-13 -4,-8 -4,-17 1,-25l57 -94 -62 0c-17,0 -31,-11 -37,-26l-873 0 0 -29 873 0c6,-15 20,-26 37,-26l111 0 87 -120c9,-15 33,-15 42,0l70 119 107 0c17,0 31,11 37,26l873 0 0 29 -873 0c-6,15 -20,26 -37,26l-59 0 55 94c5,8 5,17 0,25 -4,8 -12,12 -21,12l-23 0 0 30 115 0c107,0 197,84 204,192l50 784c9,136 15,270 20,398l1801 0 2947 193 0 -40c0,-33 29,-60 62,-58z"/></svg>';
 //const svgContainer = document.getElementById('svg-container');
 //svgContainer.innerHTML = svgCode;
@@ -193,46 +194,6 @@ function svgPathToShape(s) {
 }
 
 //===Plane===
-//const planeShape = new THREE.Shape();
-//planeShape.moveTo(-0.3, -2);
-//planeShape.lineTo(-0.2, -2.7);
-//planeShape.lineTo(-1.8, -4);
-//planeShape.lineTo(-2, -4.5);
-//planeShape.lineTo(-0.1, -3.7);
-//planeShape.lineTo(0, -5);
-//planeShape.lineTo(0.1, -3.7);
-//planeShape.lineTo(2, -4.5);
-//planeShape.lineTo(1.8, -4);
-//planeShape.lineTo(0.2, -2.7);
-//planeShape.lineTo(0.3, -2);
-//planeShape.lineTo(0.3, 0);
-//planeShape.lineTo(0.5, 0);
-
-//planeShape.lineTo(0.5, 0.5);
-//planeShape.lineTo(1.3, 0.3);
-//planeShape.lineTo(5.1, -1.3);
-//planeShape.lineTo(5, -0.7);
-//planeShape.lineTo(0.5, 2.7);
-
-//planeShape.lineTo(0.5, 3);
-//planeShape.lineTo(0.3, 3);
-//planeShape.lineTo(0.3, 4);
-//planeShape.bezierCurveTo(0.3, 4, 0.3, 5, 0, 5);
-//planeShape.bezierCurveTo(0, 5, -0.3, 5, -0.3, 4);
-//planeShape.lineTo(-0.3, 4);
-//planeShape.lineTo(-0.3, 3);
-//planeShape.lineTo(-0.5, 3);
-
-//planeShape.lineTo(-0.5, 2.7);
-//planeShape.lineTo(-5, -0.7);
-//planeShape.lineTo(-5.1, -1.3);
-//planeShape.lineTo(-1.3, 0.3);
-//planeShape.lineTo(-0.5, 0.5);
-
-//planeShape.lineTo(-0.5, 0);
-//planeShape.lineTo(-0.3, 0);
-//planeShape.lineTo(-0.3, -2);
-
 const extrudeSettings = {
 	steps: 8,
 	depth: 50.0,
@@ -242,74 +203,202 @@ const extrudeSettings = {
 	bevelThickness: 0.2,
 	bevelOffset: 0
 };
-const planeShape = svgPathToShape(svgPath);
-const planeGeometry = new THREE.ExtrudeGeometry(planeShape, extrudeSettings);
-const planeMaterial = new THREE.MeshLambertMaterial({color: 0xA0A0A0, wireframe: false});
-const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-plane.castShadow = true;
-plane.position.y = 0.0;
-plane.position.z = 0.0;
-plane.rotation.x = -Math.PI / 2;
-plane.scale.set(0.001, 0.001, 0.001);
-scene.add(plane);
+
+const plane = [];
+
+const plane1Shape = svgPathToShape(svgPath1);
+const plane1Geometry = new THREE.ExtrudeGeometry(plane1Shape, extrudeSettings);
+plane1Geometry.center();
+const plane1Material = new THREE.MeshLambertMaterial({color: 0xC0C080, wireframe: false});
+plane.push(new THREE.Mesh(plane1Geometry, plane1Material));
+plane[0].castShadow = true;
+plane[0].rotation.x = Math.PI / 2;
+plane[0].scale.set(0.001, 0.001, 0.001);
+scene.add(plane[0]);
 
 const plane2Shape = svgPathToShape(svgPath2);
 const plane2Geometry = new THREE.ExtrudeGeometry(plane2Shape, extrudeSettings);
-const plane2Material = new THREE.MeshLambertMaterial({color: 0xA0A0A0, wireframe: false});
-const plane2 = new THREE.Mesh(plane2Geometry, plane2Material);
-plane2.castShadow = true;
-plane2.position.y = 0.0;
-plane2.position.z = 0.0;
-plane2.rotation.x = -Math.PI / 2;
-plane2.scale.set(0.002, 0.002, 0.002);
-scene.add(plane2);
+plane2Geometry.center();
+const plane2Material = new THREE.MeshLambertMaterial({color: 0x80C0C0, wireframe: false});
+plane.push(new THREE.Mesh(plane2Geometry, plane2Material));
+plane[1].castShadow = true;
+plane[1].rotation.x = Math.PI / 2;
+plane[1].scale.set(0.002, 0.002, 0.002);
+scene.add(plane[1]);
 
-planeAngle = 0;
-planeRadius = 5;
-planeAltitude = 0.5;
+const plane3Shape = svgPathToShape(svgPath3);
+const plane3Geometry = new THREE.ExtrudeGeometry(plane3Shape, extrudeSettings);
+plane3Geometry.center();
+const plane3Material = new THREE.MeshLambertMaterial({color: 0xC080C0, wireframe: false});
+plane.push(new THREE.Mesh(plane3Geometry, plane3Material));
+plane[2].castShadow = true;
+plane[2].rotation.x = Math.PI / 2;
+plane[2].scale.set(0.0015, 0.0015, 0.0015);
+scene.add(plane[2]);
 
-plane2Angle = 180;
-plane2Radius = 6;
-plane2Altitude = 1.5;
-
-planeYaw = 0;
-planePitch = 0;
-planeRoll = -30;
-
-plane2Yaw = 0;
-plane2Pitch = 0;
-plane2Roll = 20;
-
-function planePositionUpdate() {
-	plane.position.x = planeRadius * Math.sin(THREE.MathUtils.degToRad(planeAngle)) * Math.cos(THREE.MathUtils.degToRad(planeAngle));
-	plane.position.z = planeRadius * Math.cos(THREE.MathUtils.degToRad(planeAngle)) * Math.cos(THREE.MathUtils.degToRad(planeAngle)) - planeRadius / 2;
-	
-	planeAltitude += planePitch / 1000;
-	plane.position.y = planeAltitude;
-
-    plane.rotation.x = -Math.PI / 2;;
-    plane.rotation.y = 0.0;
-    plane.rotation.z = 0.0;
-
-    plane.rotateOnWorldAxis(xAxis, THREE.MathUtils.degToRad(-planePitch)); //pitch
-    plane.rotateOnWorldAxis(zAxis, THREE.MathUtils.degToRad(planeRoll)); //roll
-    plane.rotateOnWorldAxis(yAxis, THREE.MathUtils.degToRad(planeAngle * 2 + 90)); //yaw
+function FlightData(radius, angle, posX, posY, altitude, velocity, yaw, pitch, roll) {
+	this.radius = radius;
+	this.angle = angle;
+	this.posX = posX;
+	this.posY = posY;
+	this.altitude = altitude;
+	this.velocity = velocity;
+	this.yaw = yaw;
+	this.pitch = pitch;
+	this.roll = roll;
 }
 
-function plane2PositionUpdate() {
-	plane2.position.x = plane2Radius * Math.sin(THREE.MathUtils.degToRad(plane2Angle)) * Math.cos(THREE.MathUtils.degToRad(plane2Angle));
-	plane2.position.z = plane2Radius * Math.cos(THREE.MathUtils.degToRad(plane2Angle)) * Math.cos(THREE.MathUtils.degToRad(plane2Angle)) - plane2Radius / 2;
+flightData = [];
+
+flightData.push(new FlightData(4.0,  0.0, 0.0, 0.0, 0.5, 250.0, 0.0, 0.0, 30.0)); //Private
+flightData.push(new FlightData(5.0,  0.0, 0.0, 0.0, 1.5, 300.0, 0.0, 0.0, 25.0)); //Passenger
+flightData.push(new FlightData(10.0, 0.0, 0.0, 0.0, 2.5, 500.0, 0.0, 0.0, 20.0)); //Fighter
+
+function planePositionUpdate(index) {
+	plane[index].position.x = flightData[index].radius * Math.sin(THREE.MathUtils.degToRad(flightData[index].angle)) * Math.cos(THREE.MathUtils.degToRad(flightData[index].angle));
+	plane[index].position.z = flightData[index].radius * Math.cos(THREE.MathUtils.degToRad(flightData[index].angle)) * Math.cos(THREE.MathUtils.degToRad(flightData[index].angle)) - flightData[index].radius / 2;
 	
-	plane2Altitude += plane2Pitch / 1000;
-	plane2.position.y = plane2Altitude;
+	flightData[index].altitude += flightData[index].pitch / 1000;
+	plane[index].position.y = flightData[index].altitude;
 
-    plane2.rotation.x = -Math.PI / 2;;
-    plane2.rotation.y = 0.0;
-    plane2.rotation.z = 0.0;
+    plane[index].rotation.x = Math.PI / 2;;
+    plane[index].rotation.y = 0.0;
+    plane[index].rotation.z = 0.0;
 
-    plane2.rotateOnWorldAxis(xAxis, THREE.MathUtils.degToRad(-plane2Pitch)); //pitch
-    plane2.rotateOnWorldAxis(zAxis, THREE.MathUtils.degToRad(plane2Roll)); //roll
-    plane2.rotateOnWorldAxis(yAxis, THREE.MathUtils.degToRad(plane2Angle * 2 - 90)); //yaw
+    plane[index].rotateOnWorldAxis(xAxis, THREE.MathUtils.degToRad(flightData[index].pitch));
+    plane[index].rotateOnWorldAxis(zAxis, THREE.MathUtils.degToRad(flightData[index].roll));
+    plane[index].rotateOnWorldAxis(yAxis, THREE.MathUtils.degToRad(flightData[index].angle * 2 - 90)); //yaw
+}
+
+//===Runway===
+const runwayStartLineWidth = 0.03;
+const runwayStartLineLength = 0.4;
+const runwayBorderLineWidth = 0.01;
+const runwayBorderLineLength = 0.5;
+
+const runwayFloorMaterial = new THREE.MeshLambertMaterial({color: 0x404040});
+const runwayBaseMaterial = new THREE.MeshLambertMaterial({color: 0x101010});
+const runwayLineMaterial = new THREE.MeshLambertMaterial({color: 0xC0C0C0});
+const runwayLightMaterial = new THREE.MeshBasicMaterial({color: 0xFFFF80, transparent: false, opacity: 1.0});
+const runwayDarkMaterial = new THREE.MeshBasicMaterial({color: 0xFFFF80, transparent: true, opacity: 0.1});
+
+const runwayFloorGeometry = new THREE.BoxGeometry(0.5, 1.4, 0.002);
+const runwayBaseGeometry = new THREE.BoxGeometry(0.5, 1, 0.002);
+const runwayStartLineGeometry = new THREE.BoxGeometry(runwayStartLineWidth, runwayStartLineLength, 0.001);
+const runwayBorderLineGeometry = new THREE.BoxGeometry(runwayBorderLineWidth, runwayBorderLineLength, 0.001);
+const runwayLightGeometry = new THREE.SphereGeometry(0.02, 16, 16);
+
+const runwayFloor = new THREE.Mesh(runwayFloorGeometry, runwayFloorMaterial);
+runwayFloor.rotation.x = Math.PI / 2;
+runwayFloor.position.y = 0.002;
+runwayFloor.receiveShadow = true;
+const runwayBase = new THREE.Mesh(runwayBaseGeometry, runwayBaseMaterial);
+runwayBase.rotation.x = Math.PI / 2;
+runwayBase.position.y = 0.004;
+runwayBase.receiveShadow = true;
+const runwayBorderLine = new THREE.Mesh(runwayBorderLineGeometry, runwayLineMaterial);
+runwayBorderLine.rotation.x = Math.PI / 2;
+runwayBorderLine.rotation.z = Math.PI / 2;
+runwayBorderLine.position.y = 0.006;
+runwayBorderLine.receiveShadow = true;
+const runwayStartLine = new THREE.Mesh(runwayStartLineGeometry, runwayLineMaterial);
+runwayStartLine.rotation.x = Math.PI / 2;
+runwayStartLine.rotation.z = Math.PI / 2;
+runwayStartLine.position.y = 0.006;
+runwayStartLine.receiveShadow = true;
+
+const runwayLight0 = new THREE.Mesh(runwayLightGeometry, runwayLightMaterial);
+runwayLight0.position.z = 0.025;
+const runwayLight1 = new THREE.Mesh(runwayLightGeometry, runwayLightMaterial);
+runwayLight1.position.z = 0.6;
+const runwayLight2 = new THREE.Mesh(runwayLightGeometry, runwayLightMaterial);
+runwayLight2.position.z = -0.6;
+
+const runwayElement = []; //new THREE.Group();
+
+runwayElement.push(new THREE.Group());
+
+runwayElement[0].add(runwayLight0.clone());
+runwayElement[0].add(runwayLight1.clone());
+runwayElement[0].add(runwayLight2.clone());
+runwayElement[0].add(runwayFloor.clone());
+runwayElement[0].add(runwayBase.clone());
+runwayBorderLine.position.z = 0.45;
+runwayElement[0].add(runwayBorderLine.clone());
+runwayBorderLine.position.z = -0.45;
+runwayElement[0].add(runwayBorderLine.clone());
+for (let i = 0; i < 6; i++) {
+	runwayStartLine.position.z = 0.35 - i * runwayStartLineWidth * 2;
+	runwayElement[0].add(runwayStartLine.clone());
+	runwayStartLine.position.z = -0.35 + i * runwayStartLineWidth * 2;
+	runwayElement[0].add(runwayStartLine.clone());
+}
+
+runwayElement.push(new THREE.Group());
+runwayElement[1].add(runwayLight0.clone());
+runwayElement[1].add(runwayLight1.clone());
+runwayElement[1].add(runwayLight2.clone());
+runwayElement[1].add(runwayFloor.clone());
+runwayElement[1].add(runwayBase.clone());
+runwayBorderLine.position.z = 0.45;
+runwayElement[1].add(runwayBorderLine.clone());
+runwayBorderLine.position.z = -0.45;
+runwayElement[1].add(runwayBorderLine.clone());
+
+runwayElement.push(new THREE.Group());
+runwayElement[2].add(runwayLight0.clone());
+runwayElement[2].add(runwayLight1.clone());
+runwayElement[2].add(runwayLight2.clone());
+runwayElement[2].add(runwayFloor);
+runwayElement[2].add(runwayBase);
+runwayBorderLine.position.z = 0.45;
+runwayElement[2].add(runwayBorderLine.clone());
+runwayBorderLine.position.z = 0.0;
+runwayElement[2].add(runwayBorderLine.clone());
+runwayBorderLine.position.z = -0.45;
+runwayElement[2].add(runwayBorderLine.clone());
+runwayElement[2].position.x = 1;
+
+//const runway = [];
+//runway.push(new THREE.Group());
+const runway = new THREE.Group();
+
+const runwayLength = 8;
+var posX = -runwayLength - 1;
+runwayElement[0].position.x = posX++ / 2;
+runway.add(runwayElement[0].clone());
+for (let i = 0; i < runwayLength; i++) {
+	runwayElement[1].position.x = posX++ / 2;
+	runway.add(runwayElement[1].clone());
+	runwayElement[2].position.x = posX++ / 2;
+	runway.add(runwayElement[2].clone());
+}
+runwayElement[1].position.x = posX++ / 2;
+runway.add(runwayElement[1].clone());
+runwayElement[0].position.x = posX++ / 2;
+runway.add(runwayElement[0].clone());
+scene.add(runway);
+
+//===Field===
+const fieldWidth = 18;
+const fieldHeight = 10;
+const fieldMaterial0 = new THREE.MeshLambertMaterial({color: 0x009000});
+const fieldMaterial1 = new THREE.MeshLambertMaterial({color: 0x007000});
+const fieldGeometry = new THREE.BoxGeometry(1, 1, 0.002);
+const fieldMesh0 = new THREE.Mesh(fieldGeometry, fieldMaterial0);
+const fieldMesh1 = new THREE.Mesh(fieldGeometry, fieldMaterial1);
+const field = [];
+for (let i = 0; i < fieldWidth * fieldHeight; i++) {
+  if ((i & 1) == (~~(i / fieldWidth) & 1)) {
+  	field.push(fieldMesh0.clone());
+  } else {
+  	field.push(fieldMesh1.clone());
+  }
+  field[i].receiveShadow = true;
+  field[i].rotation.x = Math.PI / 2;
+  field[i].position.x = (i % fieldWidth) - (fieldWidth / 2) + 0.5;
+  field[i].position.z = ~~(i / fieldWidth) - (fieldHeight / 2) + 0.5;
+  scene.add(field[i]);
 }
 
 //===Star===
@@ -380,118 +469,9 @@ star.rotation.x = Math.PI / 2;
 star.visible = false;
 scene.add(star);
 
-//===Runway===
-const runwayStartLineWidth = 0.03;
-const runwayStartLineLength = 0.4;
-const runwayBorderLineWidth = 0.01;
-const runwayBorderLineLength = 0.5;
-
-const runwayFloorMaterial = new THREE.MeshLambertMaterial({color: 0x404040});
-const runwayBaseMaterial = new THREE.MeshLambertMaterial({color: 0x101010});
-const runwayLineMaterial = new THREE.MeshLambertMaterial({color: 0xC0C0C0});
-const runwayFloorGeometry = new THREE.BoxGeometry(0.5, 1.4, 0.002);
-const runwayBaseGeometry = new THREE.BoxGeometry(0.5, 1, 0.002);
-const runwayStartLineGeometry = new THREE.BoxGeometry(runwayStartLineWidth, runwayStartLineLength, 0.001);
-const runwayBorderLineGeometry = new THREE.BoxGeometry(runwayBorderLineWidth, runwayBorderLineLength, 0.001);
-
-const runwayFloor = new THREE.Mesh(runwayFloorGeometry, runwayFloorMaterial);
-runwayFloor.rotation.x = Math.PI / 2;
-runwayFloor.position.y = 0.002;
-runwayFloor.receiveShadow = true;
-const runwayBase = new THREE.Mesh(runwayBaseGeometry, runwayBaseMaterial);
-runwayBase.rotation.x = Math.PI / 2;
-runwayBase.position.y = 0.004;
-runwayBase.receiveShadow = true;
-const runwayBorderLine = new THREE.Mesh(runwayBorderLineGeometry, runwayLineMaterial);
-runwayBorderLine.rotation.x = Math.PI / 2;
-runwayBorderLine.rotation.z = Math.PI / 2;
-runwayBorderLine.position.y = 0.006;
-runwayBorderLine.receiveShadow = true;
-const runwayStartLine = new THREE.Mesh(runwayStartLineGeometry, runwayLineMaterial);
-runwayStartLine.rotation.x = Math.PI / 2;
-runwayStartLine.rotation.z = Math.PI / 2;
-runwayStartLine.position.y = 0.006;
-runwayStartLine.receiveShadow = true;
-
-const runwayElement = []; //new THREE.Group();
-
-runwayElement.push(new THREE.Group());
-runwayElement[0].add(runwayFloor.clone());
-runwayElement[0].add(runwayBase.clone());
-runwayBorderLine.position.z = 0.45;
-runwayElement[0].add(runwayBorderLine.clone());
-runwayBorderLine.position.z = -0.45;
-runwayElement[0].add(runwayBorderLine.clone());
-for (let i = 0; i < 6; i++) {
-	runwayStartLine.position.z = 0.35 - i * runwayStartLineWidth * 2;
-	runwayElement[0].add(runwayStartLine.clone());
-	runwayStartLine.position.z = -0.35 + i * runwayStartLineWidth * 2;
-	runwayElement[0].add(runwayStartLine.clone());
-}
-
-runwayElement.push(new THREE.Group());
-runwayElement[1].add(runwayFloor.clone());
-runwayElement[1].add(runwayBase.clone());
-runwayBorderLine.position.z = 0.45;
-runwayElement[1].add(runwayBorderLine.clone());
-runwayBorderLine.position.z = -0.45;
-runwayElement[1].add(runwayBorderLine.clone());
-
-runwayElement.push(new THREE.Group());
-runwayElement[2].add(runwayFloor);
-runwayElement[2].add(runwayBase);
-runwayBorderLine.position.z = 0.45;
-runwayElement[2].add(runwayBorderLine.clone());
-runwayBorderLine.position.z = 0.0;
-runwayElement[2].add(runwayBorderLine.clone());
-runwayBorderLine.position.z = -0.45;
-runwayElement[2].add(runwayBorderLine.clone());
-runwayElement[2].position.x = 1;
-
-//const runway = [];
-//runway.push(new THREE.Group());
-const runway = new THREE.Group();
-
-runwayElement[0].position.x = -3.0;
-runway.add(runwayElement[0].clone());
-for (let i = 0; i < 5; i++) {
-	runwayElement[1].position.x = -2.5 + i * 2 * 0.5;
-	runway.add(runwayElement[1].clone());
-	runwayElement[2].position.x = -2.0 + i * 2 * 0.5;
-	runway.add(runwayElement[2].clone());
-}
-runwayElement[1].position.x = 2.5;
-runway.add(runwayElement[1].clone());
-runwayElement[0].position.x = 3.0;
-runway.add(runwayElement[0].clone());
-//runway.rotation.y = -Math.PI / 8;
-scene.add(runway);
-
-//===Field===
-const fieldWidth = 16;
-const fieldHeight = 9;
-const fieldMaterial0 = new THREE.MeshLambertMaterial({color: 0x009000});
-const fieldMaterial1 = new THREE.MeshLambertMaterial({color: 0x007000});
-const fieldGeometry = new THREE.BoxGeometry(1, 1, 0.002);
-const fieldMesh0 = new THREE.Mesh(fieldGeometry, fieldMaterial0);
-const fieldMesh1 = new THREE.Mesh(fieldGeometry, fieldMaterial1);
-const field = [];
-for (let i = 0; i < fieldWidth * fieldHeight; i++) {
-  if ((i & 1) == (~~(i / fieldWidth) & 1)) {
-  	field.push(fieldMesh0.clone());
-  } else {
-  	field.push(fieldMesh1.clone());
-  }
-  field[i].receiveShadow = true;
-  field[i].rotation.x = Math.PI / 2;
-  field[i].position.x = (i % fieldWidth) - (fieldWidth / 2) + 0.5;
-  field[i].position.z = ~~(i / fieldWidth) - (fieldHeight / 2) + 0.5;
-  scene.add(field[i]);
-}
-
 //===Line===
 var linePosition = 0;
-const lineMaterial = new THREE.LineBasicMaterial({color: 0xffffff})
+const lineMaterial = new THREE.LineDashedMaterial({color: 0xffffff})
 const lineGeometry = new THREE.BufferGeometry();
 const linePositionAttribute = new THREE.BufferAttribute(new Float32Array(1000 * 3), 3);
 linePositionAttribute.setUsage(THREE.DynamicDrawUsage);
@@ -598,6 +578,10 @@ function onWindowResize() {
 }
 
 //===Renderer===
+var thisLight = 0;
+var thisMaterial = 0;
+var planeIndex = 0;
+
 var render = function () {
     setTimeout(function() {
         requestAnimationFrame(render);
@@ -608,17 +592,50 @@ var render = function () {
 //				cameraPositionUpdate();
 			}
 
-			planeAngle += 0.5;
-			if (planeAngle >= 360) planeAngle -= 360;
-			planePitch = Math.sin(THREE.MathUtils.degToRad(planeAngle * 4)) * 30;
-			planePositionUpdate();
+			planeIndex = 0;
+			flightData[planeIndex].angle += 0.5; if (flightData[planeIndex].angle >= 360) flightData[planeIndex].angle -= 360;
+			flightData[planeIndex].pitch = Math.sin(THREE.MathUtils.degToRad(flightData[planeIndex].angle * 4)) * 30;
+			planePositionUpdate(planeIndex);
 
-			plane2Angle -= 0.5;
-			if (plane2Angle <= 0) plane2Angle += 360;
-			plane2Pitch = Math.cos(THREE.MathUtils.degToRad(plane2Angle * 3)) * 30;
-			plane2PositionUpdate();
+			planeIndex = 1;
+			flightData[planeIndex].angle += 0.25; if (flightData[planeIndex].angle >= 360) flightData[planeIndex].angle -= 360; if (flightData[planeIndex].angle < 0) flightData[planeIndex].angle += 360;
+			flightData[planeIndex].pitch = Math.sin(THREE.MathUtils.degToRad(flightData[planeIndex].angle * 3)) * 30;
+			planePositionUpdate(planeIndex);
 
-			runway.rotation.y -= Math.PI / 360;
+			planeIndex = 2;
+			flightData[planeIndex].angle += 1.0; if (flightData[planeIndex].angle >= 360) flightData[planeIndex].angle -= 360;
+			flightData[planeIndex].pitch = Math.sin(THREE.MathUtils.degToRad(flightData[planeIndex].angle * 2)) * 30;
+			planePositionUpdate(planeIndex);
+
+//			plane1Angle += 0.5;	if (plane1Angle >= 360) plane1Angle -= 360;
+//			plane1Pitch = Math.sin(THREE.MathUtils.degToRad(plane1Angle * 4)) * 30;
+//			plane1PositionUpdate();
+
+//			plane2Angle -= 0.25; if (plane2Angle <= 0) plane2Angle += 360;
+//			plane2Pitch = Math.cos(THREE.MathUtils.degToRad(plane2Angle * 3)) * 30;
+//			plane2PositionUpdate();
+
+//			plane3Angle += 1; if (plane3Angle >= 360) plane3Angle -= 360;
+//			plane3Pitch = Math.sin(THREE.MathUtils.degToRad(plane3Angle * 2)) * 40;
+//			plane3PositionUpdate();
+
+
+			if (thisMaterial) {
+				runway.children[thisLight].children[0].material = runwayDarkMaterial;
+				runway.children[thisLight].children[1].material = runwayDarkMaterial;
+				runway.children[thisLight].children[2].material = runwayDarkMaterial;
+			} else {
+				runway.children[thisLight].children[0].material = runwayLightMaterial;
+				runway.children[thisLight].children[1].material = runwayLightMaterial;
+				runway.children[thisLight].children[2].material = runwayLightMaterial;
+			}
+			thisLight++;
+			if (thisLight == runway.children.length) {
+				thisLight = 0;
+				thisMaterial++;
+				if (thisMaterial == 2) thisMaterial = 0;
+			}
+//			runway.rotation.y -= Math.PI / 360;
 		}
 	}, 1000 / 60);
 
@@ -626,3 +643,47 @@ var render = function () {
 }
 
 render();
+
+//u˙=X/m−g⋅sin(θ)+r⋅v−q⋅w
+//v˙=Y/m−g⋅sin(ϕ)⋅cos(θ)−r⋅u+p⋅w
+//w˙=Z/m−g⋅cos(ϕ) cos(θ)−q⋅u−p⋅v
+
+//const planeShape = new THREE.Shape();
+//planeShape.moveTo(-0.3, -2);
+//planeShape.lineTo(-0.2, -2.7);
+//planeShape.lineTo(-1.8, -4);
+//planeShape.lineTo(-2, -4.5);
+//planeShape.lineTo(-0.1, -3.7);
+//planeShape.lineTo(0, -5);
+//planeShape.lineTo(0.1, -3.7);
+//planeShape.lineTo(2, -4.5);
+//planeShape.lineTo(1.8, -4);
+//planeShape.lineTo(0.2, -2.7);
+//planeShape.lineTo(0.3, -2);
+//planeShape.lineTo(0.3, 0);
+//planeShape.lineTo(0.5, 0);
+
+//planeShape.lineTo(0.5, 0.5);
+//planeShape.lineTo(1.3, 0.3);
+//planeShape.lineTo(5.1, -1.3);
+//planeShape.lineTo(5, -0.7);
+//planeShape.lineTo(0.5, 2.7);
+
+//planeShape.lineTo(0.5, 3);
+//planeShape.lineTo(0.3, 3);
+//planeShape.lineTo(0.3, 4);
+//planeShape.bezierCurveTo(0.3, 4, 0.3, 5, 0, 5);
+//planeShape.bezierCurveTo(0, 5, -0.3, 5, -0.3, 4);
+//planeShape.lineTo(-0.3, 4);
+//planeShape.lineTo(-0.3, 3);
+//planeShape.lineTo(-0.5, 3);
+
+//planeShape.lineTo(-0.5, 2.7);
+//planeShape.lineTo(-5, -0.7);
+//planeShape.lineTo(-5.1, -1.3);
+//planeShape.lineTo(-1.3, 0.3);
+//planeShape.lineTo(-0.5, 0.5);
+
+//planeShape.lineTo(-0.5, 0);
+//planeShape.lineTo(-0.3, 0);
+//planeShape.lineTo(-0.3, -2);
