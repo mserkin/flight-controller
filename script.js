@@ -913,3 +913,726 @@ render();
 //planeShape.lineTo(-0.5, 0);
 //planeShape.lineTo(-0.3, 0);
 //planeShape.lineTo(-0.3, -2);
+
+class Enum {
+	// приватный конструктор, чтобы никто не создавал экземпляры
+	constructor(name, value) {
+	  this.#name = name;
+	  this.#value = value;
+	  Object.freeze(this); // делаем объект константой
+	}
+  
+	toString() {
+	  return this.#name;
+	}
+  
+	valueOf() {
+	  return this.#value;
+	}
+}
+  
+class AngleUnits extends Enum {
+	static RADIAN = new AngleUnits("RADIAN", 0);
+	static DEGREE = new AngleUnits("DEGREE", 1);
+  
+	static values() {
+	  return [this.RADIAN, this.DEGREE];
+	}
+}
+
+///////////////////////////////////////////////////////////
+//  Instruments.as
+///////////////////////////////////////////////////////////
+
+class Instruments //static
+{
+	static distDiff(x1, x2, perimeter)//: Number
+	{
+		var dbl_dist = x1 - x2;
+		
+		if (Math.abs(dbl_dist) <= perimeter / 2)
+			return dbl_dist;
+		else
+			if (dbl_dist > 0)
+				return dbl_dist - perimeter;
+			else 
+				return dbl_dist + perimeter;
+	}
+
+	static random_int(max=Number.MAX_SAFE_INTEGER-1)
+	{
+		return Math.floor(Math.random() * (max + 1.0))
+	}
+
+	static random_sign() //: int
+	{
+		return Instruments.random_int(3) - 1;  
+	}
+
+	static sign(value) //: int
+	{
+		return value > 0 ? +1 : (value < 0 ? -1 : 0);
+	}
+	
+	static str2bool(str) //: Boolean
+	{
+		if (str.toUpperCase() === "TRUE")
+			return true;
+		else
+			return false;
+	}
+
+	static string_of_char(char, count)
+	{
+		var str_result = "" 
+		var str_char = char.charAt(0);
+		for (var i = 1; i <= count; i++)
+			str_result += str_char;
+		return str_result;
+	}
+	
+	static xor(bool1, bool2) //: Boolean
+	{
+		return (bool1 != bool2);
+	}
+}
+
+///////////////////////////////////////////////////////////
+//  Angle.as
+///////////////////////////////////////////////////////////
+
+class Angle
+{
+	static #DBL_ROTATION_ERROR = Math.PI /  90;
+
+	#value
+
+	constructor(value, unit=AngleUnits.RADIAN)
+	{
+		switch(unit)
+		{
+			case AngleUnits.RADIAN: 
+				this.#value = value;
+				break;
+			case AngleUnits.DEGREE:
+				this.#value = value / 180 * Math.PI;
+				break;
+			default:
+				throw new Error("Illegal unit:" + unit.toString());
+		}
+		this.normalize();
+	} 
+
+// properties
+	get DBL_ROTATION_ERROR() 
+	{
+		return Angle.#DBL_ROTATION_ERROR
+	}
+
+	get PI()
+	{
+		return new Angle(Math.PI, AngleUnits.RADIAN);
+	}
+
+	get degree()
+    {
+    	return this.#value / Math.PI * 180;
+    }
+
+    set degree(value)
+    {
+		this.#value = value / 180 * Math.PI;
+		normalize();
+    }
+
+    get radian()
+    {
+    	return this.#value;
+    }
+
+	set radian(value)
+    {
+		this.#value = value;
+		normalize();
+    }
+	
+// methods
+	// public methods
+    abs(angle) //: Angle
+    {
+		return new Angle(Math.abs(this.radian), AngleUnits.RADIAN);
+    }
+	
+    add(angle) //: Angle
+    {
+		return new Angle(this.#value + angle.radian, AngleUnits.RADIAN);
+    }
+
+	static arcsin(value) //: Angle
+	{
+		return new Angle(Math.asin(value), AngleUnits.RADIAN);
+	}
+
+	static arctg(value) //: Angle
+	{
+		return new Angle(Math.atan(value), AngleUnits.RADIAN);
+	}
+
+    clone() //: Angle
+	{
+		return new Angle(this.#value, AngleUnits.RADIAN); 
+	}
+
+    cos() //: Number
+    {
+		return Math.cos(this.#value);
+    }
+
+    dec(angle)//: void
+    {
+		this.radian -= angle.radian;
+    }
+	
+	static direction (point_from, point_to, distance_obj = null)
+	{
+		var x_diff = (point_to.X - point_from.X);		
+		var y_diff = -(point_to.Y - point_from.Y);
+		var dbl_dist = Math.sqrt(x_diff*x_diff + y_diff*y_diff);
+		var ang_target = Angle.arcsin(x_diff/dbl_dist);  	
+		if (y_diff < 0) ang_target.radian = Math.PI - ang_target.radian;
+		
+		if (distance_obj)
+			distance_obj.distance = dbl_dist;
+			
+		return ang_target;
+	}
+
+	//в какую сторону нужно врущаться с текущего угла в AnAngle 
+	//1 - по часовой (в сторону увеличения угла)
+	//-1 - против часовой (в сторону уменьшения угла)
+	//0 - поворот не требуется
+	get_rotation(angle) //: int
+	{
+		var dbl_ang = this.normalizeAngleValue(angle.radian - this.radian);
+		if (Math.abs(dbl_ang) < DBL_ROTATION_ERROR)
+			return 0;
+		else
+			return (dbl_ang > 0) ? 1 : ((dbl_ang < 0) ? -1 : 0);
+	}
+	
+    inc(angle) //: void
+    {
+		this.radian += angle.radian;
+    }
+
+    sin() //: Number
+    {
+		return Math.sin(this.#value);
+    }
+
+    sub(angle)//: Angle
+    {
+		return new Angle(this.radian - angle.radian, AngleUnits.RADIAN);
+    }
+	
+	toString(indent=0) //: String
+	{
+		var str_indent = Instruments.stringOfChar("\t", AnIndent);
+		var str_indent_plus = Instruments.stringOfChar("\t", AnIndent + 1);
+		
+		return str_indent + "[Angle]\n" 
+			+ str_indent + "{\n"
+			+ str_indent_plus + "Degree=" + Degree + "\n"
+			+ str_indent_plus + "Radian=" + Radian + "\n"
+			+ str_indent + "}\n";	
+	}	
+	
+	normalize()
+	{
+		this.#value = Angle.normalizeAngleValue(this.#value);
+	}
+	
+	static normalizeAngleValue(value) //: Number
+	{
+		var n_sign = Instruments.sign(value);
+		value -= Math.floor(Math.abs(value / (2 * Math.PI))) * 2 * Math.PI * n_sign;
+		if (Math.abs(value) > Math.PI)
+			value = (2 * Math.PI - Math.abs(value)) * n_sign * -1;
+		return value;
+	}	
+}
+
+///////////////////////////////////////////////////////////
+//  Point.as
+///////////////////////////////////////////////////////////
+class Point
+{
+	#x;
+	#y;
+
+	constructor(x, y) 
+	{
+		this.#x = x
+		this.#y = y
+	}
+	
+	//properties	
+	get radius()
+	{
+		return Math.sqrt(this.#x*this.#x + this.#y*this.#y);
+	}		
+	
+	set radius(value)
+	{
+		fromPolar(value, this.theta);
+	}		
+		
+	get theta() //: Angle
+	{
+		if (this.#y == 0) 
+			return new Angle(Math.PI/2 * Instruments.sign(this.#x), AngleUnits.RADIAN);
+		else
+		{
+			var ang_theta = Angle.arctg(-this.#x/this.#y);
+			if (this.#y > 0)
+			{
+				ang_theta.dec(new Angle.PI);
+			}
+			return ang_theta;
+		}
+	}
+	
+	set theta(angle)
+	{
+		fromPolar(this.radius, angle);
+	}	
+
+	get x() //: Number
+	{
+		return this.#x;
+	}		
+
+	set x(value)
+	{
+		this.#x = value;
+	}		
+
+	get y() //: Number
+	{
+		return this.#y;
+	}		
+
+	set y(value)
+	{
+		this.#y = value;
+	}			
+
+//methods
+	add(point) //: Point
+	{
+		return new Point(this.#x + point.x, this.#y + point.y);
+	}
+
+	clone() //: Point
+	{
+		return new Point(this.#x, this.#y);
+	}
+
+	fromPolar(radius, theta_angle)
+	{
+		this.#x = radius * theta_angle.sin();
+		this.#y = -radius * theta_angle.cos();
+	}
+		
+	sub(point) //: Point
+	{
+		return new Point(this.#x - point.x, this.#y - point.y);
+	}
+	
+	toString(indent=0) //: String
+	{
+		var str_indent = Instruments.string_of_char("\t", indent);
+		return str_indent + "[Point]\n" 
+			+ str_indent + "{\n"
+			+ Instruments.string_of_char("\t", indent + 1) + "X=" + this.#x + "\n"
+			+ Instruments.string_of_char("\t", indent + 1) + "Y=" + this.#y + "\n"
+			+ str_indent + "}\n";
+	}	
+}
+
+	///////////////////////////////////////////////////////////
+	//  Size.as
+	///////////////////////////////////////////////////////////
+class Size
+{
+	#height;
+	#width;
+
+	constructor(height, width) {
+		this.#height = height
+		this.#width = width
+	}
+	
+//properties
+	get height() //: Number
+	{
+		return this.#height;
+	}
+		
+	set height(value)
+	{
+		this.#height = value;
+	}
+	
+	get width() //: Number
+	{
+		return this.#width;
+	}
+		
+	set width(value)
+	{
+		this.#width = value;
+	}
+
+//methods
+	clone() //: Size
+	{
+		return new Size(this.#width, this.#height);				
+	}
+
+	scale(factor)
+	{
+		return new Size(this.#width*factor, this.#height*factor);				
+	}
+	
+	to_string(indent=0) //: String
+	{
+		var str_indent = Instruments.string_of_char("\t", indent);
+		var str_indent_plus = Instruments.string_of_char("\t", indent + 1);		
+		return str_indent + "[Size]\n" 
+			+ str_indent + "{\n"
+			+ str_indent_plus + "width=" + this.#width + "\n"
+			+ str_indent_plus + "height=" + this.#height + "\n"
+			+ str_indent + "}\n";
+	}	
+}
+
+class Airport {
+	#aircrafts;
+	#airfields;
+	#aprons;
+	#cloud_probability;
+	#clouds;
+	#current_wind;
+	#gates;
+	#is_thumbnail_mode;
+	#location;
+	#size;
+
+	constructor(is_thumbnail_mode = false) {
+		//this.OnGateLoaded : CustomDispatcher = new CustomDispatcher();
+		//this.OnLevelLoaded: CustomDispatcher = new CustomDispatcher();
+		//this.OnResized: CustomDispatcher = new CustomDispatcher();
+		this.#aircrafts = [];
+		this.#airfields = [];
+		this.#aprons = [];
+		this.#cloud_probability = 0;
+		this.#clouds = [];
+		this.#current_wind = null;
+		this.#gates = [];
+		this.#is_thumbnail_mode = is_thumbnail_mode;
+		this.#location = new Point(0, 0);
+		this.#size = new Size(0, 0);
+
+		console.log("Airport created!");
+	}
+//getters
+	get aircrafts() {return this.#aircrafts;}
+	get airfields() {return this.#airfields;}
+	get aprons() {return this.#apronsFAprons;}
+	get clouds() {return this.#clouds;}	
+	get cloud_probability() {return this.#cloud_probability;	}	
+	get current_wind() {return this.#current_wind;}	
+	get gates() {return this.#gates;}
+	get is_thumbnail_mode() {return this.#thumbnail_mode;}
+
+//methods
+
+	//public methods
+	find_gate(gate_id) //: Gate
+	{
+		for (const gate of this.#gates)
+		{
+			if (gate.id == gate_id)
+				return gate;
+		}
+		return null;
+	}
+
+	fix_airport_rect(hor_zoom, vert_zoom) //: void
+	{
+		if (vert_zoom > hor_zoom)
+		{
+			var cx_fixed = this.Extent.Width / hor_zoom * vert_zoom;
+			this.Location.X -=(cx_fixed - this.Extent.Width) / 2;
+			this.Extent.Width = cx_fixed;
+		}
+		else
+		{
+			var cy_fixed = this.Extent.Height / vert_zoom * hor_zoom;
+			this.Location.Y -=(cy_fixed - this.Extent.Height) / 2;
+			this.Extent.Height = cy_fixed;
+		}
+	}
+
+	public function getAirportModelRegion(): Region
+	{
+		var region: Region = new Region();
+		for each (var airfield: IAirfield in Airfields)
+		{
+			var apoints: Vector.<Point> = airfield.getRegion().CornerPoints;
+			for (var j: int = 0; j < apoints.length; j++)
+			{
+				var point: Point = apoints[j];
+				var x_left: Number = region.Location.X - region.Extent.Width / 2;
+				var x_right: Number = region.Location.X + region.Extent.Width / 2;
+				var y_top: Number = region.Location.Y - region.Extent.Height / 2;
+				var y_bottom: Number = region.Location.Y + region.Extent.Height / 2;
+				var cx_left_shift = x_left - point.X;
+				var cx_right_shift = point.X - x_right;
+				var cy_top_shift = y_top - point.Y;
+				var cy_bottom_shift = point.Y - y_bottom;
+				if (cx_left_shift > 0)
+				{
+					region.Extent.Width += cx_left_shift;
+					region.Location.X -= cx_left_shift / 2;
+				}
+				else if (cx_right_shift > 0)
+				{
+					region.Extent.Width += cx_right_shift;
+					region.Location.X += cx_right_shift / 2;
+				}
+				if (cy_top_shift > 0)
+				{
+					region.Extent.Height += cy_top_shift;
+					region.Location.Y -= cy_top_shift / 2;
+				}
+				else if (cy_bottom_shift > 0)
+				{
+					region.Extent.Height += cy_bottom_shift;
+					region.Location.Y += cy_bottom_shift / 2;
+				}
+			}
+		}
+		return region;
+	}
+
+	public function loadLevel(ALevelFile: String)
+	{
+		ulLoader = new URLLoader();
+		var urlr_file: URLRequest = new URLRequest(ALevelFile);
+		try {
+			ulLoader.addEventListener(Event.COMPLETE, URLLoader_OnComplete);
+			ulLoader.load(urlr_file);
+		} 
+		catch (error:Error) 
+		{
+			trace("  Unable to load file " + ALevelFile);
+		}		
+	}
+
+	public function makeLevelXML(): XML
+	{
+		var xml_doc: XML = new XML('<level></level>');
+		saveGates(xml_doc);
+		saveAirfields(xml_doc);
+		saveAprons(xml_doc);
+
+		return xml_doc;
+	}	
+	
+	public function resize(ALocation: Point, AnExtent: Size)
+	{
+		this.Location = ALocation;
+		this.Extent = AnExtent;
+		
+		OnResized.fireOnResized();
+	}
+
+	public function updateWind()
+	{
+		FCurrentWind.update();
+		for each (var airfield: IAirfield in FAirfields)
+		{
+			airfield.updateWind(FCurrentWind.Direction);
+		}
+	}
+
+	//protected methods
+
+	/* protected function <#camelStyle#>(<#ADelphiStyle#>: <#Type#>)
+	{
+	}*/
+
+	//private methods
+
+	
+	private function loadAirport(AnXml: XML): void
+	{
+		resize(
+			new Point(AnXml.@left, AnXml.@top), 
+			new Size(AnXml.@width, AnXml.@height)
+		);
+		
+		if (!FThumbnailMode)
+		{
+			loadGates(AnXml.gates[0]);
+			loadHelipads(AnXml.helipads[0]);
+			loadAprons(AnXml.aprons[0]);		
+		}
+		loadRunways(AnXml.runways[0]);
+	}
+	
+	private function loadAprons(AnXml: XML): void
+	{
+		if (!AnXml || !AnXml.apron) return;
+		
+		for each (var xml_node: XML in AnXml.apron)
+		{
+			FAprons.push(SelectableObject.fromXml(xml_node));
+		}
+	}
+		
+	private function loadGates(AnXml: XML): void
+	{
+		for each (var xml_node in AnXml.gate)
+		{
+			var gate: Gate = Gate.fromXml(xml_node);
+			FGates.push(gate);
+			
+			OnGateLoaded.fireOnGateLoaded(gate);
+		}
+	}
+
+	private function loadHelipads(AnXml: XML)
+	{
+		if (!AnXml || !AnXml.helipad) return;
+		
+		for each (var xml_helipad: XML in AnXml.helipad)
+		{
+			var helipad: Helipad = Helipad.fromXml(xml_helipad);
+			FGates.push(helipad);
+			FAirfields.push(helipad);
+			
+			OnGateLoaded.fireOnGateLoaded(helipad);			
+		}
+	}	
+	
+	private function loadLevelCont()
+	{
+		var xml_doc: XML = new XML(ulLoader.data);
+		ulLoader.close();
+
+		var xml_airport: XML = xml_doc.airport[0];
+
+		if (!xml_airport)
+		{
+			trace("Failed to load level: airport tag not found.");
+			return;
+		}
+		
+		if (!FThumbnailMode)
+		{
+			loadWeather(xml_doc.weather[0]);
+		}
+		loadAirport(xml_airport);
+
+		OnLevelLoaded.fireOnLevelLoaded();
+	}
+		
+	private function loadRunways(AnXml: XML)
+	{
+		if (!AnXml || !AnXml.runway) return;		
+		
+		for each (var xml_runway: XML in AnXml.runway)
+		{
+			FAirfields.push(new Runway(xml_runway, this));
+		}
+	}
+	
+	private function loadWeather(AnXml: XML)
+	{
+		var dbl_cloud_probability: Number = AnXml.clouds[0].@probability;
+		var xml_wind: XML = AnXml.wind[0];
+		var dbl_wind_variability: Number = xml_wind.@variability;
+		var dbl_wind_min_speed: Number = xml_wind.@minSpeed;
+		var dbl_wind_max_speed: Number = xml_wind.@maxSpeed;
+		
+		FCurrentWind = new Wind(dbl_wind_min_speed, dbl_wind_max_speed, dbl_wind_variability);
+		FCloudProbability = dbl_cloud_probability;
+	}
+	
+	private function saveAirfields(AnXmlNode: XML): void
+	{
+		var xml_runways: XML = new XML('<runways></runways>');
+		AnXmlNode.appendChild(xml_runways);
+		
+		for each (var airfield: IAirfield in FAirfields)
+		{
+			var xml_runway: XML = new XML('<runway></runway>');
+			xml_runways.appendChild(xml_runway);
+
+			airfield.toXml(xml_runway);
+		}
+	}
+		
+	private function saveAprons(AnXmlNode: XML): void
+	{
+		var xml_aprons: XML = new XML('<aprons></aprons>');
+		AnXmlNode.appendChild(xml_aprons);
+		
+		for each (var mo_apron: SelectableObject in FAprons)
+		{
+			var xml_apron: XML = new XML('<apron></apron>');
+			xml_aprons.appendChild(xml_apron);
+			
+			mo_apron.toXml(xml_apron);
+		}
+	}
+
+	private function saveGates(AnXmlNode: XML): void
+	{
+		var xml_gates: XML = new XML('<gates></gates>');
+		AnXmlNode.appendChild(xml_gates);
+		
+		for each(var gate: Gate in FGates)
+		{
+			var xml_gate: XML = new XML('<gate></gate>');
+			xml_gates.appendChild(xml_gate);
+
+			gate.toXml(xml_gate);
+		}
+	}
+
+	//event handlers
+	
+	private function URLLoader_OnComplete(AnEvent: Event): void
+	{
+		loadLevelCont();
+	}
+}
+
+function start()
+{
+		var ap_airport: Airport = new Airport();
+		trace("Executed!!!");
+				
+		FrameBuilder.init(ap_airport);
+
+		ControlDispatcher.CurrentDisplayMode = DisplayMode.SplashScreen;
+		MenuController.getInstance();
+		ControlDispatcher.ActiveController = GameController.getInstance(ap_airport);
+		EditController.getInstance(ap_airport);
+		
+		Core.run(AStage);
+}
