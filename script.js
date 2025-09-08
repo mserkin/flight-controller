@@ -914,6 +914,10 @@ render();
 //planeShape.lineTo(-0.3, 0);
 //planeShape.lineTo(-0.3, -2);
 
+//////////////////////////////////////////////////
+// Logic
+//////////////////////////////////////////////////
+
 class Enum {
 	// приватный конструктор, чтобы никто не создавал экземпляры
 	constructor(name, value) {
@@ -1238,7 +1242,7 @@ class Point
 		return new Point(this.#x, this.#y);
 	}
 
-	fromPolar(radius, theta_angle)
+	from_polar(radius, theta_angle)
 	{
 		this.#x = radius * theta_angle.sin();
 		this.#y = -radius * theta_angle.cos();
@@ -1249,20 +1253,22 @@ class Point
 		return new Point(this.#x - point.x, this.#y - point.y);
 	}
 	
-	toString(indent=0) //: String
+	to_string(indent=0) //: String
 	{
 		var str_indent = Instruments.string_of_char("\t", indent);
 		return str_indent + "[Point]\n" 
 			+ str_indent + "{\n"
-			+ Instruments.string_of_char("\t", indent + 1) + "X=" + this.#x + "\n"
-			+ Instruments.string_of_char("\t", indent + 1) + "Y=" + this.#y + "\n"
+			+ Instruments.string_of_char("\t", indent + 1) + "x=" + this.#x + "\n"
+			+ Instruments.string_of_char("\t", indent + 1) + "y=" + this.#y + "\n"
 			+ str_indent + "}\n";
 	}	
 }
 
-	///////////////////////////////////////////////////////////
-	//  Size.as
-	///////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////
+//  Size.as
+///////////////////////////////////////////////////////////
+
 class Size
 {
 	#height;
@@ -1316,6 +1322,190 @@ class Size
 			+ str_indent + "}\n";
 	}	
 }
+
+///////////////////////////////////////////////////////////
+//  Rect.as
+///////////////////////////////////////////////////////////
+
+class Rect 
+{
+	#extent: Size;
+	#location: Point;
+
+    constructor (location=null, extent=null)
+    {
+		if (!location) location = new Point();
+		this.#location = location;
+		if (!extent) extent = new Size();
+		this.#extent = extent;
+    }
+//properties
+	get center() //: Point 
+	{
+		return new Point(this.#location.x + this.#extent.width / 2, 
+			this.#location.y + this.#extent.height / 2);
+	}
+	
+	get corner_points() //: Vector.<Point>
+	{
+		var apnt = []
+		for (let i_height = 0; i_height <= 1; i_height++)
+		{
+			for (let i_width = 0; i_width <= 1; i_width++)	
+			{
+				let pnt_corner: Point = new Point(this.#location.x + this.#extent.width*i_width, 
+					this.#location.y + this.#extent.height*i_height); 
+				apnt.push(pnt_corner);
+			}
+		}
+		return apnt;
+	}
+	//properties
+    get extent() //: Size
+    {
+    	return this.#extent;
+    }
+
+	set extent(size)
+    {
+   		this.#extent = size.clone();
+    }
+	
+    get location() //: Point
+    {
+    	return this.#location;
+    }
+	
+	set location(point)
+    {
+   		this.#location = point.clone();
+    }
+	
+//methods
+	clone() //: Rect
+    {
+		return new Rect(this.#location.clone(), this,#extent.clone());
+    }
+	
+	is_inside(point) //: Boolean
+	{
+		return ((point.x > this.#location.x) 
+			&& (point.x < this.#location.x + this.#extent.width) 
+			&& (point.y > this.#location.y) 
+			&& (point.y < this.#location.y + this.#extent.height));
+	}
+	
+	move_to_rect(point) //: Point
+	{
+		var pnt_result: Point = new Point();
+		pnt_result.x = (point.x < this.#location.x) ? this.#location.x : 
+			((point.x > this.#location.x + this.#extent.width) ? this.#location.x + this.#extent.width : point.x);
+		pnt_result.y = (point.y < this.#location.y) ? this.#location.y : 
+			((point.y > this.#location.y + this.#extent.height) ? this.#location.y + this.#extent.height : point.y);
+		return pnt_result;
+	}
+
+    to_string(indent=0) //: String
+    {
+		let str_indent = Instruments.string_of_char("\t", indent);
+		let str_indent_plus = Instruments.string_of_char("\t", indent + 1);
+		return str_indent + "[Rect]\n"
+			+ str_indent + "{\n"
+			+ str_indent_plus + "extent=\n" 
+			+ this.#extent.to_string(indent + 2)
+			+ str_indent_plus + "location=\n" 
+			+ this.#location.to_string(indent + 2)
+			+ str_indent + "}\n";	
+	}
+	
+	to_xml(xml_node)
+	{
+		xml_node.@x = this.#location.x;
+		xml_node.@y = this.#location.y;
+		xml_node.@width = this.#extent.width;
+		xml_node.@height = this.#extent.height;
+	}	
+}
+
+
+///////////////////////////////////////////////////////////
+//  Region.as
+///////////////////////////////////////////////////////////
+
+//Rect с Location в центре, повернутый на угол Rotation
+class Region extends Rect 
+{
+	#rotation
+
+	constructor (location=null, size=null, rotation=null)
+	{
+		if (!location) location = new Point();
+		if (!size) size = new Size();
+		if (!rotation) rotation = new Angle();
+		
+		super(location, size);
+		this.#rotation = rotation;		
+	}
+
+//properties
+	get center() //: Point
+	{
+		return this.location.clone();
+	}
+	
+	get corner_points() //: Vector.<Point>
+	{
+		var apnt = [];
+		for (let i_height = -1; i_height <= 1; i_height+=2)
+		{
+			for (let i_width = -1; i_width <= 1; i_width+=2)	
+			{
+				let pnt_corner: Point = new Point(this.#extent.width/2*i_width, this.#extent.height/2*i_height); 
+				//var ang_fix: Angle = new Angle(pnt_corner.Theta.Radian - Math.PI / 2 * i_width); 
+				pnt_corner.theta = pnt_corner.theta.add(rotation);
+				pnt_corner.x += this.location.x;
+				pnt_corner.y += this.location.y;
+				apnt[(i_width + 1)/2 + i_height + 1] = pnt_corner;
+			}
+		}
+		return apnt;
+	}
+
+	get rotation() //: Angle
+    {
+    	return this.#rotation;
+    }
+
+//methods
+	clone_region() //: Region
+    {
+		return new Region(this.location.clone(), this.extent.clone(), this.rotation.clone());
+    }	
+	
+	in_area(point)
+    {
+		let point = point.sub(this.location);
+		let ang_theta = point.theta;
+		point.theta = ang_theta.sub(rotation);
+		return Math.abs(point.y) < this.extent.height / 2 && Math.abs(point.x) < this.extent.width / 2;
+	}
+
+	to_string(indent=0) //: String
+	{
+		let str_indent = Instruments.string_of_char("\t", indent);
+		let str_indent_plus = Instruments.string_of_char("\t", indent + 1);
+		return str_indent + "[Region]\n"
+			+ str_indent + "{\n"
+			+ super.to_string(indent + 1) 
+			+ str_indent_plus + "rotation=\n" + this.#rotation.to_string(indent + 2)
+			+ str_indent + "}\n";	
+	}
+}
+
+
+///////////////////////////////////////////////////////////
+//  Airport.as
+///////////////////////////////////////////////////////////
 
 class Airport {
 	#aircrafts;
@@ -1373,54 +1563,55 @@ class Airport {
 	{
 		if (vert_zoom > hor_zoom)
 		{
-			var cx_fixed = this.Extent.Width / hor_zoom * vert_zoom;
-			this.Location.X -=(cx_fixed - this.Extent.Width) / 2;
-			this.Extent.Width = cx_fixed;
+			var cx_fixed = this.extent.width / hor_zoom * vert_zoom;
+			this.location.x -=(cx_fixed - this.extent.width) / 2;
+			this.extent.width = cx_fixed;
 		}
 		else
 		{
-			var cy_fixed = this.Extent.Height / vert_zoom * hor_zoom;
-			this.Location.Y -=(cy_fixed - this.Extent.Height) / 2;
-			this.Extent.Height = cy_fixed;
+			var cy_fixed = this.extent.height / vert_zoom * hor_zoom;
+			this.location.y -=(cy_fixed - this.extent.height) / 2;
+			this.extent.height = cy_fixed;
 		}
 	}
 
-	public function getAirportModelRegion(): Region
+	get_airport_model_region() //: Region
 	{
 		var region: Region = new Region();
-		for each (var airfield: IAirfield in Airfields)
+		for (airfield of this.airfields)
 		{
-			var apoints: Vector.<Point> = airfield.getRegion().CornerPoints;
-			for (var j: int = 0; j < apoints.length; j++)
+			//////////// current place
+			var apoints = airfield.get_region().corner_points;
+			for (let j = 0; j < apoints.length; j++)
 			{
 				var point: Point = apoints[j];
-				var x_left: Number = region.Location.X - region.Extent.Width / 2;
-				var x_right: Number = region.Location.X + region.Extent.Width / 2;
-				var y_top: Number = region.Location.Y - region.Extent.Height / 2;
-				var y_bottom: Number = region.Location.Y + region.Extent.Height / 2;
-				var cx_left_shift = x_left - point.X;
-				var cx_right_shift = point.X - x_right;
-				var cy_top_shift = y_top - point.Y;
-				var cy_bottom_shift = point.Y - y_bottom;
+				var x_left = region.location.x - region.extent.width / 2;
+				var x_right = region.location.x + region.extent.width / 2;
+				var y_top = region.location.y - region.extent.height / 2;
+				var y_bottom = region.location.y + region.extent.height / 2;
+				var cx_left_shift = x_left - point.x;
+				var cx_right_shift = point.x - x_right;
+				var cy_top_shift = y_top - point.y;
+				var cy_bottom_shift = point.y - y_bottom;
 				if (cx_left_shift > 0)
 				{
-					region.Extent.Width += cx_left_shift;
-					region.Location.X -= cx_left_shift / 2;
+					region.extent.width += cx_left_shift;
+					region.location.x -= cx_left_shift / 2;
 				}
 				else if (cx_right_shift > 0)
 				{
-					region.Extent.Width += cx_right_shift;
-					region.Location.X += cx_right_shift / 2;
+					region.extent.width += cx_right_shift;
+					region.location.x += cx_right_shift / 2;
 				}
 				if (cy_top_shift > 0)
 				{
-					region.Extent.Height += cy_top_shift;
-					region.Location.Y -= cy_top_shift / 2;
+					region.extent.height += cy_top_shift;
+					region.location.y -= cy_top_shift / 2;
 				}
 				else if (cy_bottom_shift > 0)
 				{
-					region.Extent.Height += cy_bottom_shift;
-					region.Location.Y += cy_bottom_shift / 2;
+					region.extent.height += cy_bottom_shift;
+					region.location.y += cy_bottom_shift / 2;
 				}
 			}
 		}
