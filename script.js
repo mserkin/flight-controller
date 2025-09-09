@@ -1033,7 +1033,17 @@ class Angle
 		return Angle.#DBL_ROTATION_ERROR
 	}
 
-	get PI()
+	static get HalfPI() //: Angle
+	{
+		return new Angle(Math.PI / 2, AngleUnits.RADIAN);
+	}
+
+	static get MinusHalfPI() //: Angle
+	{
+		return new Angle(-Math.PI / 2, AngleUnits.RADIAN);
+	}
+
+	static get PI()
 	{
 		return new Angle(Math.PI, AngleUnits.RADIAN);
 	}
@@ -1069,7 +1079,7 @@ class Angle
 	
     add(angle) //: Angle
     {
-		return new Angle(this.#value + angle.radian, AngleUnits.RADIAN);
+		return new Angle(this.radian + angle.radian, AngleUnits.RADIAN);
     }
 
 	static arcsin(value) //: Angle
@@ -1139,15 +1149,15 @@ class Angle
 		return new Angle(this.radian - angle.radian, AngleUnits.RADIAN);
     }
 	
-	toString(indent=0) //: String
+	to_string(indent=0) //: String
 	{
-		var str_indent = Instruments.stringOfChar("\t", AnIndent);
-		var str_indent_plus = Instruments.stringOfChar("\t", AnIndent + 1);
+		var str_indent = Instruments.stringOfChar("\t", indent);
+		var str_indent_plus = Instruments.stringOfChar("\t", indent + 1);
 		
 		return str_indent + "[Angle]\n" 
 			+ str_indent + "{\n"
-			+ str_indent_plus + "Degree=" + Degree + "\n"
-			+ str_indent_plus + "Radian=" + Radian + "\n"
+			+ str_indent_plus + "degree=" + this.degree + "\n"
+			+ str_indent_plus + "radian=" + this.radian + "\n"
 			+ str_indent + "}\n";	
 	}	
 	
@@ -1158,7 +1168,7 @@ class Angle
 	
 	static normalizeAngleValue(value) //: Number
 	{
-		var n_sign = Instruments.sign(value);
+		let n_sign = Instruments.sign(value);
 		value -= Math.floor(Math.abs(value / (2 * Math.PI))) * 2 * Math.PI * n_sign;
 		if (Math.abs(value) > Math.PI)
 			value = (2 * Math.PI - Math.abs(value)) * n_sign * -1;
@@ -1384,7 +1394,7 @@ class Rect
 //methods
 	clone() //: Rect
     {
-		return new Rect(this.#location.clone(), this,#extent.clone());
+		return new Rect(this.#location.clone(), this.#extent.clone());
     }
 	
 	is_inside(point) //: Boolean
@@ -1410,7 +1420,7 @@ class Rect
 		let str_indent = Instruments.string_of_char("\t", indent);
 		let str_indent_plus = Instruments.string_of_char("\t", indent + 1);
 		return str_indent + "[Rect]\n"
-			+ str_indent + "{\n"
+			+ str_indent + "{\n"	
 			+ str_indent_plus + "extent=\n" 
 			+ this.#extent.to_string(indent + 2)
 			+ str_indent_plus + "location=\n" 
@@ -1504,6 +1514,446 @@ class Region extends Rect
 
 
 ///////////////////////////////////////////////////////////
+//  SelectableObject.as
+///////////////////////////////////////////////////////////
+
+//Выделяемый Region с Location в центре
+class SelectableObject extends Region 
+{
+    #selected = false;
+	
+	constructor (location, size, course)
+	{
+		super(location, size, course);	
+	}
+	
+	static fromXml(xml)
+	{
+		let x: int = xml.@x;
+		let y: int = xml.@y;
+		let cx: int = xml.@width;
+		let cy: int = xml.@height;
+		let n_course: int = xml.@course;
+
+		return new SelectableObject(new Point(x, y), new Size(cx, cy), new Angle(n_course, AngleUnits.DEGREE));
+	}
+
+//properties
+
+	get course() //: Angle
+    {
+    	return this.rotation;
+    }
+
+    get selected() //: Boolean
+    {
+    	return this.#selected;
+    }
+
+    set selected(is_selected)
+    {
+		this.#selected = is_selected;
+    }
+
+//methods
+	clone_object() //: SelectableObject
+    {
+		var mo: SelectableObject = new SelectableObject(this.location.clone(), this.extent.clone(), this.course.clone());
+		mo.selected = this.#selected;
+		return mo;
+    }	
+
+	to_string(indent=0) //: String
+	{
+		let str_indent = Instruments.string_of_char("\t", indent);
+		let str_indent_plus = Instruments.string_of_char("\t", indent + 1);
+		return str_indent + "[SelectableObject]\n"
+			+ str_indent + "{\n"
+			+ super.toString(indent + 1) 
+			+ str_indent_plus + "course=\n" + this.course.to_string(indent + 2)
+			+ str_indent_plus + "selected=" + this.#selected + "\n"
+			+ str_indent + "}\n";	
+	}
+	
+	to_xml(xml_node)
+	{
+		super.to_xml(xml_node);
+		xml_node.@course = this.course.degree;
+	}	
+	}
+
+///////////////////////////////////////////////////////////
+//  Runway.as
+///////////////////////////////////////////////////////////
+
+class Runway extends SelectableObject
+{
+//const
+	get DBL_DEFAULT_LENGTH() {return 4000}
+	get DBL_LANDING_ZONE_WIDTH_RATIO() {return 0.7}
+	get DBL_WIDTH() {return 700}
+	
+//fields
+	#active_course
+	#back_course_lights_distance = 0;
+	#course_lights_distance = 0;
+	#gates = [];
+	#occupied_by = null;
+	#upwind_course = null;
+	#ang_wind_direction = null;
+
+	constructor(xml, airport)
+	{
+		let x = 0;
+		let y = 0;
+		let cy_length = this.DBL_DEFAULT_LENGTH;
+		let ang_course = new Angle();
+		
+		if (xml)
+		{
+			x = xml.@x;
+			y = xml.@y;
+			cy_length = xml.@length;
+			ang_course.degree = xml.@course;
+			let dbl_course_lights_dist = xml.@courseLights;
+			let dbl_backcourse_lights_dist = xml.@backcourseLights;
+			if (dbl_course_lights_dist) this.#course_lights_distance = xml.@courseLights;
+			if (dbl_backcourse_lights_dist) this.#back_course_lights_distance = xml.@backcourseLights;
+					
+			this.#load_gates_from_xml(xml.gates[0], airport);
+		}
+		
+		super(new Point(x, y), new Size(this.DBL_WIDTH, cy_length), ang_course);
+		
+		this.#active_course = ang_course;
+	}
+	
+//properties
+
+	get active_course() //: Angle
+	{
+		return this.#active_course;
+	}
+
+	get back_course_lights_distance() //: Number
+	{
+		return this.#back_course_lights_distance;
+	}
+
+	get course_lights_distance() //: Number
+	{
+		return this.#course_lights_distance;
+	}
+	
+	get has_free_gate() //: Boolean
+	{
+		for (let i = 0; i < this.#gates.length; i++)
+		{
+			if (this.#gates[i].free)
+				return true;
+		}		
+		return false;
+	}
+
+	get gates() //: Vector.<Gate>
+	{
+		return this.#gates;
+	}
+	
+	get is_runway() //: Boolean
+	{
+		return true;
+	}	
+	
+	get length() //: Number
+	{
+		return this.#extent.height;
+	}
+
+	get occupied() //: Boolean
+	{
+		return (this.#occupied_by != null);
+	}
+	
+	get occupied_by() //: Aircraft
+	{
+		return this.#occupied_by;
+	}		
+
+	get upwind_course() //: Angle
+	{
+		return this.#upwind_course;
+	}
+	
+	get width() //: Number
+	{
+		return this.#extent.width;
+	}
+
+//methods
+	exchange_gate(gate, location) //: Gate
+	{
+		let dbl_min_dist = Number.MAX_VALUE;
+		let gt_nearest = null;
+		for (let g of this.#gates)
+		{
+			if (!g.free && g != gate) continue;
+			
+			let pnt_rel = location.sub(g.location);
+			let dbl_dist = Math.max(Math.abs(pnt_rel.x), Math.abs(pnt_rel.y));
+			if (dbl_dist < dbl_min_dist)
+			{
+				dbl_min_dist = dbl_dist;
+				gt_nearest = gate;
+			}
+		}
+		
+		if (gt_nearest && gt_nearest != gate) 
+		{
+			gate.free(null);
+			gt_nearest.occupy();
+			return gt_nearest;
+		}
+		else
+			return gate;
+	}
+
+	free(aircraft) //: void
+	{
+		if (aircraft == this.#occupied_by)
+			this.#occupied_by = null;
+	}
+
+	get_distance_to_centerline(point)
+	{
+		let pnt = point.sub(this.location);
+		let ang_theta = pnt.theta;
+		pnt.theta = ang_theta.sub(this.course);
+		return Math.abs(pnt.x);
+	}
+		
+	get_region() //: Region
+	{
+		return Region(this);
+	}	
+	
+	in_landing_zone(point) //: Boolean
+	{
+		let mo_landing_zone = this.clone_object();
+		mo_landing_zone.extent.width *= this.DBL_LANDING_ZONE_WIDTH_RATIO;
+		return mo_landing_zone.in_area(point);
+	}		
+		
+	occupy_to_land(aircraft) //: Gate
+	{
+		if (this.#occupied_by != null) return null;
+		
+		var gate = null;
+		
+		for (let gt of this.#gates)
+		{
+			if (gt.free) 
+			{
+				gate = gt;
+				break;
+			}
+		}
+
+		if (gate != null)
+		{
+			gate.occupy();
+			this.#occupied_by = aircraft;
+			this.#active_course = this.choose_runway_course(Angle.direction(aircraft.location, this.location, {}));
+			//trace('!!!FActiveCourse=' + FActiveCourse.Degree);
+		}
+		return gate;
+	}
+
+	occupy_to_takeoff(aircraft) //: Boolean
+	{
+		if (this.#occupied_by != null) return false;
+		
+		this.#occupied_by = aircraft;
+		this.#active_course = this.#upwind_course;
+		return true;
+	}
+
+	to_string(indent=0) //: String
+	{
+		let str_indent = Instruments.string_of_char("\t", indent);
+		let str_indent_plus = Instruments.string_of_char("\t", indent + 1);		
+		return str_indent + "[Runway]\n" 
+			+ super.to_string(indent + 1) 
+			+ str_indent_plus + "active_coure=" + this.#active_course + "\n"
+			+ str_indent_plus + "occupied_by=" + this.#occupied_by + "\n"
+			+ str_indent + "}\n";	
+	}
+
+	to_xml(xml_node)
+	{
+		super.to_xml(xml_node);
+		
+		xml_node.@length = this.extent.height;
+			
+		let xml_gates = new XML('<gates></gates>');
+		xml_node.appendChild(xml_gates);
+			
+		for (let gate of this.gates)
+		{
+			let xml_gate = new XML('<gate></gate>');
+			xml_gates.appendChild(xml_gate);
+			xml_gate.@ref = gate.id;
+		}
+	}
+
+	update_wind(wind_direction)
+	{
+		this.#upwind_course = this.#chooseRunwayCourse(wind_direction.sub(Angle.PI));	
+	}
+
+	//private methods
+	#choose_runway_course(reference_course)
+	{
+		let ang_course: Angle = this.course.clone();
+		if (reference_course.sub(ang_course).abs().radian > Math.PI / 2)
+		{
+			ang_course.dec(Angle.PI);								
+		}
+		return ang_course;
+	}	
+	
+	#load_gates_from_xml(gates_node, airport)
+	{
+		for (let xml_gate of gates_node.gate)
+		{
+			let str_id = xml_gate.@ref;
+
+			let gate = airport.find_gate(str_id);
+			
+			if (gate)
+			{
+				gate.associate(this);
+				this.#gates.push(gate);
+			}
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////
+//  Gate.as
+///////////////////////////////////////////////////////////
+
+class Gate extends SelectableObject
+{
+	get DBL_SELECT_RADIUS {return 400};
+    #free = true;
+    #id = "";
+	#arw_hosting_airfields = [];
+
+    constructor(id, location, is_free)
+    {
+		super(location, new Size(0, 0), new Angle());
+		this.#id = id;
+		this.#free = is_free;
+    }
+
+//properties
+
+    get free() //: Boolean
+    {
+    	return this.#free;
+    }
+
+    get hosting_airfield() //: IAirfield
+    {
+		for (let airfield of arw_hosting_airfields)
+		{
+			if (!airfield.occupied) return airfield; 
+		}
+    	return arw_hosting_airfields[0];
+    }
+
+    get id() //: String
+    {
+    	return this.#id;
+    }
+<<<<<<<<<<<<<<------------------ current point
+//methods
+    public function associate(AHostingAirfield: IAirfield): void
+    {
+		arwHostingAirfields.push(AHostingAirfield);
+	}
+
+    public function free(AnAircraft: Aircraft): void
+    {
+		FFree = true;
+    }
+    
+	static public function fromXml(AnXml: XML): Gate
+	{
+		var obj_gate_props: Object = getGatePropsFromXml(AnXml);	
+		return new Gate(obj_gate_props.Id, obj_gate_props.Location, obj_gate_props.IsFree);
+	}	
+	
+    public override function inArea(APoint:Point)
+    {
+		var point: Point = APoint.sub(Location);
+		return point.Radius < DBL_SELECT_RADIUS;
+	}
+	
+	public function isHostedBy(AnAirfield: IAirfield): Boolean
+    {
+		for each (var airfield: IAirfield in arwHostingAirfields)
+			if (airfield == AnAirfield) return true;
+
+		return false;
+    }
+
+    public function occupy(): Boolean
+    {
+		var is_free: Boolean = FFree;
+		FFree = false;
+		return is_free;
+	}
+
+	public override function toString(AnIndent: int = 0): String
+	{
+		var str_indent = Instruments.stringOfChar("\t", AnIndent);
+		var str_indent_plus = Instruments.stringOfChar("\t", AnIndent + 1);
+		
+		return str_indent + "[Gate]\n" 
+			+ str_indent + "{\n"
+			+ super.toString(AnIndent + 1)
+			+ str_indent_plus + "Id=" + FId + "\n"
+			+ str_indent_plus + "Free=" + FFree + "\n"
+			+ str_indent + "}\n";	
+	}
+
+	public override function toXml(AnXmlNode: XML)
+	{
+		super.toXml(AnXmlNode);
+		
+		AnXmlNode.@free = FFree;
+		AnXmlNode.@id = FId;
+	}	
+
+	//protected methods
+
+	static protected function getGatePropsFromXml(AnXml: XML): Object
+	{		
+		var obj_props: Object = {Id: "", Location: new Point(0, 0), IsFree: true};
+		obj_props.Id = AnXml.@id;					
+		obj_props.Location.X = AnXml.@x;
+		obj_props.Location.Y = AnXml.@y;
+		var str_free: String = AnXml.@free;
+		obj_props.IsFree = Instruments.str2Bool(str_free);
+		return obj_props;
+	}
+}
+
+
+
+///////////////////////////////////////////////////////////
 //  Airport.as
 ///////////////////////////////////////////////////////////
 
@@ -1551,7 +2001,7 @@ class Airport {
 	//public methods
 	find_gate(gate_id) //: Gate
 	{
-		for (const gate of this.#gates)
+		for (let gate of this.#gates)
 		{
 			if (gate.id == gate_id)
 				return gate;
@@ -1578,7 +2028,7 @@ class Airport {
 	get_airport_model_region() //: Region
 	{
 		var region: Region = new Region();
-		for (airfield of this.airfields)
+		for (let airfield of this.airfields)
 		{
 			//////////// current place
 			var apoints = airfield.get_region().corner_points;
