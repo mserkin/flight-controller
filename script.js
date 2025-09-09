@@ -914,6 +914,7 @@ render();
 //planeShape.lineTo(-0.3, 0);
 //planeShape.lineTo(-0.3, -2);
 
+
 //////////////////////////////////////////////////
 // Logic
 //////////////////////////////////////////////////
@@ -1189,7 +1190,7 @@ class Point
 		this.#x = x
 		this.#y = y
 	}
-	
+		
 	//properties	
 	get radius()
 	{
@@ -1198,7 +1199,7 @@ class Point
 	
 	set radius(value)
 	{
-		fromPolar(value, this.theta);
+		from_polar(value, this.theta);
 	}		
 		
 	get theta() //: Angle
@@ -1218,7 +1219,7 @@ class Point
 	
 	set theta(angle)
 	{
-		fromPolar(this.radius, angle);
+		this.from_polar(this.radius, angle);
 	}	
 
 	get x() //: Number
@@ -1251,13 +1252,13 @@ class Point
 	{
 		return new Point(this.#x, this.#y);
 	}
-
+	
 	from_polar(radius, theta_angle)
 	{
 		this.#x = radius * theta_angle.sin();
 		this.#y = -radius * theta_angle.cos();
 	}
-		
+
 	sub(point) //: Point
 	{
 		return new Point(this.#x - point.x, this.#y - point.y);
@@ -1582,11 +1583,46 @@ class SelectableObject extends Region
 	}	
 	}
 
+
+///////////////////////////////////////////////////////////
+//  IAirfield.as
+///////////////////////////////////////////////////////////
+
+//interface IAirfield
+//properties
+//	get active_course() //: Angle;
+//	get back_course_lights_distance() //: Number;
+//	get course() //: Angle	
+//	get course_lights_distance() //: Number;
+//	get gates() //: Vector.<Gate>;
+//	get is_runway() //: Boolean;	
+//	get length() //: Number;
+//  get location() //: Point;
+//  set location(AValue: Point);
+//	get occupied() //: Boolean;
+//	get occupied_by() //: Aircraft;
+//  get selected() //: Boolean
+//  set selected(IsSelected: Boolean)	
+//	get upwind_course() //: Angle;
+//	get width() //: Number;
+//methods
+//  exchangeGate(gate, location) //: Gate;
+//  free(aircraft) //: void;
+//  getRegion() //: Region;
+//  inArea(point);
+//  inLandingZone(point) //: Boolean;
+//  occupyToLand(aircraft) //: Gate;
+//  occupyToTakeoff(aircraft) //: Boolean;
+//  toString(indent=0) //: String;
+//  toXml(xml_node);
+//  updateWind(wind_direction);
+
+
 ///////////////////////////////////////////////////////////
 //  Runway.as
 ///////////////////////////////////////////////////////////
 
-class Runway extends SelectableObject
+class Runway extends SelectableObject //implements IAirfield
 {
 //const
 	get DBL_DEFAULT_LENGTH() {return 4000}
@@ -1857,6 +1893,12 @@ class Gate extends SelectableObject
 		this.#free = is_free;
     }
 
+	static from_xml(xml) //: Gate
+	{
+		var obj_gate_props = get_gate_props_from_xml(xml);	
+		return new Gate(obj_gate_props.id, obj_gate_props.location, obj_gate_props.is_free);
+	}	
+	
 //properties
 
     get free() //: Boolean
@@ -1877,80 +1919,209 @@ class Gate extends SelectableObject
     {
     	return this.#id;
     }
-<<<<<<<<<<<<<<------------------ current point
-//methods
-    public function associate(AHostingAirfield: IAirfield): void
+
+//public methods
+    associate(hosting_airfield) //: void
     {
-		arwHostingAirfields.push(AHostingAirfield);
+		arw_hosting_airfields.push(hosting_airfield);
 	}
 
-    public function free(AnAircraft: Aircraft): void
+    free(aircraft) //: void
     {
-		FFree = true;
+		this.#free = true;
     }
     
-	static public function fromXml(AnXml: XML): Gate
-	{
-		var obj_gate_props: Object = getGatePropsFromXml(AnXml);	
-		return new Gate(obj_gate_props.Id, obj_gate_props.Location, obj_gate_props.IsFree);
-	}	
-	
-    public override function inArea(APoint:Point)
+    in_area(point)
     {
-		var point: Point = APoint.sub(Location);
-		return point.Radius < DBL_SELECT_RADIUS;
+		var point = point.sub(this.location);
+		return point.radius < this.DBL_SELECT_RADIUS;
 	}
 	
-	public function isHostedBy(AnAirfield: IAirfield): Boolean
+	is_hosted_by(airfield) //: Boolean
     {
-		for each (var airfield: IAirfield in arwHostingAirfields)
-			if (airfield == AnAirfield) return true;
+		for (let airfield of this.#arw_hosting_airfields)
+			if (airfield == airfield) return true;
 
 		return false;
     }
 
-    public function occupy(): Boolean
+    occupy() //: Boolean
     {
-		var is_free: Boolean = FFree;
-		FFree = false;
+		let is_free = this.#free;
+		this.#free = false;
 		return is_free;
 	}
 
-	public override function toString(AnIndent: int = 0): String
+	to_string(indent = 0) //: String
 	{
-		var str_indent = Instruments.stringOfChar("\t", AnIndent);
-		var str_indent_plus = Instruments.stringOfChar("\t", AnIndent + 1);
+		let str_indent = Instruments.string_of_char("\t", indent);
+		let str_indent_plus = Instruments.string_of_char("\t", indent + 1);
 		
 		return str_indent + "[Gate]\n" 
 			+ str_indent + "{\n"
-			+ super.toString(AnIndent + 1)
-			+ str_indent_plus + "Id=" + FId + "\n"
-			+ str_indent_plus + "Free=" + FFree + "\n"
+			+ super.to_string(indent + 1)
+			+ str_indent_plus + "id=" + this.#id + "\n"
+			+ str_indent_plus + "free=" + this.#free + "\n"
 			+ str_indent + "}\n";	
 	}
 
-	public override function toXml(AnXmlNode: XML)
+	to_xml(xml_node)
 	{
-		super.toXml(AnXmlNode);
+		super.to_xml(xml_node);
 		
-		AnXmlNode.@free = FFree;
-		AnXmlNode.@id = FId;
+		xml_node.@free = this.#free;
+		xml_node.@id = this.#id;
 	}	
 
-	//protected methods
-
-	static protected function getGatePropsFromXml(AnXml: XML): Object
+//protected methods
+	_get_gate_props_from_xml(xml) //: Object
 	{		
-		var obj_props: Object = {Id: "", Location: new Point(0, 0), IsFree: true};
-		obj_props.Id = AnXml.@id;					
-		obj_props.Location.X = AnXml.@x;
-		obj_props.Location.Y = AnXml.@y;
+		var obj_props = {id: "", location: new Point(0, 0), is_free: true};
+		obj_props.id = AnXml.@id;					
+		obj_props.location.x = AnXml.@x;
+		obj_props.location.y = AnXml.@y;
 		var str_free: String = AnXml.@free;
-		obj_props.IsFree = Instruments.str2Bool(str_free);
+		obj_props.is_free = Instruments.str2Bool(str_free);
 		return obj_props;
 	}
 }
 
+
+///////////////////////////////////////////////////////////
+//  Helipad.as
+///////////////////////////////////////////////////////////
+
+class Helipad extends Gate //implements IAirfield
+{
+	get #DBL_HELIPAD_LENGTH() {return 1000};
+	get #DBL_HELIPAD_WIDTH() {return DBL_HELIPAD_LENGTH};
+//property fields
+	#active_course = new Angle(0, AngleUnits.RADIAN);
+	#occupied_by = null;
+    
+    constructor(id, location, is_free)
+    {
+		super(id, location, is_free);
+		this.extent = new Size(this.DBL_HELIPAD_WIDTH, this.DBL_HELIPAD_LENGTH);
+		associate(this);
+    }
+
+	static from_xml(xml) //: Helipad
+	{
+		let obj_gate_props = Gate._get_gate_props_from_xml(xml);	
+		return new Helipad(obj_gate_props.id, obj_gate_props.location, obj_gate_props.is_free);
+	}
+	
+//properties
+	get active_course() //: Angle
+	{
+		return this.#active_course;
+	}
+
+	get back_course_lights_distance() {return -1};
+	get course_lights_distance() {return -1};
+	
+	get gates() //: Vector.<Gate>
+	{
+		return [this];
+	}
+
+	get is_runway() //: Boolean
+	{
+		return false;
+	}
+	
+	get length() //: Number
+	{
+		return this.extent.height;
+	}
+
+	get occupied() //: Boolean
+	{
+		return (this.#occupied_by != null);
+	}
+	
+	get occupied_by() //: Aircraft
+	{
+		return this.#occupied_by;
+	}		
+
+	get upwind_course() //: Angle
+	{
+		return null;
+	}
+	
+	get width() //: Number
+	{
+		return this.extent.width;
+	}
+
+//methods
+	exchange_gate(gate, location) //: Gate
+	{
+		return gate;
+	}
+
+	free(aircraft) //: void
+	{
+		this.#occupied_by = null;
+		super.free(aircraft);
+	}
+
+	get_region() //: Region
+	{
+		return Region(this);
+	}
+
+	is_hosted_by(airfield) //: Boolean
+    {
+		return this == airfield;
+    }
+
+	in_landing_zone(point) //: Boolean
+	{
+		return in_area(point);
+	}
+	
+	occupy_to_land(aircraft) //: Gate
+	{
+		if (this.#occupied_by != null) return null;
+		
+		this.occupy();
+		this.#occupied_by = aircraft;
+		this.#active_course = Angle.direction(aircraft.location, this.location, {});
+
+		return this;
+	}		
+		
+	occupy_to_takeoff(aircraft) //: Boolean
+	{
+		if (this.#occupied_by != null && this.#occupied_by != aircraft) return false;
+		
+		this.#occupied_by = aircraft;
+		return true;		
+	}
+
+	to_string(indent=0) //: String
+	{
+		let str_indent = Instruments.string_of_char("\t", indent);
+		let str_indent_plus = Instruments.string_of_char("\t", indent + 1);
+		
+		return str_indent + "[Helipad]\n" 
+			+ str_indent + "{\n"
+			+ super.to_string(indent + 1)
+			+ str_indent_plus + "id=" + this.id + "\n"
+			+ str_indent_plus + "free=" + this.free + "\n"
+			+ str_indent + "}\n";	
+	}
+
+	to_xml(xml_node)
+	{
+		super.to_xml(xml_node);
+	}	
+	
+	update_wind(wind_direction) {}
+}
 
 
 ///////////////////////////////////////////////////////////
@@ -1967,7 +2138,7 @@ class Airport {
 	#gates;
 	#is_thumbnail_mode;
 	#location;
-	#size;
+	#extent;
 
 	constructor(is_thumbnail_mode = false) {
 		//this.OnGateLoaded : CustomDispatcher = new CustomDispatcher();
@@ -1982,14 +2153,15 @@ class Airport {
 		this.#gates = [];
 		this.#is_thumbnail_mode = is_thumbnail_mode;
 		this.#location = new Point(0, 0);
-		this.#size = new Size(0, 0);
+		this.#extent = new Size(0, 0);
 
 		console.log("Airport created!");
-	}
+}
+
 //getters
 	get aircrafts() {return this.#aircrafts;}
 	get airfields() {return this.#airfields;}
-	get aprons() {return this.#apronsFAprons;}
+	get aprons() {return this.#aprons;}
 	get clouds() {return this.#clouds;}	
 	get cloud_probability() {return this.#cloud_probability;	}	
 	get current_wind() {return this.#current_wind;}	
@@ -2013,36 +2185,35 @@ class Airport {
 	{
 		if (vert_zoom > hor_zoom)
 		{
-			var cx_fixed = this.extent.width / hor_zoom * vert_zoom;
-			this.location.x -=(cx_fixed - this.extent.width) / 2;
-			this.extent.width = cx_fixed;
+			var cx_fixed = this.#extent.width / hor_zoom * vert_zoom;
+			this.#location.x -=(cx_fixed - this.#extent.width) / 2;
+			this.#extent.width = cx_fixed;
 		}
 		else
 		{
-			var cy_fixed = this.extent.height / vert_zoom * hor_zoom;
-			this.location.y -=(cy_fixed - this.extent.height) / 2;
-			this.extent.height = cy_fixed;
+			var cy_fixed = this.#extent.height / vert_zoom * hor_zoom;
+			this.#location.y -=(cy_fixed - this.#extent.height) / 2;
+			this.#extent.height = cy_fixed;
 		}
 	}
 
 	get_airport_model_region() //: Region
 	{
-		var region: Region = new Region();
-		for (let airfield of this.airfields)
+		var region = new Region();
+		for (let airfield of this.#airfields)
 		{
-			//////////// current place
-			var apoints = airfield.get_region().corner_points;
+			let apoints = airfield.get_region().corner_points;
 			for (let j = 0; j < apoints.length; j++)
 			{
-				var point: Point = apoints[j];
-				var x_left = region.location.x - region.extent.width / 2;
-				var x_right = region.location.x + region.extent.width / 2;
-				var y_top = region.location.y - region.extent.height / 2;
-				var y_bottom = region.location.y + region.extent.height / 2;
-				var cx_left_shift = x_left - point.x;
-				var cx_right_shift = point.x - x_right;
-				var cy_top_shift = y_top - point.y;
-				var cy_bottom_shift = point.y - y_bottom;
+				let point: Point = apoints[j];
+				let x_left = region.location.x - region.extent.width / 2;
+				let x_right = region.location.x + region.extent.width / 2;
+				let y_top = region.location.y - region.extent.height / 2;
+				let y_bottom = region.location.y + region.extent.height / 2;
+				let cx_left_shift = x_left - point.x;
+				let cx_right_shift = point.x - x_right;
+				let cy_top_shift = y_top - point.y;
+				let cy_bottom_shift = point.y - y_bottom;
 				if (cx_left_shift > 0)
 				{
 					region.extent.width += cx_left_shift;
@@ -2068,206 +2239,188 @@ class Airport {
 		return region;
 	}
 
-	public function loadLevel(ALevelFile: String)
+	load_level(level_file) 
 	{
-		ulLoader = new URLLoader();
-		var urlr_file: URLRequest = new URLRequest(ALevelFile);
-		try {
-			ulLoader.addEventListener(Event.COMPLETE, URLLoader_OnComplete);
-			ulLoader.load(urlr_file);
-		} 
-		catch (error:Error) 
-		{
-			trace("  Unable to load file " + ALevelFile);
-		}		
+		//TODO - load level from... somewhere.
 	}
 
-	public function makeLevelXML(): XML
+	make_level_xml() //: XML
 	{
-		var xml_doc: XML = new XML('<level></level>');
-		saveGates(xml_doc);
-		saveAirfields(xml_doc);
-		saveAprons(xml_doc);
-
+		var xml_doc = new XML('<level></level>');
+		this.#saveGates(xml_doc);
+		this.#saveAirfields(xml_doc);
+		this.#saveAprons(xml_doc);
 		return xml_doc;
 	}	
 	
-	public function resize(ALocation: Point, AnExtent: Size)
+	resize(location, extent)
 	{
-		this.Location = ALocation;
-		this.Extent = AnExtent;
-		
-		OnResized.fireOnResized();
+		this.#location = location;
+		this.#extent = extent;
+	
+		//TODO: OnResized.fireOnResized();
 	}
 
-	public function updateWind()
+	update_wind()
 	{
-		FCurrentWind.update();
-		for each (var airfield: IAirfield in FAirfields)
+		this.#current_wind.update();
+		for (let airfield of this.#airfields)
 		{
-			airfield.updateWind(FCurrentWind.Direction);
+			airfield.update_wind(this.#current_wind.direction);
 		}
 	}
 
-	//protected methods
-
-	/* protected function <#camelStyle#>(<#ADelphiStyle#>: <#Type#>)
+//private methods
+	#load_airport(xml) //: void
 	{
-	}*/
-
-	//private methods
-
-	
-	private function loadAirport(AnXml: XML): void
-	{
-		resize(
-			new Point(AnXml.@left, AnXml.@top), 
-			new Size(AnXml.@width, AnXml.@height)
+		this.resize(
+			new Point(xml.@left, xml.@top), 
+			new Size(xml.@width, xml.@height)
 		);
 		
-		if (!FThumbnailMode)
+		if (!this.#thumbnail_mode)
 		{
-			loadGates(AnXml.gates[0]);
-			loadHelipads(AnXml.helipads[0]);
-			loadAprons(AnXml.aprons[0]);		
+			this.#load_gates(xml.gates[0]);
+			this.#load_helipads(xml.helipads[0]);
+			this.#load_aprons(xml.aprons[0]);		
 		}
-		loadRunways(AnXml.runways[0]);
+		this.#load_runways(xml.runways[0]);
 	}
 	
-	private function loadAprons(AnXml: XML): void
+	#load_aprons(xml) //: void
 	{
-		if (!AnXml || !AnXml.apron) return;
+		if (!xml || !xml.apron) return;
 		
-		for each (var xml_node: XML in AnXml.apron)
+		for (let xml_node of xml.apron)
 		{
-			FAprons.push(SelectableObject.fromXml(xml_node));
+			this.#aprons.push(SelectableObject.from_xml(xml_node));
 		}
 	}
 		
-	private function loadGates(AnXml: XML): void
+	#load_gates(xml) //: void
 	{
-		for each (var xml_node in AnXml.gate)
+		for (let xml_node of xml.gate)
 		{
-			var gate: Gate = Gate.fromXml(xml_node);
-			FGates.push(gate);
+			let gate = Gate.from_xml(xml_node);
+			this.#gates.push(gate);
 			
-			OnGateLoaded.fireOnGateLoaded(gate);
+			//TODO: OnGateLoaded.fireOnGateLoaded(gate);
 		}
 	}
 
-	private function loadHelipads(AnXml: XML)
+	#load_helipads(xml)
 	{
-		if (!AnXml || !AnXml.helipad) return;
+		if (!xml || !xml.helipad) return;
 		
-		for each (var xml_helipad: XML in AnXml.helipad)
+		for (let xml_helipad in xml.helipad)
 		{
-			var helipad: Helipad = Helipad.fromXml(xml_helipad);
-			FGates.push(helipad);
-			FAirfields.push(helipad);
+			var helipad = Helipad.from_xml(xml_helipad);
+			this.#gates.push(helipad);
+			this.#airfields.push(helipad);
 			
-			OnGateLoaded.fireOnGateLoaded(helipad);			
+			//TODO: OnGateLoaded.fireOnGateLoaded(helipad);			
 		}
 	}	
 	
-	private function loadLevelCont()
+	#load_level_cont()
 	{
-		var xml_doc: XML = new XML(ulLoader.data);
-		ulLoader.close();
+		//TODO: load level continuation let xml_doc = new XML(ulLoader.data);
+		//ulLoader.close();
 
-		var xml_airport: XML = xml_doc.airport[0];
+		let xml_airport = xml_doc.airport[0];
 
 		if (!xml_airport)
 		{
-			trace("Failed to load level: airport tag not found.");
+			console.log("Failed to load level: airport tag not found.");
 			return;
 		}
 		
-		if (!FThumbnailMode)
+		if (!this.#thumbnail_mode)
 		{
-			loadWeather(xml_doc.weather[0]);
+			this.#load_weather(xml_doc.weather[0]);
 		}
-		loadAirport(xml_airport);
+		this.#load_airport(xml_airport);
 
-		OnLevelLoaded.fireOnLevelLoaded();
+		//TODO: send level loaded event OnLevelLoaded.fireOnLevelLoaded();
 	}
 		
-	private function loadRunways(AnXml: XML)
+	#load_runways(xml)
 	{
-		if (!AnXml || !AnXml.runway) return;		
+		if (!xml || !xml.runway) return;		
 		
-		for each (var xml_runway: XML in AnXml.runway)
+		for (var xml_runway of xml.runway)
 		{
-			FAirfields.push(new Runway(xml_runway, this));
+			this.#airfields.push(new Runway(xml_runway, this));
 		}
 	}
 	
-	private function loadWeather(AnXml: XML)
+	#load_weather(xml)
 	{
-		var dbl_cloud_probability: Number = AnXml.clouds[0].@probability;
-		var xml_wind: XML = AnXml.wind[0];
-		var dbl_wind_variability: Number = xml_wind.@variability;
-		var dbl_wind_min_speed: Number = xml_wind.@minSpeed;
-		var dbl_wind_max_speed: Number = xml_wind.@maxSpeed;
+		let dbl_cloud_probability = xml.clouds[0].@probability;
+		let xml_wind = xml.wind[0];
+		let dbl_wind_variability = xml_wind.@variability;
+		let dbl_wind_min_speed = xml_wind.@minSpeed;
+		let dbl_wind_max_speed = xml_wind.@maxSpeed;
 		
-		FCurrentWind = new Wind(dbl_wind_min_speed, dbl_wind_max_speed, dbl_wind_variability);
-		FCloudProbability = dbl_cloud_probability;
+		this.#current_wind = new Wind(dbl_wind_min_speed, dbl_wind_max_speed, dbl_wind_variability);
+		this.#cloud_probability = dbl_cloud_probability;
 	}
 	
-	private function saveAirfields(AnXmlNode: XML): void
+	#save_airfields(xml_node) //: void
 	{
-		var xml_runways: XML = new XML('<runways></runways>');
-		AnXmlNode.appendChild(xml_runways);
+		let xml_runways = new XML('<runways></runways>');
+		xml_node.appendChild(xml_runways);
 		
-		for each (var airfield: IAirfield in FAirfields)
+		for (let airfield of this.#airfields)
 		{
-			var xml_runway: XML = new XML('<runway></runway>');
+			let xml_runway = new XML('<runway></runway>');
 			xml_runways.appendChild(xml_runway);
 
-			airfield.toXml(xml_runway);
+			airfield.to_xml(xml_runway);
 		}
 	}
 		
-	private function saveAprons(AnXmlNode: XML): void
+	#save_aprons(xml_node) //: void
 	{
-		var xml_aprons: XML = new XML('<aprons></aprons>');
-		AnXmlNode.appendChild(xml_aprons);
+		let xml_aprons = new XML('<aprons></aprons>');
+		xml_node.appendChild(xml_aprons);
 		
-		for each (var mo_apron: SelectableObject in FAprons)
+		for (let mo_apron of this.#aprons)
 		{
-			var xml_apron: XML = new XML('<apron></apron>');
+			let xml_apron = new XML('<apron></apron>');
 			xml_aprons.appendChild(xml_apron);
 			
-			mo_apron.toXml(xml_apron);
+			mo_apron.to_xml(xml_apron);
 		}
 	}
 
-	private function saveGates(AnXmlNode: XML): void
+	#save_gates(xml_node) //: void
 	{
-		var xml_gates: XML = new XML('<gates></gates>');
-		AnXmlNode.appendChild(xml_gates);
+		let xml_gates = new XML('<gates></gates>');
+		xml_node.appendChild(xml_gates);
 		
-		for each(var gate: Gate in FGates)
+		for (let gate of this.#gates)
 		{
-			var xml_gate: XML = new XML('<gate></gate>');
+			let xml_gate = new XML('<gate></gate>');
 			xml_gates.appendChild(xml_gate);
 
-			gate.toXml(xml_gate);
+			gate.to_xml(xml_gate);
 		}
 	}
 
 	//event handlers
-	
-	private function URLLoader_OnComplete(AnEvent: Event): void
-	{
-		loadLevelCont();
-	}
+	//TODO: continue level loading of file download finished
+	//URLLoader_OnComplete(AnEvent: Event): void
+	//{
+	//	loadLevelCont();
+	//}
 }
 
 function start()
 {
-		var ap_airport: Airport = new Airport();
-		trace("Executed!!!");
-				
+		let ap_airport = new Airport();
+		console.log("Executed!!!");
+				<<=========== HERE
 		FrameBuilder.init(ap_airport);
 
 		ControlDispatcher.CurrentDisplayMode = DisplayMode.SplashScreen;
