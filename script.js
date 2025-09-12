@@ -945,6 +945,73 @@ class AngleUnits extends Enum {
 	}
 }
 
+class Controllers extends Enum {
+	static GAME_CONTROLLER = new Controllers("GAME_CONTROLLER", 0);
+	static EDIT_CONTROLLER = new Controllers("EDIT_CONTROLLER", 1);
+	static MENU_CONTROLLER = new Controllers("MENU_CONTROLLER", 2);
+	
+	static values() {
+	  return [this.GAME_CONTROLLER, this.EDIT_CONTROLLER, this.MENU_CONTROLLER];
+	}
+}
+
+class IncomingDispatcherEventTypes extends Enum {
+	static N_MENU_BOX_SELECT = new IncomingDispatcherEventTypes("N_MENU_BOX_SELECT", 0);
+	static N_MENU_BACK_CLICK = new IncomingDispatcherEventTypes("N_MENU_BACK_CLICK", 1);		
+	static N_INFO_PANEL_MENU_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_MENU_CLICK", 2);          
+	static N_INFO_PANEL_PAUSE_SIM_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_PAUSE_SIM_CLICK", 3);
+	static N_INFO_PANEL_FAST_SIM_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_FAST_SIM_CLICK", 4);
+	static N_INFO_PANEL_RESTART_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_RESTART_CLICK", 5);
+	static N_PAUSE_SIMULATION = new IncomingDispatcherEventTypes("N_PAUSE_SIMULATION", 5);		
+	static N_EDITOR_CORNER_CLICK = new IncomingDispatcherEventTypes("N_EDITOR_CORNER_CLICK", 6);
+	static N_AIRPORT_DOUBLE_CLICK = new IncomingDispatcherEventTypes("N_AIRPORT_DOUBLE_CLICK", 7);
+	static N_AIRPORT_KEY_PRESSED = new IncomingDispatcherEventTypes("N_AIRPORT_KEY_PRESSED", 8);
+	static N_AIRPORT_MOUSE_DOWN = new IncomingDispatcherEventTypes("N_AIRPORT_MOUSE_DOWN", 9);
+	static N_AIRPORT_MOUSE_MOVE = new IncomingDispatcherEventTypes("N_AIRPORT_MOUSE_MOVE", 10);
+	static N_AIRPORT_MOUSE_UP = new IncomingDispatcherEventTypes("N_AIRPORT_MOUSE_UP", 11);		
+	static N_INFO_PANEL_HINT_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_HINT_CLICK", 12);
+	static N_MENU_LEVEL_SELECT = new IncomingDispatcherEventTypes("N_MENU_LEVEL_SELECT", 13);		
+	static N_BANNER_BACK_CLICK = new IncomingDispatcherEventTypes("N_BANNER_BACK_CLICK", 14);
+	static N_BANNER_START_CLICK = new IncomingDispatcherEventTypes("N_BANNER_START_CLICK", 15);
+	static N_BANNER_RESTART_CLICK = new IncomingDispatcherEventTypes("N_BANNER_RESTART_CLICK", 16);
+	static N_BANNER_SKIP_LEVEL_CLICK = new IncomingDispatcherEventTypes("N_BANNER_SKIP_LEVEL_CLICK", 17);
+	static N_INFO_PANEL_INFO_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_INFO_CLICK", 18);
+}
+
+class OutcomingDispatcherEventTypes extends Enum {
+	static N_LEVEL_START = new OutcomingDispatcherEventTypes("N_LEVEL_START", 0);
+	static N_BOX_OPEN = new OutcomingDispatcherEventTypes("N_BOX_OPEN", 1);
+	static N_BACK_TO_BOXES = new OutcomingDispatcherEventTypes("N_BACK_TO_BOXES", 2);
+	static N_RESERVED2 = new OutcomingDispatcherEventTypes("N_RESERVED2", 3);
+	static N_FAST_SIMULATION = new OutcomingDispatcherEventTypes("N_FAST_SIMULATION", 4);
+	static N_START_LEVEL = new OutcomingDispatcherEventTypes("N_START_LEVEL", 6);
+	static N_LEVEL_CONFIG_VISIBILITY = new OutcomingDispatcherEventTypes("N_LEVEL_CONFIG_VISIBILITY", 7);
+	static N_OBJECT_ACTIVATE = new OutcomingDispatcherEventTypes("N_OBJECT_ACTIVATE", 8);
+	static N_OBJECT_INFO = new OutcomingDispatcherEventTypes("N_OBJECT_INFO", 9);
+	static N_OBJECT_SELECT = new OutcomingDispatcherEventTypes("N_OBJECT_SELECT", 10);
+	static N_PATH_CONTINUE = new OutcomingDispatcherEventTypes("N_PATH_CONTINUE", 11);
+	static N_PATH_FINISH = new OutcomingDispatcherEventTypes("N_PATH_FINISH", 12);
+	static N_KEY_PRESSED = new OutcomingDispatcherEventTypes("N_KEY_PRESSED", 13);
+	static N_SHOW_HINTS = new OutcomingDispatcherEventTypes("N_SHOW_HINTS", 14);
+	static N_NEXT_LEVEL = new OutcomingDispatcherEventTypes("N_NEXT_LEVEL", 15);
+	static N_RESERVED1 = new OutcomingDispatcherEventTypes("N_RESERVED1", 16);		
+	static N_PLAY_LEVEL = new OutcomingDispatcherEventTypes("N_PLAY_LEVEL", 17);
+	static N_DISPLAY_MODE_CHANGED = new OutcomingDispatcherEventTypes("N_DISPLAY_MODE_CHANGED", 20);
+}
+
+class Colors //static, enum
+{
+	static BLACK = new Colors ("Black", 0x000000);
+	static BLUE = new Colors ("Black", 0x0000FF);
+	static BROWN = new Colors ("Black", 0x938F0D);
+	static GRAY = new Colors ("Black", 0xAAAAAA);
+	static GREEN = new Colors ("Black", 0x00FF00);
+	static RED = new Colors ("Black", 0xFF0000);
+	static SELECTION = new Colors ("Black", 0xF29200);
+	static YELLOW = new Colors ("Black", 0xF2F200);
+	static WHITE = new Colors ("Black", 0xFFFFFF);
+}
+
 ///////////////////////////////////////////////////////////
 //  Instruments.as
 ///////////////////////////////////////////////////////////
@@ -2415,6 +2482,1491 @@ class Airport {
 	//	loadLevelCont();
 	//}
 }
+
+
+///////////////////////////////////////////////////////////
+//  ScreenManager.as
+///////////////////////////////////////////////////////////
+
+class ScreenManager //static
+{
+	static get #FONT_SIZE_TINY() {return 8};
+	static get #FONT_SIZE_SMALL() {return 12};
+	static get #FONT_SIZE_MEDIUM() {return 16};
+	static get #FONT_SIZE_LARGE() {return 32};
+	static #stg_stage = null;
+
+//properties
+
+	static get display_objects_count () //: int
+	{
+		//TODO
+	}
+
+	static stage_size () //: Size
+	{
+		//TODO: number of objects on the stage
+	}
+//methods
+	//public methods
+	static create_frame() //: Size
+	{
+		//TODO: Remove objects from the stage
+		//let i = 0;
+		//while (i < stgStage.numChildren) 
+		//{
+		//	stgStage.removeChildAt(i);
+		//}
+		
+		//return StageSize;
+	}
+	
+	static displayImage(display_object, rect, angle = null) 
+	{
+		//TODO: Add object to stage, set position, size and angle
+
+		// display_object.x = rect.location.x;
+		// display_object.y = rect.location.y;
+		// if (rect.extent.width >= 0 && rect.extent.height >= 0)
+		// {
+		// 	display_object.width = rect.extent.width;
+		// 	display_object.height = rect.extent.height;
+		// }
+		
+		// if (angle)
+		// {
+		// 	display_object.rotation = angle.degree;
+		// }
+
+		//stgStage.addChild(display_object);
+	}
+		
+	static display_text(
+		text, 
+		rect, 
+		font_size=16, 
+		color=0x_ffffff, 
+		to_show_background=false, 
+		is_input_field=false, 
+		is_multiline=true)		
+	{	
+		//TODO: Display text
+		// var txt_field: TextField = new TextField();
+		
+		// txt_field.autoSize = TextFieldAutoSize.LEFT;
+		
+		// if (ARect.Extent.Width >= 0) txt_field.width = ARect.Extent.Width;
+		// if (ARect.Extent.Height >= 0) txt_field.height = ARect.Extent.Height;
+		// if (ToShowBackground) txt_field.background = true;
+		// if (IsInputField) 
+		// {
+		// 	txt_field.type = TextFieldType.INPUT;
+		// 	if (IsMultiline)
+		// 	{
+		// 		txt_field.wordWrap = true;
+		// 		txt_field.multiline = true;
+		// 	}
+		// }
+		
+		// txt_field.defaultTextFormat = new TextFormat("Arial", AFontSize, AColor);
+		// txt_field.text = AText; 
+		// if (ARect is Region)
+		// {
+		// 	txt_field.autoSize = TextFieldAutoSize.CENTER;
+		// 	txt_field.rotation = Region(ARect).Rotation.Degree;
+		// 	txt_field.x = ARect.Location.X - txt_field.textWidth/2;
+		// 	txt_field.y = ARect.Location.Y - txt_field.textHeight/2;
+		// }		
+		// else
+		// {
+		// 	txt_field.x = ARect.Location.X;
+		// 	txt_field.y = ARect.Location.Y;
+		// }
+		// stgStage.addChild(txt_field);
+	}
+	
+	static draw_line(point_array, color, alpha)
+	{
+		// TODO: Draw line 		
+		// if (point_array.length < 2) return;
+
+		// var shp_path: shape = new shape();
+		// shp_path.graphics.line_style(1, color, alpha, false, line_scale_mode.none, caps_style.none, null, 3);
+	
+		// var vdbl_data: vector.<number> = convert_to_int_vector(point_array);
+		// var vn_commands: vector.<int> = get_commands(point_array.length);
+				
+		// shp_path.graphics.draw_path(vn_commands, vdbl_data);
+		
+		// //sp_frame_buffer.add_child(shp_path);
+		// stg_stage.add_child(shp_path);
+	}
+
+	static init(stage)
+	{
+		//stgStage = AStage;
+	}
+	
+//private methods
+	static convert_to_int_vector(path) //: Vector.<Number>
+	{	
+		var vn_result = [];
+		for (let pnt of path)
+		{
+			vn_result.push(pnt.x);
+			vn_result.push(pnt.y);
+		}
+		return vn_result;
+	}
+		
+	static get_commands(length) //: Vector.<int>
+	{
+		
+		// var vn_result = [];	
+		// vn_result.push(GraphicsPathCommand.MOVE_TO);
+		// for (var i: int = 1; i < ALength; i++)
+		// 	vn_result.push(GraphicsPathCommand.LINE_TO);
+		// return vn_result;
+	}
+	
+}
+
+class Controllers extends Enum {
+	static GAME_CONTROLLER = new Controllers("GAME_CONTROLLER", 0);
+	static EDIT_CONTROLLER = new Controllers("EDIT_CONTROLLER", 1);
+	static MENU_CONTROLLER = new Controllers("MENU_CONTROLLER", 2);
+
+	static values() {
+	  return [this.GAME_CONTROLLER, this.EDIT_CONTROLLER, this.MENU_CONTROLLER];
+	}
+}
+
+class DisplayMode extends Enum
+{
+	static #NORMAL_PAUSE = 48;
+	static #LONG_PAUSE = 100;	
+
+	static #PAUSE = [0, 0, 0, 0, 0, NORMAL_PAUSE, NORMAL_PAUSE, 0, 0, 0, LONG_PAUSE];
+	static #AIRPORT_SHOWN = [true, false, false, false, false, true, true, false, false, true, false];
+	static #BANNER_SHOWN = [false, true, true, true, true, false, false, false, false, false, true];	
+	static #MENU_SHOWN = [false, false, false, false, false, false, false, true, true, false, false];
+	static #SPLASH_SCREEN = [false, false, false, false, false, false, false, false, false, false, true];
+	static #TITLE_COLORS = [null, Colors.Red, Colors.Green, Colors.White, Colors.Blue, null, null, Colors.Blue, Colors.Blue, null, Colors.Blue];
+	static #NAMES = ["Play", "LevelFailedBanner", "LevelCompleteBanner", "LevelStartBanner ", "AboutBanner" , "CrashPause", "MissionCompletePause", "BoxMenu", "LevelMenu", "Edit", "SplashScreen"];
+	static #TITLES = [null, "Mission failed", "Level completed", "Level ", "Admiro" , null, null, null, null, null, null];
+
+ //property fields
+	//modes
+    static PLAY = new DisplayMode("PLAY", 0);
+	static LEVEL_FAILED_BANNER = new DisplayMode("LEVEL_FAILED_BANNER", 1);
+	static LEVEL_COMPLETE_BANNER = new DisplayMode("LEVEL_COMPLETE_BANNER", 2);	
+	static LEVEL_START_BANNER = new DisplayMode("LEVEL_START_BANNER", 3);	
+	static ABOUT_BANNER = new DisplayMode("ABOUT_BANNER", 4);
+    static CRASH_PAUSE = new DisplayMode("CRASH_PAUSE", 5);	
+	static MISSION_COMPLETE_PAUSE = new DisplayMode("MISSION_COMPLETE_PAUSE", 6);
+	static BOX_MENU = new DisplayMode("BOX_MENU", 7);	
+	static LEVEL_MENU = new DisplayMode("LEVEL_MENU", 8);	
+	static EDIT = new DisplayMode("EDIT", 9);
+	static SPLASH_SCREEN = new DisplayMode("SPLASH_SCREEN", 10);
+
+	static values() {
+	  return [
+	  	this.PLAY, 
+	  	this.LEVEL_FAILED_BANNER, 
+	  	this.LEVEL_COMPLETE_BANNER, 
+	  	this.LEVEL_START_BANNER, 
+	  	this.ABOUT_BANNER, 
+	  	this.CRASH_PAUSE, 
+	  	this.MISSION_COMPLETE_PAUSE, 
+	  	this.BOX_MENU, 
+	  	this.LEVEL_MENU,
+	  	this.EDIT,
+	  	this.SPLASH_SCREEN
+	  ];
+	}
+
+//properties
+    static get about_banner() //: DisplayMode
+    {
+    	return this.#about_banner;
+    }
+
+	get airport_shown() //: Boolean
+    {
+    	return !!DisplayMode.#AIRPORT_SHOWN[this.#value];
+    }
+
+	get banner_shown() //: Boolean
+    {
+    	return !!DisplayMode.#BANNER_SHOWN[this.#value];
+    }	
+	
+    static get box_menu() //: DisplayMode
+    {
+    	return DisplayMode.BOX_MENU;
+    }		
+	
+    get color() 
+    {
+		return DisplayMode.TITLE_COLORS[this.#value];
+    }
+	
+	static get crash_pause() //: DisplayMode
+    {
+    	return DisplayMode.CRASH_PAUSE;
+    }
+
+	static get edit() //: DisplayMode
+    {
+    	return DisplayMode.EDIT;
+    }	
+
+	get id() //: int
+    {
+    	return 1 << this.#value;
+    }
+	
+    get index() //: int
+    {
+    	return this.#value;
+    }
+
+	get is_splash_screen() //: Boolean
+    {
+    	return !!DisplayMode.#SPLASH_SCREEN[this.#value];
+    }		
+
+	static get level_complete_banner() //: DisplayMode
+    {
+    	return DisplayMode.LEVEL_COMPLETE_BANNER;
+    }
+
+    static get level_failed_banner() //: DisplayMode
+    {
+    	return DisplayMode.LEVEL_FAILED_BANNER;
+    }	
+
+    static get level_menu() //: DisplayMode
+    {
+    	return DisplayMode.LEVEL_MENU;
+    }	
+	
+    static get level_start_banner() //: DisplayMode
+    {
+    	return DisplayMode.LEVEL_START_BANNER;
+    }
+
+	get menu_shown() //: Boolean
+    {
+    	return !!DisplayMode.#MENU_SHOWN[this.#value];
+    }		
+	
+	static get mission_complete_pause() //: DisplayMode
+    {
+    	return DisplayMode.MISSION_COMPLETE_PAUSE;
+    }
+	
+	get pause() //: Number
+    {
+    	return DisplayMode.#PAUSE[this.#value];
+    }
+	
+    static get play() //: DisplayMode
+    {
+    	return DisplayMode.PLAY;
+    }
+
+    static get splash_screen() //: DisplayMode
+    {
+    	return DisplayMode.SPLASH_SCREEN;
+    }
+
+    get title() //: String
+    {
+    	return DisplayMode.TITLES[this.#value];
+    }
+
+	get to_string() //: String
+    {
+    	return DisplayMode.#NAMES[this.#value];
+    }
+}
+
+class Profiler //static
+{
+	static #watches = {};
+
+//public methods
+	static checkin(name)
+    {
+		if (!Profiler.#watches[name])
+			watches[name] = {CheckinTime: new Date(), Watch: 0}
+		else
+		{
+			var watch = Profiler.#watches[name];
+			if (watch.CheckinTime.getTime() == 0)
+			{
+				watch.CheckinTime = new Date();
+				//console.log(">> " + AName + " checked in");
+			}
+			else
+				console.log("Reccurent checkin for " + name);
+		}
+    }
+
+    static checkout(name)
+    {
+		if (Profiler.#watches[name])
+		{
+			var watch = Profiler.#watches[name];
+			if (watch.CheckinTime.getTime() == 0)
+				console.log("Checkout without checkin for " + name);
+			else
+			{
+				var dt_time: Date = new Date();
+				watch.Watch += (dt_time.getTime() - watch.CheckinTime.getTime());
+				watch.CheckinTime = new Date(0);
+				//console.log("<< " + AName + " checked out");
+			}
+		}
+		else
+			console.log("Checkout without checkin for " + name);
+    }
+	
+	static get_watch(name) //: String
+	{
+		var str_report = name + " : ";
+		if (!Profiler.#watches[name]) 
+			str_report += "not found."
+		else
+		{
+			var watch = Profiler.#watches[name];
+			str_report += watch.Watch + "ms";
+			if (watch.CheckinTime.getTime() != 0)
+				str_report += " and running";
+		}
+		return str_report;
+	}
+	
+	static public function reset()
+    {
+		Profiler.#watches = {};
+    }	
+}
+
+
+///////////////////////////////////////////////////////////
+//  GameProgress.as
+///////////////////////////////////////////////////////////
+class GameProgress //static
+{
+//public fields & consts		
+	static get IS_BOSS_MODE_ON(){return true};
+	static get BOX_COUNT(){return 3};
+	static get BOX_FULL_COMPL_REQ(){return 0.99}; //0.99
+	static get BOX_PASS_REQ(){return 0.75}; //0.75
+	static get LEVEL_COUNT(){return 27};
+	
+	//public fields
+	static on_box_opened = new CustomDispatcher();
+//private fields & consts
+
+	//private consts
+	static #BOX0_FIRST_LEVEL = 1;
+	static #BOX0_LAST_LEVEL = 9;
+	static #BOX1_FIRST_LEVEL = 10;
+	static #BOX1_LAST_LEVEL = 18;
+	static #BOX2_FIRST_LEVEL = 19;
+	static #BOX2_LAST_LEVEL = 27;
+
+	//property fields
+	static #level = 1;
+	static #level_completion = [];
+	static #points = 0;
+	static #newly_opened_box = -1;
+
+	//other fields
+	static #box_first_levels = null; 
+	static #box_last_levels = null;
+
+//properties
+	static get box()
+	{
+		return GameProgress.get_box_for_level(this.#level);
+	}
+	
+	static get box_first_level()
+    {
+		return GameProgress.#box_first_levels[GameProgress.box];
+    }
+	
+	static get box_last_level()
+    {
+		return GameProgress.#box_last_levels[GameProgress.box];
+    }
+	
+	static get box_passed()
+	{
+		return GameProgress.get_box_progress(GameProgress.box) >= 1;
+	}
+
+	static get is_last_box()
+	{
+		return GameProgress.get_box_for_level(GameProgress.#level) == GameProgress.BOX_COUNT - 1;
+	}
+	
+	static get level() //: int
+    {
+    	return GameProgress.#level;
+    }
+
+	static get level_completion() //: Vector.<int>
+	{
+		return GameProgress.#level_completion;
+	}	
+	
+	static get newly_opened_box() //: int
+	{
+		return GameProgress.#newly_opened_box;
+	}	
+	
+	static get points() //: int
+    {
+    	return GameProgress.#points;
+    }	
+	
+//methods
+	//public methods
+	static accept_level_result(result)
+	{
+		let box = GameProgress.box;
+		if (GameProgress.#newly_opened_box == n_box)
+		{
+			GameProgress.#newly_opened_box = -1;
+		}
+		let progress_before: Number = GameProgress.get_box_progress(box);
+		GameProgress.#level_completion[GameProgress.#level - 1] = Math.max(result, 
+			GameProgress.#level_completion[GameProgress.#level - 1]); 
+		let progress_after: Number = get_box_progress(box);
+		if (box + 1 < GameProgress.BOX_COUNT && progress_before < 1 && progress_after >= 1) {
+			GameProgress.#newly_opened_box = box + 1;
+			//OnBoxOpened.fireOnBoxOpened(n_box + 1);
+			//TODO: Fire on box open event
+		}
+	}
+	
+	static add_points(point_qty)
+	{
+		GameProgress.#points += point_qty;
+	}
+	
+	static get_box_for_level(level_number) //: int
+	{
+		if (!GameProgress.#box_first_levels || !GameProgress.#box_last_levels) GameProgress.#init_box_info();
+	
+		for(let box = 0; box < GameProgress.BOX_COUNT; box++)
+			if (level_number >= GameProgress.#box_first_levels[box] 
+				&& level_number <= GameProgress.#box_last_levels[box])
+				return box;
+		return -1;
+	}	
+	
+	//result >= 1  - box passed
+	static get_box_progress(box_number) //: Number
+	{
+		if (box_number < 0 || box_number >= GameProgress.BOX_COUNT) return 0;
+		if (!GameProgress.#box_first_levels || !GameProgress.#box_last_levels) GameProgress.#initBoxInfo();
+		
+		let first_level_number = GameProgress.#box_first_levels[box_number];
+		let last_level_number = GameProgress.#box_last_levels[box_number];
+		let target_sum = (last_level_number - first_level_number + 1) * 100 
+			* ((box_number < GameProgress.BOX_COUNT - 1) ? GameProgress.BOX_PASS_REQ : GameProgress.BOX_FULL_COMPL_REQ);
+		let progress_sum = 0;
+		for (let i = first_level_number; i <= last_level_number; i++)
+		{
+			if (i > GameProgress.LEVEL_COUNT) break;
+			
+			progress_sum += GameProgress.#level_completion[i - 1];
+		}	
+		return progress_sum / target_sum;
+	}
+	
+	static get_first_level_for_box(box_number)
+	{
+		if (!GameProgress.#box_first_levels || !GameProgress.#box_last_levels) GameProgress.#init_box_info();
+		return GameProgress.#box_first_levels[box_number];
+	}
+	
+	static next_level()
+	{
+		GameProgress.#level++;
+	}
+
+	static reset()
+	{
+		GameProgress.#level = 1;
+	}
+
+	static select_specified_level (level_number)
+	{
+		GameProgress.this.#level = level_number;
+	}	
+	
+	
+//private methods
+	static #init_box_info()
+	{
+		GameProgress.box_first_levels = [];
+		GameProgress.box_last_levels = [];
+		GameProgress.box_first_levels[0] = GameProgress.#BOX0_FIRST_LEVEL;
+		GameProgress.box_last_levels[0] = GameProgress.#BOX0_LAST_LEVEL;
+		GameProgress.box_first_levels[1] = GameProgress.#BOX1_FIRST_LEVEL;
+		GameProgress.box_last_levels[1] = GameProgress.#BOX1_LAST_LEVEL;
+		GameProgress.box_first_levels[2] = GameProgress.#BOX2_FIRST_LEVEL;
+		GameProgress.box_last_levels[2] = GameProgress.#BOX2_LAST_LEVEL;
+	}
+}
+
+class MenuView
+{
+	static #CX_PROGRESS = 78.8; 
+	static #CY_PROGRESS = 20.50;
+	static #CY_PROGRESS_BOTTOM_MARGIN = 6;
+	static #CY_THUMBNAIL_RELATIVE_TO_ICON = 0.8;
+	static #BOX_CLOSED_ICON_HEIGHT_RATIO= 1.13;	
+	static #HORIZONTAL_MARGIN = 0.045; //relative to GameZone height
+	static #SPACE_ICON_RATIO = 0.5; //отношение места между иконками к размеру иконки
+	static #THUMBNAIL_MINIATURE_SPACING = 0.1; //отношение полей миниатюры к размеру пиктограммы
+	static #VERTICAL_MARGIN = 0.066; //relative to GameZone height
+><<<<--------------------
+	static #BOX_MENU_COLUMNS = GameProgress.N_BOX_COUNT;
+	static #BOX_MENU_ROWS: int = 1;
+	static #LEVEL_MENU_COLUMNS: int = 3;
+	static #LEVEL_MENU_ROWS: int = 3;
+	static #SPRITE_NAME1: String = "Box";
+	static #SPRITE_NAME2: String = "ThumbnailImage";
+	static #X_PROGRESS: Number = 98.60; 
+	static #Y_PROGRESS: Number = 155.65; 
+	
+	//property fields
+
+
+	//other fields
+
+//properties
+
+//methods
+	//constructor
+	//public methods
+	
+	static public function display()
+	{
+		Profiler.checkin("menu");
+		var is_box_menu: Boolean = (ControlDispatcher.CurrentDisplayMode == DisplayMode.BoxMenu);
+		var obj_params: Object = getMenuParameters(is_box_menu);
+
+		var n_item_number = is_box_menu ? -1 : GameProgress.BoxFirstLevel - 1;
+		var n_item_last = is_box_menu ? GameProgress.N_BOX_COUNT - 1 : GameProgress.BoxLastLevel;
+		for (var y: int = 0; y < obj_params.IconRows; y++)
+		{
+			for (var x: int = 0; x < obj_params.IconColumns; x++)
+			{
+				if (++n_item_number > n_item_last) break;
+				
+				var rect_icon: Rect = new Rect(
+					new Point(
+						obj_params.HorizontalMargin + (obj_params.IconWidth + obj_params.HorizontalSpace)*x, 
+						obj_params.VerticalMargin + FrameBuilder.InfoPanelRect.Extent.Height + (obj_params.IconHeight + obj_params.VerticalSpace)*y
+					), 
+					new Size(obj_params.IconWidth, obj_params.IconHeight)
+				)
+	
+				displayBoxIcon(is_box_menu, n_item_number, rect_icon, obj_params);
+			}
+		}		
+		Profiler.checkout("menu");
+	}
+
+	static public function displayBoxIcon(IsBox: Boolean, AnItemNumber: int, AnIconRect: Rect, ABoxParams: Object = null)
+	{
+		if (!ABoxParams)
+		{
+			var ABoxParams: Object = getMenuParameters(IsBox);
+		}
+		var dbl_progress: Number = IsBox ? GameProgress.getBoxProgress(AnItemNumber) : GameProgress.LevelCompletion[AnItemNumber-1] / 100;
+		var sp_icon_frame: Sprite = (dbl_progress >= 1) ? new BoxCompleteImage() : new BoxOpenImage();				
+		ABoxParams.HorizontalZoom = AnIconRect.Extent.Width / sp_icon_frame.width;
+		ABoxParams.VerticalZoom = AnIconRect.Extent.Height / sp_icon_frame.height;
+		
+		displayProgress(dbl_progress, AnIconRect, ABoxParams);	
+		ScreenManager.displayImage(sp_icon_frame, AnIconRect, new Angle());		
+		displayThumbnail(IsBox, AnItemNumber, AnIconRect, ABoxParams);
+			
+		if (IsBox && (!GameProgress.IS_BOSS_MODE_ON && AnItemNumber != 0 
+			&& GameProgress.getBoxProgress(AnItemNumber - 1) < 1
+			|| AnItemNumber == GameProgress.NewlyOpenedBox))
+		{
+			var sp_lock: Sprite = (AnItemNumber == GameProgress.NewlyOpenedBox) ? new LockOpenedImage() : new LockClosedImage();
+			ScreenManager.displayImage(sp_lock, AnIconRect, new Angle());
+		}
+	}
+	
+	static public function processEvent(AnEvent: Event): Boolean
+	{
+		if (AnEvent is MouseEvent && AnEvent.type == MouseEvent.CLICK)
+		{
+			var mouse_event: MouseEvent = MouseEvent(AnEvent);
+			
+			switch (ControlDispatcher.CurrentDisplayMode)
+			{
+				case DisplayMode.LevelMenu:
+					return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_MENU_LEVEL_SELECT, 
+						{LevelNumber: getLevelByCoords(mouse_event.stageX, mouse_event.stageY)});
+					break;
+				case DisplayMode.BoxMenu:
+					return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_MENU_BOX_SELECT, 
+						MenuView.getBoxByCoords(mouse_event.stageX, mouse_event.stageY));					
+					break;				
+				default: return false;
+			}
+		}
+		return false;
+	}
+	
+	//protected methods
+
+	/* protected function <#camelStyle#>(<#ADelphiStyle#>: <#Type#>)
+	{
+	}*/
+
+	//private methods
+		
+	static private function displayAirfield(AnAirfield: IAirfield, AThumbnailRect: Rect, AZoom: Number, AModelCenter: Point)
+	{
+		if (!AnAirfield.IsRunway) return;
+		var rect_scr: Region = AnAirfield.getRegion().cloneRegion();
+		rect_scr.Extent.Width /= AZoom;
+		rect_scr.Extent.Height /= AZoom;
+		rect_scr.Location.X = (rect_scr.Location.X - AModelCenter.X) / AZoom 
+			+ AThumbnailRect.Location.X + AThumbnailRect.Extent.Width/2;
+		rect_scr.Location.Y = (rect_scr.Location.Y - AModelCenter.Y) / AZoom 
+			+ AThumbnailRect.Location.Y + AThumbnailRect.Extent.Height/2;
+			
+		ScreenManager.displayImage(new RunwayThumbnailImage(), rect_scr, AnAirfield.ActiveCourse);
+	}
+	
+	static private function displayProgress(AProgress: Number, AnIconRect: Rect, AParams: Object)
+	{
+		AProgress = Math.min(AProgress, 1);
+		var sp_bg: Sprite = new MenuProgressBackgroundImage();	
+		var rect_bg: Rect = new Rect(
+			new Point(
+				AnIconRect.Location.X + X_PROGRESS * AParams.HorizontalZoom, 
+				AnIconRect.Location.Y + Y_PROGRESS * AParams.VerticalZoom
+			), 
+			new Size(CX_PROGRESS * AParams.HorizontalZoom, CY_PROGRESS * AParams.VerticalZoom)
+		);
+				
+		var sp_filler: Sprite = new MenuProgressFillerImage();
+		var rect_filler: Rect = rect_bg.clone();
+		rect_filler.Extent.Width *= AProgress;
+		ScreenManager.displayImage(sp_bg, rect_bg, new Angle());
+		ScreenManager.displayImage(sp_filler, rect_filler, new Angle());
+	}
+
+	static private function displayThumbnail(IsBox: Boolean, AnItemNumber: int, AnIconRect: Rect, AParams: Object)
+	{
+		var rect_thumbnail = AnIconRect.clone();
+		rect_thumbnail.Extent.Width *= CY_THUMBNAIL_RELATIVE_TO_ICON;
+		var dbl_margin: Number = (AnIconRect.Extent.Width - rect_thumbnail.Extent.Width) / 2;
+		rect_thumbnail.Location.X += dbl_margin;
+		rect_thumbnail.Location.Y += dbl_margin;
+		rect_thumbnail.Extent.Height -= dbl_margin*2 + CY_PROGRESS * AParams.VerticalZoom 
+			+ FrameBuilder.adaptToFrame(CY_PROGRESS_BOTTOM_MARGIN);
+
+		ScreenManager.displayImage(new ThumbnailBoxImage, rect_thumbnail, new Angle());
+
+		rect_thumbnail.Location.X += rect_thumbnail.Extent.Width * DBL_THUMBNAIL_MINIATURE_SPACING;
+		rect_thumbnail.Location.Y += rect_thumbnail.Extent.Height * DBL_THUMBNAIL_MINIATURE_SPACING;
+		rect_thumbnail.Extent.Width *= (1 - 2*DBL_THUMBNAIL_MINIATURE_SPACING);
+		rect_thumbnail.Extent.Height *= (1 - 2*DBL_THUMBNAIL_MINIATURE_SPACING);
+		
+		if (IsBox) {
+			var classSprite: Class = getDefinitionByName(STR_SPRITE_NAME1 + AnItemNumber + STR_SPRITE_NAME2) as Class;
+			var clip: Sprite = new classSprite();
+			ScreenManager.displayImage(clip, rect_thumbnail);
+		}	
+		else {
+			var airport: Airport = MenuController.getInstance().ThumbnailModels[AnItemNumber - 1];
+			var rg_model: Region = airport.getAirportModelRegion();
+			var dbl_zoom: Number = Math.max(rg_model.Extent.Width / rect_thumbnail.Extent.Width, 
+				rg_model.Extent.Height / rect_thumbnail.Extent.Height);
+
+			for each (var airfield: IAirfield in airport.Airfields)	{
+				displayAirfield(airfield, rect_thumbnail, dbl_zoom, rg_model.Location);
+			}
+		}
+	}
+
+	static private function getBoxByCoords(AnX: Number, AnY: Number): Object
+	{
+		var obj_level_params = getMenuParameters(new Boolean(false));
+		var obj_result = {BoxNumber: -1, OpeningLevel: -1, IsBoxLocked: true};
+		var n_box_no: int = getMenuIconNumberByCoords(true, AnX, AnY);
+		if (n_box_no >= 0 && n_box_no < GameProgress.N_BOX_COUNT)
+		{
+			obj_result.BoxNumber = n_box_no;
+			obj_result.OpeningLevel = GameProgress.getFirstLevelForBox(n_box_no);
+			obj_result.IsBoxLocked = !GameProgress.IS_BOSS_MODE_ON && n_box_no > 0 && GameProgress.getBoxProgress(n_box_no - 1) < 1;
+		}
+		return obj_result;
+	}
+
+	static private function getLevelByCoords(AnX: Number, AnY: Number): int
+	{
+		var obj_params = getMenuParameters(new Boolean(false));
+
+		var n_icon_number = getMenuIconNumberByCoords(false, AnX, AnY);
+		var n_level_number = GameProgress.BoxFirstLevel + n_icon_number;
+		if (n_icon_number >= 0 && n_level_number <= GameProgress.BoxLastLevel)
+			return n_level_number;
+		else
+			return -1;
+	}	
+	
+	static private function getMenuIconNumberByCoords(IsBoxMenu: Boolean, AnX: Number, AnY: Number): int
+	{
+		var obj_params = getMenuParameters(IsBoxMenu);
+		
+		var n_row: int = Math.floor((AnY - FrameBuilder.InfoPanelRect.Extent.Height - obj_params.VerticalMargin)/(obj_params.IconHeight + obj_params.VerticalSpace));
+		if (AnY - FrameBuilder.InfoPanelRect.Extent.Height - obj_params.VerticalMargin - (obj_params.IconHeight + obj_params.VerticalSpace) * n_row > obj_params.IconHeight) return -1;
+			
+		var n_column: int = Math.floor((AnX - obj_params.HorizontalMargin)/(obj_params.IconWidth + obj_params.HorizontalSpace));
+		if (AnX - obj_params.HorizontalMargin - (obj_params.IconWidth + obj_params.HorizontalSpace) * n_column > obj_params.IconWidth) return -1;
+		
+		return n_row * obj_params.IconColumns + n_column;
+	}
+
+	static private function getMenuParameters(IsBoxMenu: Boolean)
+	{
+		var obj_params: Object = {};		
+		if (IsBoxMenu) {
+			obj_params.IconColumns = N_BOX_MENU_COLUMNS;
+			obj_params.IconRows = N_BOX_MENU_ROWS;
+		}
+		else {
+			obj_params.IconColumns = N_LEVEL_MENU_COLUMNS;
+			obj_params.IconRows = N_LEVEL_MENU_ROWS;
+		}		
+		obj_params.HorizontalMargin = DBL_HORIZONTAL_MARGIN*FrameBuilder.GameZoneRect.Extent.Width;
+		obj_params.VerticalMargin = DBL_VERTICAL_MARGIN*FrameBuilder.GameZoneRect.Extent.Height;
+		var cx_menu: Number = FrameBuilder.GameZoneRect.Extent.Width * (1 - DBL_HORIZONTAL_MARGIN * 2);
+		var cy_menu: Number = FrameBuilder.GameZoneRect.Extent.Height * (1 - DBL_VERTICAL_MARGIN * 2);
+		var cx_icon: Number =  cx_menu / ((DBL_SPACE_ICON_RATIO + 1)*(obj_params.IconColumns - 1) + 1);;
+		var cy_icon: Number =  cy_menu / ((DBL_SPACE_ICON_RATIO + 1)*(obj_params.IconRows - 1) + 1);		
+		if (cx_icon > cy_icon) {
+			obj_params.HorizontalSpace = (cx_menu - cy_icon*obj_params.IconColumns)/(obj_params.IconColumns - 1);
+			if (obj_params.HorizontalSpace > cy_icon) {
+				obj_params.HorizontalSpace = cy_icon;
+				obj_params.HorizontalMargin += (cx_menu - cy_icon*(obj_params.IconColumns*2 - 1))/2;
+			}
+			obj_params.VerticalSpace = cy_icon * DBL_SPACE_ICON_RATIO;
+			obj_params.IconWidth = cy_icon;
+			obj_params.IconHeight = cy_icon;
+		}
+		else {
+			obj_params.HorizontalSpace = cx_icon * DBL_SPACE_ICON_RATIO;
+			obj_params.VerticalSpace = (cy_menu - cx_icon*obj_params.IconRows)/(obj_params.IconRows - 1);
+			if (obj_params.VerticalSpace > cx_icon) {
+				obj_params.VerticalSpace = cx_icon;
+				obj_params.VerticalMargin += (cy_menu - cx_icon*(obj_params.IconRows*2 - 1))/2;
+			}
+			obj_params.IconWidth = cx_icon;
+			obj_params.IconHeight = cx_icon;
+		}
+		return obj_params;
+	}
+	
+	//event handlers
+
+	/* private function <#object_OnDelphiStyle#>(<#AnDelphiStyle#>: Event): void
+	{
+	}*/
+}
+}
+
+
+class Core //static
+{
+	static get FRAME_RATE() {return 15};
+	static get DISPLAY_MODE_CHANGE() {return "DM"};
+	
+	static #prev_frame_airport_shown: Boolean = false;
+	static #is_timer_suspend_pending = false;
+
+//methods
+	static dispatch_event(event)
+	{
+		<<<<<<<<<<===========
+		if (!MenuView.process_event(event))
+			if (!HintPanelView.process_event(event))
+				if (!InfoPanelView.process_event(event))
+					if (!BannerView.process_event(event))
+						AirportView.process_event(event);
+								
+		postprocess();
+	}
+
+	static resume()
+	{
+		//TODO: Start of timer
+		//if (timerMain) timerMain.start();
+	}
+	
+	static run(stage) 
+	{
+		//TODO: Creation of timer (do we need this?)
+		//timerMain = new Timer(1000 / N_FRAME_RATE,0)
+		
+		Core.suspend();
+		
+		//TODO: Bind timer listener (and start)
+		//timerMain.addEventListener(TimerEvent.TIMER, Timer_OnTimer);
+
+		//TODO: Bind stage listeners
+
+		// AStage.mouseChildren=false;
+		// AStage.doubleClickEnabled=true;		
+		// AStage.addEventListener(KeyboardEvent.KEY_UP, Stage_OnEvent);
+		// AStage.addEventListener(KeyboardEvent.KEY_DOWN, Stage_OnEvent);			
+		// AStage.addEventListener(MouseEvent.MOUSE_DOWN, Stage_OnEvent);
+		// AStage.addEventListener(MouseEvent.MOUSE_MOVE, Stage_OnEvent);
+		// AStage.addEventListener(MouseEvent.MOUSE_UP, Stage_OnEvent);
+		// AStage.addEventListener(MouseEvent.CLICK, Stage_OnEvent);
+		// AStage.addEventListener(MouseEvent.DOUBLE_CLICK, Stage_OnEvent);
+
+		//stgStage = AStage;
+		
+		resume();
+	}
+		
+	static suspend()
+	{
+		//timerMain.stop();
+		//TODO: Pause timer
+	}
+
+//private methods
+	static #create_frame()
+	{
+		Profiler.checkin("Computing");
+
+<<<<<<<<<<===========
+		ControlDispatcher.run();
+
+		Profiler.checkout("Computing");		
+
+		FrameBuilder.buildFrame();
+}	
+						
+	static #postprocess()
+	{
+		if (ControlDispatcher.CurrentDisplayMode == DisplayMode.Edit)
+		{
+			if (EditController.getInstance().LevelConfig)
+			{	
+				
+				if (stgStage) stgStage.mouseChildren = true;
+				isTimerSuspendPending = true;				
+			}
+		}		
+		if (!(EditController.getInstance().LevelConfig))
+		{
+			if (stgStage) stgStage.mouseChildren = false;
+			if (!HintPanelView.IsShown)
+				resume();
+		}
+	}					
+	//event handlers
+
+	static #stage_on_event(event) 
+	{
+		Core.dispatch_event(AnEvent);
+	}
+			
+	static #timer_on_timer(event) 
+	{
+		createFrame();
+		
+		if (isTimerSuspendPending)
+		{
+			isTimerSuspendPending = false;
+			suspend();
+		}
+	}
+}
+
+class ControlDispatcher //static
+{
+	static #active_controller = null; //: IController
+	static #display_mode = null //: DisplayMode;	
+	static #title_pause = 0; //frames
+
+//properties
+
+	static get active_controller() //: IController
+	{
+		return this.#active_controller;
+	}
+
+	static set active_controller(controller)
+	{
+		this.#active_controller = controller;
+	}	
+
+	static get current_display_mode() //: DisplayMode
+    {
+    	return this.#display_mode;
+    }	
+
+	static set current_display_mode(display_mode)
+	{
+		if (this.#display_mode == display_mode) return;
+		
+		if (this.#title_pause == 0)
+		{
+			this.#display_mode = display_mode;
+<>>>>>>==========
+			Core.dispatch_event(new Event(Core.DISPLAY_MODE_CHANGE))
+			if (FActiveController) FActiveController.processDispatcherEvent(N_DISPLAY_MODE_CHANGED, null);
+			
+			nTitlePause = FDisplayMode.Pause;
+		}
+	}		
+
+//methods
+	//constructor - static, no instantiation!
+	/*public function <#DelphiStyle#> (<#ADelphiStyle#>: <#Type#>)
+	{
+		var <#prefix_underscore_style#>: <#Type#>;
+	}*/		
+
+	//public methods
+	static public function dispatchViewEvent(AType: int, AParamObj: Object = null): Boolean
+	{
+		switch (AType)
+		{
+			case N_AIRPORT_DOUBLE_CLICK:
+				return FActiveController.processDispatcherEvent(N_OBJECT_ACTIVATE, AParamObj);
+				
+			case N_AIRPORT_MOUSE_DOWN:
+				if (CurrentDisplayMode.AirportShown)
+					return FActiveController.processDispatcherEvent(N_OBJECT_SELECT, AParamObj);
+				else
+				{
+					nTitlePause = 0;
+					controlDisplayMode();
+					return true;
+				}
+
+			case N_AIRPORT_MOUSE_MOVE:
+				if (CurrentDisplayMode == DisplayMode.Play)
+				{
+					return GameController.getInstance().processDispatcherEvent(N_PATH_CONTINUE, AParamObj);
+				}
+				break;
+
+			case N_AIRPORT_MOUSE_UP:
+				if (CurrentDisplayMode == DisplayMode.Play)
+				{
+					return FActiveController.processDispatcherEvent(N_PATH_FINISH, AParamObj);
+				}
+				break;
+
+			case N_AIRPORT_KEY_PRESSED:
+				if (AParamObj.KeyCode == Keys.I)
+					return FActiveController.processDispatcherEvent(N_OBJECT_INFO);
+				else
+					return FActiveController.processDispatcherEvent(N_KEY_PRESSED, AParamObj);
+				break;
+
+			case N_BANNER_BACK_CLICK:
+				CurrentDisplayMode = DisplayMode.LevelMenu;
+				FActiveController = MenuController.getInstance();								
+				break;
+
+			case N_BANNER_SKIP_LEVEL_CLICK:			
+				GameController.getInstance().processDispatcherEvent(N_NEXT_LEVEL, null);
+				//fall to next case
+				
+			case N_BANNER_RESTART_CLICK:
+				GameController.getInstance().processDispatcherEvent(N_START_LEVEL, null);
+				FActiveController = GameController.getInstance();
+				break;
+
+			case N_BANNER_START_CLICK:
+				GameController.getInstance().processDispatcherEvent(N_PLAY_LEVEL, null);
+				FActiveController = GameController.getInstance();
+				break;
+				
+			case N_EDITOR_CORNER_CLICK:
+				switch (CurrentDisplayMode)
+				{
+					case DisplayMode.Play:
+						FActiveController = EditController.getInstance();
+						return true;
+						
+					case DisplayMode.Edit:
+						return FActiveController.processDispatcherEvent(N_LEVEL_CONFIG_VISIBILITY);
+				}
+				break;
+				
+			case N_INFO_PANEL_MENU_CLICK:
+				switch (CurrentDisplayMode)
+				{
+					case DisplayMode.LevelMenu:
+						return FActiveController.processDispatcherEvent(N_BACK_TO_BOXES);
+					case DisplayMode.Play:
+					case DisplayMode.CrashPause:
+						nTitlePause = 0;
+						GameProgress.acceptLevelResult(GameController.getInstance().ShiftProgress);
+						CurrentDisplayMode = DisplayMode.LevelFailedBanner;
+				}
+				break;
+				
+			case N_INFO_PANEL_FAST_SIM_CLICK:	
+				if (CurrentDisplayMode == DisplayMode.Play)
+				{
+					return FActiveController.processDispatcherEvent(N_FAST_SIMULATION, AParamObj);
+				}
+				break;
+
+			case N_INFO_PANEL_HINT_CLICK:
+				if (CurrentDisplayMode == DisplayMode.Play)
+				{
+					return FActiveController.processDispatcherEvent(N_SHOW_HINTS);				
+				}
+				break;
+
+			case N_INFO_PANEL_INFO_CLICK:
+				CurrentDisplayMode = DisplayMode.AboutBanner;
+				break;
+				
+			case N_INFO_PANEL_PAUSE_SIM_CLICK:	
+				if (CurrentDisplayMode == DisplayMode.Play)
+				{
+					return FActiveController.processDispatcherEvent(N_PAUSE_SIMULATION, AParamObj);
+				}
+				break;
+
+			case N_INFO_PANEL_RESTART_CLICK:	
+				if (CurrentDisplayMode == DisplayMode.Play)
+				{
+					GameProgress.acceptLevelResult(GameController.getInstance().ShiftProgress);
+					return FActiveController.processDispatcherEvent(N_START_LEVEL);				
+				}
+				break;
+				
+			case N_MENU_BOX_SELECT:
+				return FActiveController.processDispatcherEvent(N_BOX_OPEN, AParamObj);
+				
+			case N_MENU_LEVEL_SELECT:	
+				if (AParamObj.LevelNumber > 0)
+				{
+					GameProgress.selectSpecifiedLevel(AParamObj.LevelNumber);
+					FActiveController = GameController.getInstance();
+					return FActiveController.processDispatcherEvent(N_START_LEVEL);
+				}
+				break;
+		}
+		return false;
+	}
+
+	static public function run()
+	{
+		controlDisplayMode();
+		FActiveController.run();
+	}
+
+	//private methods
+
+	static private function controlDisplayMode()
+	{
+		if (--nTitlePause <= 0)
+		{
+			nTitlePause = 0;
+			switch (CurrentDisplayMode)
+			{
+				case DisplayMode.SplashScreen:
+					CurrentDisplayMode = DisplayMode.BoxMenu;
+					FActiveController = MenuController.getInstance();
+					break;
+
+				case DisplayMode.CrashPause:
+					GameProgress.acceptLevelResult(GameController.getInstance().ShiftProgress);
+					CurrentDisplayMode = DisplayMode.LevelFailedBanner;
+					FActiveController = GameController.getInstance();
+					break;					
+/*				case DisplayMode.LevelCompleteBanner: 
+					if (GameProgress.Complete)
+					{
+						CurrentDisplayMode = DisplayMode.AboutBanner;
+						FActiveController = GameController.getInstance();
+					}
+					break;
+				case DisplayMode.AboutBanner: 
+					GameProgress.reset();
+					CurrentDisplayMode = DisplayMode.LevelMenu;
+					FActiveController = MenuController.getInstance();					
+					break;
+					*/
+				case DisplayMode.MissionCompletePause:
+					CurrentDisplayMode = GameProgress.IsLastBox && GameProgress.BoxPassed ? 
+						DisplayMode.AboutBanner 
+						: DisplayMode.LevelCompleteBanner;
+					FActiveController = GameController.getInstance();
+					break;										
+				case DisplayMode.Play:
+					if (GameController.getInstance().ShiftProgress >= 100)
+					{
+						GameProgress.acceptLevelResult(100);					
+						CurrentDisplayMode = DisplayMode.MissionCompletePause;
+						FActiveController = GameController.getInstance();
+					}
+					break;
+			}
+		}
+	}
+
+	//event handlers
+
+	/* private function <#object_OnDelphiStyle#>(<#AnDelphiStyle#>: Event): void
+	{
+	}*/
+}
+
+
+///////////////////////////////////////////////////////////
+//  FrameBuilder.as
+///////////////////////////////////////////////////////////
+
+class FrameBuilder //static
+{
+	static before_rescale; //TODO: event
+	static get CY_INFO_PANEL_HEIGHT() {return 24.0};
+	static get DBL_STANDARD_FRAME_HEIGHT() {return 400};
+	static get DBL_STANDARD_FRAME_WIDTH() {return 550};
+	static get N_MARGIN_WIDTH() {return 300};
+	
+	//property fields
+	static #frame_rect = null;
+	static #game_zone_rect = null;
+	static #info_panel_rect = null;
+	
+	//Определяет, где на экране находится точка отсчета координат аэродрома
+	//Задается в: 
+	//	FrameBuilder.init
+	//	FrameBuilder.scaleScene
+	//Используется в:
+	//	функциях конвертации между моделью и игровой зоной
+	static #origin = null;
+	static #performance_metrics_shown: Boolean = false;
+	static #zoom: Number;	
+	
+	//other fields
+	static #ap_airport: Airport = null;
+	static #dbl_frame_adaptation_ratio = 1;
+	static #dt_frame_count = new Date(0);
+	static #n_frame_count = 0;
+	static #n_frames_per_second = 0;
+
+//properties
+	//
+	//location = {0,0}
+	//extent = {stage.stageWidth, stage.stageHeight}
+	//Задается в: get FrameRect
+	//Не изменяется ли динамически 
+	//Используется в: 
+	//	FrameBuilder.drawMargin
+	//	AircraftView.draw
+	//  HintPanelView.show
+	//  HintPanelView.getHintPanelRect
+	//Всегда ли равен по ширене GameZone.Extent.Width?
+	static get frame_rect() //: Rect
+	{
+		return this.#frame_rect;
+	}
+	
+	//Прямоугольник игровой области в единицах сцены Flash без величины панели
+	//Задается как: FrameRect - InfoPanelRect
+	//Не изменяется ли динамически 
+	//Всегда равен FrameRect за вычетом панели
+	//Используется в:
+	//	AircraftView.displayArrivalMark
+	//	AirportView.processMouseEvent
+	//  MenuView.getMenuParameters
+	static get game_zone_rect() //: Rect
+	{
+		return this.#game_zone_rect;
+	}
+	//Прямоугольник инфопанели в единицах сцены Flash
+	//Задается как:
+	//	Location = new Point(0, 0);
+	//	Extent = new Size(InfoPanelView.Height, InfoPanelView.Height);
+	//Не изменяется ли динамически 
+	//Всегда равен FrameRect за вычетом панели
+	//Используется в:
+	//	InfoPanelView.display
+	//	InfoPanelView.setButtonRects
+	static get info_panel_rect() //: Rect
+	{
+		return this.#info_panel_rect;
+	}
+
+	static set performance_metrics_shown(value) 
+	{
+		this.#performance_metrics_shown = value;
+	}	
+
+	static get zoom() //: Number
+	{
+		return this.#zoom;
+	}
+	
+//methods
+	//public methods
+	
+	static adapt_to_frame(length) //: Number 
+	{
+		return length * FrameBuilder.#dbl_frame_adaptation_ratio;
+	}
+	
+	static adapt_size_to_frame(size) //: Size 
+	{
+		return new Size (size.width * FrameBuilder.#dbl_frame_adaptation_ratio, size.height * FrameBuilder.#dbl_frame_adaptation_ratio);
+	}
+
+	static build_frame() 
+	{
+		set_frame_dimensions(ScreenManager.create_frame());
+
+<<<<--------
+		if (!ControlDispatcher.CurrentDisplayMode.IsSplashScreen) {
+			displayGameZoneBackground();
+		}
+		
+		if (ControlDispatcher.CurrentDisplayMode.AirportShown) {
+			AirportView.display(apAirport, ControlDispatcher.ActiveController.getControllerType() == 0);
+			StarView.display();
+		}
+		
+		if (ControlDispatcher.CurrentDisplayMode.MenuShown) {
+			MenuView.display();
+		}
+
+		if (ControlDispatcher.CurrentDisplayMode.BannerShown) {
+			BannerView.display();
+		}
+
+		if (ControlDispatcher.CurrentDisplayMode == DisplayMode.Edit) {
+			var edit_controller: EditController = EditController.getInstance();
+			if (edit_controller.LevelConfig) {
+				displayLevelConfig(edit_controller.LevelConfig);
+			}
+		}
+		
+		HintPanelView.display();
+		
+		if (!ControlDispatcher.CurrentDisplayMode.IsSplashScreen) {
+			InfoPanelView.display(apAirport);
+			
+			displayFrameMargins();
+		}
+
+		if (FPerformanceMetricsShown)
+			displayPerformanceMetrics();
+			
+		
+	}
+	
+	static public function center_in_frame(ARect: Rect): Rect
+	{
+		var rect_result = ARect.clone();
+		rect_result.Location.X = (FFrameRect.Extent.Width - rect_result.Extent.Width) / 2;
+		rect_result.Location.Y = (FFrameRect.Extent.Height - rect_result.Extent.Height) / 2;
+		return rect_result;
+	}
+
+	static public function convert_to_model_length(ALength: Number): Number 
+	{
+		return ALength * FZoom;
+	}
+	
+	static public function convert_to_model_point(APoint: Point): Point
+	{
+		return new Point((APoint.X - FOrigin.X) * FZoom, (APoint.Y - FOrigin.Y - FInfoPanelRect.Extent.Height) * FZoom);
+	}
+	
+	static public function convert_to_model_rect(ARect: Rect): Rect
+	{
+		return new Rect (convertToModelPoint(ARect.Location), convertToModelSize(ARect.Extent));
+	}
+	
+	static public function convert_to_model_size(ASize: Size): Size 
+	{
+		return new Size(convertToModelLength(ASize.Width), convertToModelLength(ASize.Height));
+	}
+	
+	static public function convert_to_screen_length(ALength: Number): Number
+	{
+		return ALength / FZoom;
+	}
+	
+	static public function convert_to_screen_point(APoint: Point): Point
+	{
+		return new Point(APoint.X / FZoom + FOrigin.X, APoint.Y / FZoom + FOrigin.Y + FInfoPanelRect.Extent.Height);
+	}
+	
+	static public function convert_to_screen_rect(ARect: Rect): Rect 
+	{
+		return new Rect (convertToScreenPoint(ARect.Location), convertToScreenSize(ARect.Extent));
+	}
+	
+	static public function convert_to_screen_size(ASize: Size): Size
+	{
+		return new Size(convertToScreenLength(ASize.Width), convertToScreenLength(ASize.Height));
+	}		
+				
+	static public function init(AnAirport: Airport)		
+	{
+		apAirport = AnAirport;		
+
+		FOrigin = new Point();
+		apAirport.OnResized.addEventListener(CustomDispatcher.ON_RESIZED, Airport_OnResized);
+	}
+
+	static public function fit_to_frame(ARect: Rect): Rect
+	{
+		var rect_result = ARect.clone();
+		var dbl_hor_scale = FFrameRect.Extent.Width / ARect.Extent.Width;    //10x50 / 500x100 //50
+		var dbl_ver_scale = FFrameRect.Extent.Height / ARect.Extent.Height;//2
+		var dbl_scale = Math.min(dbl_hor_scale, dbl_ver_scale);
+		rect_result.Extent.Width *= dbl_scale; 
+		rect_result.Extent.Height *= dbl_scale;			
+		
+		return centerInFrame(rect_result);
+	}
+//private methods
+
+	static private function #display_frame_margins()
+	{
+		Profiler.checkin("margins");
+		for (var x = -1; x <= 1; x++)
+			for (var y = (x ? 0: -1); y <= (x ? 0 : 1); y+=2)
+				displayMargin(x, y);
+		
+		//рамка	
+		ScreenManager.displayImage(new BorderImage(), GameZoneRect);
+		Profiler.checkout("margins");
+	}
+
+	static private function #display_game_zone_background()
+	{
+		Profiler.checkin("background");
+		ScreenManager.displayImage(new GameZoneBgImage(), GameZoneRect);
+		Profiler.checkout("background");
+	}
+	
+	static private function #display_level_config(AConfig: XML)
+	{
+		ScreenManager.displayText(AConfig.toString(), new Rect(new Point(20, 50), new Size(500, -1)), 
+			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_MEDIUM), Colors.White, true, true)		
+	}	
+
+	static private function #display_margin(AnX: int, AnY: int)
+	{
+		var dbl_margin_width = adaptToFrame(N_MARGIN_WIDTH);
+		var x: Number = AnX ? ((AnX < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.Extent.Width): 0;
+		var y: Number = AnY ? ((AnY < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.Extent.Height): 0;
+		var cx: Number = AnX ? dbl_margin_width : FrameBuilder.FrameRect.Extent.Width;
+		var cy: Number = AnY ? dbl_margin_width : FrameBuilder.FrameRect.Extent.Height;		
+	
+		ScreenManager.displayImage(new MarginImage(), new Rect(new Point(x, y), new Size(cx, cy)));
+	}
+
+	static private function #display_performance_metrics() 
+	{
+		nFrameCount++;
+		var dt: Date = new Date();
+		if (dt.getTime() - dtFrameCount.getTime() > 1000)
+		{	
+			nFramesPerSecond = nFrameCount;
+			nFrameCount = 0;
+			dtFrameCount = dt;
+		}	
+		
+		var str_text: String = "FPS: " + nFramesPerSecond.toString() 
+		+ "\nDisplaying:"
+		+ "\n\t" + Profiler.getWatch("background")
+		+ "\n\t" + Profiler.getWatch("margins")
+		+ "\n\t" + Profiler.getWatch("airport")
+		+ "\n\t\t" + Profiler.getWatch("aprons")
+		+ "\n\t\t" + Profiler.getWatch("gates")
+		+ "\n\t\t" + Profiler.getWatch("airfields")
+		+ "\n\t\t" + Profiler.getWatch("aircrafts")
+		+ "\n\t\t\t" + Profiler.getWatch("balloons")
+		+ "\n\t\t\t" + Profiler.getWatch("shadows")
+		+ "\n\t\t\t" + Profiler.getWatch("headlights")
+		+ "\n\t\t\t" + Profiler.getWatch("bodies")
+		+ "\n\t\t\t" + Profiler.getWatch("gauges")	
+		+ "\n\t\t\t" + Profiler.getWatch("paths")
+		+ "\n\t" + Profiler.getWatch("menu")
+		+ "\n\t" + Profiler.getWatch("hint")
+		+ "\n\t" + Profiler.getWatch("banner")
+		+ "\n" + Profiler.getWatch("Computing")
+		+ "\nDisplay objects: " + ScreenManager.DisplayObjectsCount;
+		ScreenManager.displayText(str_text, new Rect(new Point(50, 50), new Size(-1, -1)), FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL));
+	}
+		
+	static private function #scale_scene()
+	{
+		BeforeRescale.fireBeforeRescale();
+		
+		FZoom = apAirport.Extent.Width/GameZoneRect.Extent.Width;//after fix apAirport.CY / cyScreen == apAirport.CX / cxScreen
+		//1. 0 аэропорта совпадает с 0 экрана
+		//2. - apAirport.X/FZoom - сдвигаем 0 аэропорта чтобы 0 экрана совпал с левой границей аэропорта
+		//3. apAirport.CX/FZoom  - получаем размер аэропорта в экранном размере
+		//4. cxScreen -                    - получаем лишнее, свободное место экрана не занятое аэропортом
+		//5. /2.0                          - делим лишнее место, чтобы получить ширину поля слева (справа будет равное)
+		//6. +                             - сдвигаем аэропорт на ширину левого поля 
+		FOrigin.X = - apAirport.Location.X/FZoom + (GameZoneRect.Extent.Width - apAirport.Extent.Width/FZoom)/2.0;
+		FOrigin.Y = - apAirport.Location.Y/FZoom + (GameZoneRect.Extent.Height - apAirport.Extent.Height/FZoom)/2.0;		
+	}
+
+	static private function #set_frame_dimensions(AFrameSize: Size)
+	{
+		FFrameRect = new Rect(new Point(), ScreenManager.StageSize);	
+
+		if (FFrameRect.Extent.Width > FFrameRect.Extent.Height)
+			dblFrameAdaptationRatio = FFrameRect.Extent.Height / DBL_STANDARD_FRAME_HEIGHT;
+		else
+			dblFrameAdaptationRatio = FFrameRect.Extent.Width / DBL_STANDARD_FRAME_WIDTH;
+
+		FInfoPanelRect = new Rect(new Point(), new Size(FFrameRect.Extent.Width, adaptToFrame(CY_INFO_PANEL_HEIGHT)));		
+		
+		var sz_game_zone: Size = ScreenManager.StageSize.clone();
+		sz_game_zone.Height -= FInfoPanelRect.Extent.Height;
+		FGameZoneRect = new Rect(new Point(0, FInfoPanelRect.Extent.Height), sz_game_zone);		
+	}
+
+	//event handlers	
+	static private function #airport_on_resized(AnEvent: Event):void 
+	{
+		scaleScene();
+	}
+}
+}
+
 
 function start()
 {
