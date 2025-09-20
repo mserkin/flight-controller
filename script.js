@@ -919,7 +919,8 @@ render();
 // Logic
 //////////////////////////////////////////////////
 
-class Enum {
+class Enum 
+{
 	// приватный конструктор, чтобы никто не создавал экземпляры
 	constructor(name, value) {
 	  this.#name = name;
@@ -936,7 +937,8 @@ class Enum {
 	}
 }
   
-class AngleUnits extends Enum {
+class AngleUnits extends Enum 
+{
 	static RADIAN = new AngleUnits("RADIAN", 0);
 	static DEGREE = new AngleUnits("DEGREE", 1);
   
@@ -945,7 +947,8 @@ class AngleUnits extends Enum {
 	}
 }
 
-class Controllers extends Enum {
+class Controllers extends Enum 
+{
 	static GAME_CONTROLLER = new Controllers("GAME_CONTROLLER", 0);
 	static EDIT_CONTROLLER = new Controllers("EDIT_CONTROLLER", 1);
 	static MENU_CONTROLLER = new Controllers("MENU_CONTROLLER", 2);
@@ -955,48 +958,50 @@ class Controllers extends Enum {
 	}
 }
 
-class IncomingDispatcherEventTypes extends Enum {
-	static N_MENU_BOX_SELECT = new IncomingDispatcherEventTypes("N_MENU_BOX_SELECT", 0);
-	static N_MENU_BACK_CLICK = new IncomingDispatcherEventTypes("N_MENU_BACK_CLICK", 1);		
-	static N_INFO_PANEL_MENU_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_MENU_CLICK", 2);          
-	static N_INFO_PANEL_PAUSE_SIM_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_PAUSE_SIM_CLICK", 3);
-	static N_INFO_PANEL_FAST_SIM_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_FAST_SIM_CLICK", 4);
-	static N_INFO_PANEL_RESTART_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_RESTART_CLICK", 5);
-	static N_PAUSE_SIMULATION = new IncomingDispatcherEventTypes("N_PAUSE_SIMULATION", 5);		
-	static N_EDITOR_CORNER_CLICK = new IncomingDispatcherEventTypes("N_EDITOR_CORNER_CLICK", 6);
-	static N_AIRPORT_DOUBLE_CLICK = new IncomingDispatcherEventTypes("N_AIRPORT_DOUBLE_CLICK", 7);
-	static N_AIRPORT_KEY_PRESSED = new IncomingDispatcherEventTypes("N_AIRPORT_KEY_PRESSED", 8);
-	static N_AIRPORT_MOUSE_DOWN = new IncomingDispatcherEventTypes("N_AIRPORT_MOUSE_DOWN", 9);
-	static N_AIRPORT_MOUSE_MOVE = new IncomingDispatcherEventTypes("N_AIRPORT_MOUSE_MOVE", 10);
-	static N_AIRPORT_MOUSE_UP = new IncomingDispatcherEventTypes("N_AIRPORT_MOUSE_UP", 11);		
-	static N_INFO_PANEL_HINT_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_HINT_CLICK", 12);
-	static N_MENU_LEVEL_SELECT = new IncomingDispatcherEventTypes("N_MENU_LEVEL_SELECT", 13);		
-	static N_BANNER_BACK_CLICK = new IncomingDispatcherEventTypes("N_BANNER_BACK_CLICK", 14);
-	static N_BANNER_START_CLICK = new IncomingDispatcherEventTypes("N_BANNER_START_CLICK", 15);
-	static N_BANNER_RESTART_CLICK = new IncomingDispatcherEventTypes("N_BANNER_RESTART_CLICK", 16);
-	static N_BANNER_SKIP_LEVEL_CLICK = new IncomingDispatcherEventTypes("N_BANNER_SKIP_LEVEL_CLICK", 17);
-	static N_INFO_PANEL_INFO_CLICK = new IncomingDispatcherEventTypes("N_INFO_PANEL_INFO_CLICK", 18);
+class IncomingDispatcherEventTypes extends Enum 
+{
+	static MENU_BOX_SELECT = new IncomingDispatcherEventTypes("MENU_BOX_SELECT", 0);
+	static MENU_BACK_CLICK = new IncomingDispatcherEventTypes("MENU_BACK_CLICK", 1);		
+	static INFO_PANEL_MENU_CLICK = new IncomingDispatcherEventTypes("INFO_PANEL_MENU_CLICK", 2);          
+	static INFO_PANEL_PAUSE_SIM_CLICK = new IncomingDispatcherEventTypes("INFO_PANEL_PAUSE_SIM_CLICK", 3);
+	static INFO_PANEL_FAST_SIM_CLICK = new IncomingDispatcherEventTypes("INFO_PANEL_FAST_SIM_CLICK", 4);
+	static INFO_PANEL_RESTART_CLICK = new IncomingDispatcherEventTypes("INFO_PANEL_RESTART_CLICK", 5);
+	static PAUSE_SIMULATION = new IncomingDispatcherEventTypes("PAUSE_SIMULATION", 5);		
+	static EDITOR_CORNER_CLICK = new IncomingDispatcherEventTypes("EDITOR_CORNER_CLICK", 6);
+	static AIRPORT_DOUBLE_CLICK = new IncomingDispatcherEventTypes("AIRPORT_DOUBLE_CLICK", 7);
+	static AIRPORT_KEY_PRESSED = new IncomingDispatcherEventTypes("AIRPORT_KEY_PRESSED", 8);
+	static AIRPORT_MOUSE_DOWN = new IncomingDispatcherEventTypes("AIRPORT_MOUSE_DOWN", 9);
+	static AIRPORT_MOUSE_MOVE = new IncomingDispatcherEventTypes("AIRPORT_MOUSE_MOVE", 10);
+	static AIRPORT_MOUSE_UP = new IncomingDispatcherEventTypes("AIRPORT_MOUSE_UP", 11);		
+	static INFO_PANEL_HINT_CLICK = new IncomingDispatcherEventTypes("INFO_PANEL_HINT_CLICK", 12);
+	static MENU_LEVEL_SELECT = new IncomingDispatcherEventTypes("MENU_LEVEL_SELECT", 13);		
+	static BANNER_BACK_CLICK = new IncomingDispatcherEventTypes("BANNER_BACK_CLICK", 14);
+	static BANNER_START_CLICK = new IncomingDispatcherEventTypes("BANNER_START_CLICK", 15);
+	static BANNER_RESTART_CLICK = new IncomingDispatcherEventTypes("BANNER_RESTART_CLICK", 16);
+	static BANNER_SKIP_LEVEL_CLICK = new IncomingDispatcherEventTypes("BANNER_SKIP_LEVEL_CLICK", 17);
+	static INFO_PANEL_INFO_CLICK = new IncomingDispatcherEventTypes("INFO_PANEL_INFO_CLICK", 18);
 }
 
-class OutcomingDispatcherEventTypes extends Enum {
-	static N_LEVEL_START = new OutcomingDispatcherEventTypes("N_LEVEL_START", 0);
-	static N_BOX_OPEN = new OutcomingDispatcherEventTypes("N_BOX_OPEN", 1);
-	static N_BACK_TO_BOXES = new OutcomingDispatcherEventTypes("N_BACK_TO_BOXES", 2);
-	static N_RESERVED2 = new OutcomingDispatcherEventTypes("N_RESERVED2", 3);
-	static N_FAST_SIMULATION = new OutcomingDispatcherEventTypes("N_FAST_SIMULATION", 4);
-	static N_START_LEVEL = new OutcomingDispatcherEventTypes("N_START_LEVEL", 6);
-	static N_LEVEL_CONFIG_VISIBILITY = new OutcomingDispatcherEventTypes("N_LEVEL_CONFIG_VISIBILITY", 7);
-	static N_OBJECT_ACTIVATE = new OutcomingDispatcherEventTypes("N_OBJECT_ACTIVATE", 8);
-	static N_OBJECT_INFO = new OutcomingDispatcherEventTypes("N_OBJECT_INFO", 9);
-	static N_OBJECT_SELECT = new OutcomingDispatcherEventTypes("N_OBJECT_SELECT", 10);
-	static N_PATH_CONTINUE = new OutcomingDispatcherEventTypes("N_PATH_CONTINUE", 11);
-	static N_PATH_FINISH = new OutcomingDispatcherEventTypes("N_PATH_FINISH", 12);
-	static N_KEY_PRESSED = new OutcomingDispatcherEventTypes("N_KEY_PRESSED", 13);
-	static N_SHOW_HINTS = new OutcomingDispatcherEventTypes("N_SHOW_HINTS", 14);
-	static N_NEXT_LEVEL = new OutcomingDispatcherEventTypes("N_NEXT_LEVEL", 15);
-	static N_RESERVED1 = new OutcomingDispatcherEventTypes("N_RESERVED1", 16);		
-	static N_PLAY_LEVEL = new OutcomingDispatcherEventTypes("N_PLAY_LEVEL", 17);
-	static N_DISPLAY_MODE_CHANGED = new OutcomingDispatcherEventTypes("N_DISPLAY_MODE_CHANGED", 20);
+class OutcomingDispatcherEventTypes extends Enum 
+{
+	static LEVEL_START = new OutcomingDispatcherEventTypes("LEVEL_START", 0);
+	static BOX_OPEN = new OutcomingDispatcherEventTypes("BOX_OPEN", 1);
+	static BACK_TO_BOXES = new OutcomingDispatcherEventTypes("BACK_TO_BOXES", 2);
+	static RESERVED2 = new OutcomingDispatcherEventTypes("RESERVED2", 3);
+	static FAST_SIMULATION = new OutcomingDispatcherEventTypes("FAST_SIMULATION", 4);
+	static START_LEVEL = new OutcomingDispatcherEventTypes("START_LEVEL", 6);
+	static LEVEL_CONFIG_VISIBILITY = new OutcomingDispatcherEventTypes("LEVEL_CONFIG_VISIBILITY", 7);
+	static OBJECT_ACTIVATE = new OutcomingDispatcherEventTypes("OBJECT_ACTIVATE", 8);
+	static OBJECT_INFO = new OutcomingDispatcherEventTypes("OBJECT_INFO", 9);
+	static OBJECT_SELECT = new OutcomingDispatcherEventTypes("OBJECT_SELECT", 10);
+	static PATH_CONTINUE = new OutcomingDispatcherEventTypes("PATH_CONTINUE", 11);
+	static PATH_FINISH = new OutcomingDispatcherEventTypes("PATH_FINISH", 12);
+	static KEY_PRESSED = new OutcomingDispatcherEventTypes("KEY_PRESSED", 13);
+	static SHOW_HINTS = new OutcomingDispatcherEventTypes("SHOW_HINTS", 14);
+	static NEXT_LEVEL = new OutcomingDispatcherEventTypes("NEXT_LEVEL", 15);
+	static RESERVED1 = new OutcomingDispatcherEventTypes("RESERVED1", 16);		
+	static PLAY_LEVEL = new OutcomingDispatcherEventTypes("PLAY_LEVEL", 17);
+	static DISPLAY_MODE_CHANGED = new OutcomingDispatcherEventTypes("DISPLAY_MODE_CHANGED", 20);
 }
 
 class Colors //static, enum
@@ -1101,17 +1106,17 @@ class Angle
 		return Angle.#DBL_ROTATION_ERROR
 	}
 
-	static get HalfPI() //: Angle
+	static get half_pi() //: Angle
 	{
 		return new Angle(Math.PI / 2, AngleUnits.RADIAN);
 	}
 
-	static get MinusHalfPI() //: Angle
+	static get minus_half_pi() //: Angle
 	{
 		return new Angle(-Math.PI / 2, AngleUnits.RADIAN);
 	}
 
-	static get PI()
+	static get pi()
 	{
 		return new Angle(Math.PI, AngleUnits.RADIAN);
 	}
@@ -1177,8 +1182,8 @@ class Angle
 	
 	static direction (point_from, point_to, distance_obj = null)
 	{
-		var x_diff = (point_to.X - point_from.X);		
-		var y_diff = -(point_to.Y - point_from.Y);
+		var x_diff = (point_to.x - point_from.x);		
+		var y_diff = -(point_to.y - point_from.y);
 		var dbl_dist = Math.sqrt(x_diff*x_diff + y_diff*y_diff);
 		var ang_target = Angle.arcsin(x_diff/dbl_dist);  	
 		if (y_diff < 0) ang_target.radian = Math.PI - ang_target.radian;
@@ -1510,7 +1515,7 @@ class Rect
 //  Region.as
 ///////////////////////////////////////////////////////////
 
-//Rect с Location в центре, повернутый на угол Rotation
+//Rect с location в центре, повернутый на угол Rotation
 class Region extends Rect 
 {
 	#rotation
@@ -1585,7 +1590,7 @@ class Region extends Rect
 //  SelectableObject.as
 ///////////////////////////////////////////////////////////
 
-//Выделяемый Region с Location в центре
+//Выделяемый Region с location в центре
 class SelectableObject extends Region 
 {
     #selected = false;
@@ -1648,7 +1653,7 @@ class SelectableObject extends Region
 		super.to_xml(xml_node);
 		xml_node.@course = this.course.degree;
 	}	
-	}
+}
 
 
 ///////////////////////////////////////////////////////////
@@ -1673,16 +1678,16 @@ class SelectableObject extends Region
 //	get upwind_course() //: Angle;
 //	get width() //: Number;
 //methods
-//  exchangeGate(gate, location) //: Gate;
+//  exchange_gate(gate, location) //: Gate;
 //  free(aircraft) //: void;
-//  getRegion() //: Region;
-//  inArea(point);
-//  inLandingZone(point) //: Boolean;
-//  occupyToLand(aircraft) //: Gate;
-//  occupyToTakeoff(aircraft) //: Boolean;
-//  toString(indent=0) //: String;
-//  toXml(xml_node);
-//  updateWind(wind_direction);
+//  get_region() //: Region;
+//  in_area(point);
+//  in_landing_zone(point) //: Boolean;
+//  occupy_to_land(aircraft) //: Gate;
+//  occupy_to_takeoff(aircraft) //: Boolean;
+//  to_string(indent=0) //: String;
+//  to_xml(xml_node);
+//  update_wind(wind_direction);
 
 
 ///////////////////////////////////////////////////////////
@@ -2195,7 +2200,8 @@ class Helipad extends Gate //implements IAirfield
 //  Airport.as
 ///////////////////////////////////////////////////////////
 
-class Airport {
+class Airport 
+{
 	#aircrafts;
 	#airfields;
 	#aprons;
@@ -2477,7 +2483,7 @@ class Airport {
 
 	//event handlers
 	//TODO: continue level loading of file download finished
-	//URLLoader_OnComplete(AnEvent: Event): void
+	//URLLoader_OnComplete(event): void
 	//{
 	//	loadLevelCont();
 	//}
@@ -2521,7 +2527,7 @@ class ScreenManager //static
 		//return StageSize;
 	}
 	
-	static displayImage(display_object, rect, angle = null) 
+	static display_image(display_object, rect, angle = null) 
 	{
 		//TODO: Add object to stage, set position, size and angle
 
@@ -2555,8 +2561,8 @@ class ScreenManager //static
 		
 		// txt_field.autoSize = TextFieldAutoSize.LEFT;
 		
-		// if (ARect.Extent.Width >= 0) txt_field.width = ARect.Extent.Width;
-		// if (ARect.Extent.Height >= 0) txt_field.height = ARect.Extent.Height;
+		// if (ARect.extent.width >= 0) txt_field.width = ARect.extent.width;
+		// if (ARect.extent.height >= 0) txt_field.height = ARect.extent.height;
 		// if (ToShowBackground) txt_field.background = true;
 		// if (IsInputField) 
 		// {
@@ -2574,13 +2580,13 @@ class ScreenManager //static
 		// {
 		// 	txt_field.autoSize = TextFieldAutoSize.CENTER;
 		// 	txt_field.rotation = Region(ARect).Rotation.Degree;
-		// 	txt_field.x = ARect.Location.X - txt_field.textWidth/2;
-		// 	txt_field.y = ARect.Location.Y - txt_field.textHeight/2;
+		// 	txt_field.x = ARect.location.x - txt_field.textWidth/2;
+		// 	txt_field.y = ARect.location.y - txt_field.textHeight/2;
 		// }		
 		// else
 		// {
-		// 	txt_field.x = ARect.Location.X;
-		// 	txt_field.y = ARect.Location.Y;
+		// 	txt_field.x = ARect.location.x;
+		// 	txt_field.y = ARect.location.y;
 		// }
 		// stgStage.addChild(txt_field);
 	}
@@ -2628,10 +2634,10 @@ class ScreenManager //static
 		// 	vn_result.push(GraphicsPathCommand.LINE_TO);
 		// return vn_result;
 	}
-	
 }
 
-class Controllers extends Enum {
+class Controllers extends Enum 
+{
 	static GAME_CONTROLLER = new Controllers("GAME_CONTROLLER", 0);
 	static EDIT_CONTROLLER = new Controllers("EDIT_CONTROLLER", 1);
 	static MENU_CONTROLLER = new Controllers("MENU_CONTROLLER", 2);
@@ -2652,7 +2658,6 @@ class DisplayMode extends Enum
 	static #MENU_SHOWN = [false, false, false, false, false, false, false, true, true, false, false];
 	static #SPLASH_SCREEN = [false, false, false, false, false, false, false, false, false, false, true];
 	static #TITLE_COLORS = [null, Colors.Red, Colors.Green, Colors.White, Colors.Blue, null, null, Colors.Blue, Colors.Blue, null, Colors.Blue];
-	static #NAMES = ["Play", "LevelFailedBanner", "LevelCompleteBanner", "LevelStartBanner ", "AboutBanner" , "CrashPause", "MissionCompletePause", "BoxMenu", "LevelMenu", "Edit", "SplashScreen"];
 	static #TITLES = [null, "Mission failed", "Level completed", "Level ", "Admiro" , null, null, null, null, null, null];
 
  //property fields
@@ -2686,11 +2691,6 @@ class DisplayMode extends Enum
 	}
 
 //properties
-    static get about_banner() //: DisplayMode
-    {
-    	return this.#about_banner;
-    }
-
 	get airport_shown() //: Boolean
     {
     	return !!DisplayMode.#AIRPORT_SHOWN[this.#value];
@@ -2701,26 +2701,11 @@ class DisplayMode extends Enum
     	return !!DisplayMode.#BANNER_SHOWN[this.#value];
     }	
 	
-    static get box_menu() //: DisplayMode
-    {
-    	return DisplayMode.BOX_MENU;
-    }		
-	
     get color() 
     {
 		return DisplayMode.TITLE_COLORS[this.#value];
     }
 	
-	static get crash_pause() //: DisplayMode
-    {
-    	return DisplayMode.CRASH_PAUSE;
-    }
-
-	static get edit() //: DisplayMode
-    {
-    	return DisplayMode.EDIT;
-    }	
-
 	get id() //: int
     {
     	return 1 << this.#value;
@@ -2735,62 +2720,32 @@ class DisplayMode extends Enum
     {
     	return !!DisplayMode.#SPLASH_SCREEN[this.#value];
     }		
-
-	static get level_complete_banner() //: DisplayMode
-    {
-    	return DisplayMode.LEVEL_COMPLETE_BANNER;
-    }
-
-    static get level_failed_banner() //: DisplayMode
-    {
-    	return DisplayMode.LEVEL_FAILED_BANNER;
-    }	
-
-    static get level_menu() //: DisplayMode
-    {
-    	return DisplayMode.LEVEL_MENU;
-    }	
 	
-    static get level_start_banner() //: DisplayMode
-    {
-    	return DisplayMode.LEVEL_START_BANNER;
-    }
-
 	get menu_shown() //: Boolean
     {
     	return !!DisplayMode.#MENU_SHOWN[this.#value];
     }		
 	
-	static get mission_complete_pause() //: DisplayMode
-    {
-    	return DisplayMode.MISSION_COMPLETE_PAUSE;
-    }
-	
 	get pause() //: Number
     {
     	return DisplayMode.#PAUSE[this.#value];
     }
-	
-    static get play() //: DisplayMode
-    {
-    	return DisplayMode.PLAY;
-    }
-
-    static get splash_screen() //: DisplayMode
-    {
-    	return DisplayMode.SPLASH_SCREEN;
-    }
 
     get title() //: String
     {
-    	return DisplayMode.TITLES[this.#value];
+    	return DisplayMode.#TITLES[this.#value];
     }
 
 	get to_string() //: String
     {
-    	return DisplayMode.#NAMES[this.#value];
+    	return this.#name;
     }
 }
+
+
+///////////////////////////////////////////////////////////
+//  Profiler.as
+///////////////////////////////////////////////////////////
 
 class Profiler //static
 {
@@ -2848,12 +2803,11 @@ class Profiler //static
 		return str_report;
 	}
 	
-	static public function reset()
+	static reset()
     {
 		Profiler.#watches = {};
     }	
 }
-
 
 ///////////////////////////////////////////////////////////
 //  GameProgress.as
@@ -3027,6 +2981,11 @@ class GameProgress //static
 	}
 }
 
+
+///////////////////////////////////////////////////////////
+//  MenuView.as
+///////////////////////////////////////////////////////////
+
 class MenuView
 {
 	static #CX_PROGRESS = 78.8; 
@@ -3038,193 +2997,181 @@ class MenuView
 	static #SPACE_ICON_RATIO = 0.5; //отношение места между иконками к размеру иконки
 	static #THUMBNAIL_MINIATURE_SPACING = 0.1; //отношение полей миниатюры к размеру пиктограммы
 	static #VERTICAL_MARGIN = 0.066; //relative to GameZone height
-><<<<--------------------
 	static #BOX_MENU_COLUMNS = GameProgress.N_BOX_COUNT;
-	static #BOX_MENU_ROWS: int = 1;
-	static #LEVEL_MENU_COLUMNS: int = 3;
-	static #LEVEL_MENU_ROWS: int = 3;
-	static #SPRITE_NAME1: String = "Box";
-	static #SPRITE_NAME2: String = "ThumbnailImage";
-	static #X_PROGRESS: Number = 98.60; 
-	static #Y_PROGRESS: Number = 155.65; 
-	
-	//property fields
-
-
-	//other fields
-
-//properties
-
+	static #BOX_MENU_ROWS = 1;
+	static #LEVEL_MENU_COLUMNS = 3;
+	static #LEVEL_MENU_ROWS = 3;
+	static #SPRITE_NAME1 = "Box";
+	static #SPRITE_NAME2 = "ThumbnailImage";
+	static #X_PROGRESS = 98.60; 
+	static #Y_PROGRESS = 155.65; 
 //methods
-	//constructor
-	//public methods
-	
-	static public function display()
+	static display()
 	{
 		Profiler.checkin("menu");
-		var is_box_menu: Boolean = (ControlDispatcher.CurrentDisplayMode == DisplayMode.BoxMenu);
-		var obj_params: Object = getMenuParameters(is_box_menu);
+		var is_box_menu = ControlDispatcher.current_display_mode == DisplayMode.BOX_MENU;
+		var obj_params = MenuView.#get_menu_parameters(is_box_menu);
 
-		var n_item_number = is_box_menu ? -1 : GameProgress.BoxFirstLevel - 1;
-		var n_item_last = is_box_menu ? GameProgress.N_BOX_COUNT - 1 : GameProgress.BoxLastLevel;
-		for (var y: int = 0; y < obj_params.IconRows; y++)
+		var n_item_number = is_box_menu ? -1 : GameProgress.box_first_level - 1;
+		let n_item_last = is_box_menu ? GameProgress.BOX_COUNT - 1 : GameProgress.box_last_level;
+		for (let y = 0; y < obj_params.IconRows; y++)
 		{
-			for (var x: int = 0; x < obj_params.IconColumns; x++)
+			for (let x = 0; x < obj_params.IconColumns; x++)
 			{
 				if (++n_item_number > n_item_last) break;
 				
-				var rect_icon: Rect = new Rect(
+				var rect_icon = new Rect(
 					new Point(
 						obj_params.HorizontalMargin + (obj_params.IconWidth + obj_params.HorizontalSpace)*x, 
-						obj_params.VerticalMargin + FrameBuilder.InfoPanelRect.Extent.Height + (obj_params.IconHeight + obj_params.VerticalSpace)*y
+						obj_params.VerticalMargin + FrameBuilder.info_panel_rect.extent.height + (obj_params.IconHeight + obj_params.VerticalSpace)*y
 					), 
 					new Size(obj_params.IconWidth, obj_params.IconHeight)
 				)
-	
-				displayBoxIcon(is_box_menu, n_item_number, rect_icon, obj_params);
+				MenuView.display_box_icon(is_box_menu, n_item_number, rect_icon, obj_params);
 			}
 		}		
 		Profiler.checkout("menu");
 	}
 
-	static public function displayBoxIcon(IsBox: Boolean, AnItemNumber: int, AnIconRect: Rect, ABoxParams: Object = null)
+	static display_box_icon(is_box, item_number, icon_rect, box_params=null)
 	{
-		if (!ABoxParams)
+		if (!box_params)
 		{
-			var ABoxParams: Object = getMenuParameters(IsBox);
+			var box_params = MenuView.#get_menu_parameters(is_box);
 		}
-		var dbl_progress: Number = IsBox ? GameProgress.getBoxProgress(AnItemNumber) : GameProgress.LevelCompletion[AnItemNumber-1] / 100;
-		var sp_icon_frame: Sprite = (dbl_progress >= 1) ? new BoxCompleteImage() : new BoxOpenImage();				
-		ABoxParams.HorizontalZoom = AnIconRect.Extent.Width / sp_icon_frame.width;
-		ABoxParams.VerticalZoom = AnIconRect.Extent.Height / sp_icon_frame.height;
+		var dbl_progress = is_box ? GameProgress.get_box_progress(item_number) : GameProgress.level_completion[item_number-1] / 100;
+		// TODO: sprite creation
+		//var sp_icon_frame = (dbl_progress >= 1) ? new BoxCompleteImage() : new BoxOpenImage();				
+		box_params.HorizontalZoom = icon_rect.extent.width / sp_icon_frame.width;
+		box_params.VerticalZoom = icon_rect.extent.height / sp_icon_frame.height;
 		
-		displayProgress(dbl_progress, AnIconRect, ABoxParams);	
-		ScreenManager.displayImage(sp_icon_frame, AnIconRect, new Angle());		
-		displayThumbnail(IsBox, AnItemNumber, AnIconRect, ABoxParams);
+		MenuView.display_progress(dbl_progress, icon_rect, box_params);	
+		ScreenManager.display_image(sp_icon_frame, icon_rect, new Angle());		
+		MenuView.display_thumbnail(is_box, item_number, icon_rect, box_params);
 			
-		if (IsBox && (!GameProgress.IS_BOSS_MODE_ON && AnItemNumber != 0 
-			&& GameProgress.getBoxProgress(AnItemNumber - 1) < 1
-			|| AnItemNumber == GameProgress.NewlyOpenedBox))
+		if (is_box && (!GameProgress.IS_BOSS_MODE_ON && item_number != 0 
+			&& GameProgress.get_box_progress(item_number - 1) < 1
+			|| item_number == GameProgress.newly_opened_box))
 		{
-			var sp_lock: Sprite = (AnItemNumber == GameProgress.NewlyOpenedBox) ? new LockOpenedImage() : new LockClosedImage();
-			ScreenManager.displayImage(sp_lock, AnIconRect, new Angle());
+			//TODO Sprite creation
+			//var sp_lock = (item_number == GameProgress.newly_opened_box) ? new LockOpenedImage() : new LockClosedImage();
+			ScreenManager.display_image(sp_lock, icon_rect, new Angle());
 		}
 	}
 	
-	static public function processEvent(AnEvent: Event): Boolean
+	static process_event(event) //: Boolean
 	{
-		if (AnEvent is MouseEvent && AnEvent.type == MouseEvent.CLICK)
-		{
-			var mouse_event: MouseEvent = MouseEvent(AnEvent);
+		//TODO Event processing
+		//if (event is MouseEvent && event.type == MouseEvent.CLICK)
+		// {
+		// 	TODO Event processing
+		// 	var mouse_event: MouseEvent = MouseEvent(event);
 			
-			switch (ControlDispatcher.CurrentDisplayMode)
-			{
-				case DisplayMode.LevelMenu:
-					return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_MENU_LEVEL_SELECT, 
-						{LevelNumber: getLevelByCoords(mouse_event.stageX, mouse_event.stageY)});
-					break;
-				case DisplayMode.BoxMenu:
-					return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_MENU_BOX_SELECT, 
-						MenuView.getBoxByCoords(mouse_event.stageX, mouse_event.stageY));					
-					break;				
-				default: return false;
-			}
-		}
+		// 	switch (ControlDispatcher.current_display_mode)
+		// 	{
+		// 		case DisplayMode.LEVEL_MENU:
+		// 			return ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.MENU_LEVEL_SELECT, 
+		// 				{LevelNumber: MenuView.#get_level_by_coords(mouse_event.stageX, mouse_event.stageY)});
+		// 			break;
+		// 		case DisplayMode.BOX_MENU:
+		// 			return ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.N_MENU_BOX_SELECT, 
+		// 				MenuView.get_box_by_coords(mouse_event.stageX, mouse_event.stageY));					
+		// 			break;				
+		// 		default: return false;
+		// 	}
+		// }
 		return false;
 	}
 	
-	//protected methods
-
-	/* protected function <#camelStyle#>(<#ADelphiStyle#>: <#Type#>)
+//private methods
+	static #display_airfield(airfield, thumbnail_rect, zoom_factor, model_center)
 	{
-	}*/
-
-	//private methods
-		
-	static private function displayAirfield(AnAirfield: IAirfield, AThumbnailRect: Rect, AZoom: Number, AModelCenter: Point)
-	{
-		if (!AnAirfield.IsRunway) return;
-		var rect_scr: Region = AnAirfield.getRegion().cloneRegion();
-		rect_scr.Extent.Width /= AZoom;
-		rect_scr.Extent.Height /= AZoom;
-		rect_scr.Location.X = (rect_scr.Location.X - AModelCenter.X) / AZoom 
-			+ AThumbnailRect.Location.X + AThumbnailRect.Extent.Width/2;
-		rect_scr.Location.Y = (rect_scr.Location.Y - AModelCenter.Y) / AZoom 
-			+ AThumbnailRect.Location.Y + AThumbnailRect.Extent.Height/2;
-			
-		ScreenManager.displayImage(new RunwayThumbnailImage(), rect_scr, AnAirfield.ActiveCourse);
+		if (!airfield.is_runway) return;
+		var scr_region = airfield.get_region().clone_region();
+		scr_region.extent.width /= zoom_factor;
+		scr_region.extent.height /= zoom_factor;
+		scr_region.location.x = (scr_region.location.x - model_center.x) / zoom_factor 
+			+ thumbnail_rect.location.x + thumbnail_rect.extent.width/2;
+		scr_region.location.y = (scr_region.location.y - model_center.y) / zoom_factor 
+			+ thumbnail_rect.location.y + thumbnail_rect.extent.height/2;
+		//TODO: Sprite creation
+		//ScreenManager.display_image(new RunwayThumbnailImage(), scr_region, airfield.active_course);
 	}
 	
-	static private function displayProgress(AProgress: Number, AnIconRect: Rect, AParams: Object)
+	static #display_progress(progress, icon_rect, params)
 	{
-		AProgress = Math.min(AProgress, 1);
-		var sp_bg: Sprite = new MenuProgressBackgroundImage();	
-		var rect_bg: Rect = new Rect(
-			new Point(
-				AnIconRect.Location.X + X_PROGRESS * AParams.HorizontalZoom, 
-				AnIconRect.Location.Y + Y_PROGRESS * AParams.VerticalZoom
-			), 
-			new Size(CX_PROGRESS * AParams.HorizontalZoom, CY_PROGRESS * AParams.VerticalZoom)
-		);
+		progress = Math.min(progress, 1);
+		//TODO: Sprite creation
+		//var sp_bg: Sprite = new MenuProgressBackgroundImage();	
+		// var rect_bg: Rect = new Rect(
+		// 	new Point(
+		// 		icon_rect.location.x + MenuView.#X_PROGRESS * params.HorizontalZoom, 
+		// 		icon_rect.location.y + MenuView.#Y_PROGRESS * params.VerticalZoom
+		// 	), 
+		// 	new Size(MenuView.#CX_PROGRESS * params.HorizontalZoom, MenuView.#CY_PROGRESS * params.VerticalZoom)
+		// );
 				
-		var sp_filler: Sprite = new MenuProgressFillerImage();
-		var rect_filler: Rect = rect_bg.clone();
-		rect_filler.Extent.Width *= AProgress;
-		ScreenManager.displayImage(sp_bg, rect_bg, new Angle());
-		ScreenManager.displayImage(sp_filler, rect_filler, new Angle());
+		// var sp_filler = new MenuProgressFillerImage();
+		// var rect_filler = rect_bg.clone();
+		// rect_filler.extent.width *= progress;
+		// ScreenManager.display_image(sp_bg, rect_bg, new Angle());
+		// ScreenManager.display_image(sp_filler, rect_filler, new Angle());
 	}
 
-	static private function displayThumbnail(IsBox: Boolean, AnItemNumber: int, AnIconRect: Rect, AParams: Object)
+	static #display_thumbnail(is_box, item_number, icon_rect, params)
 	{
-		var rect_thumbnail = AnIconRect.clone();
-		rect_thumbnail.Extent.Width *= CY_THUMBNAIL_RELATIVE_TO_ICON;
-		var dbl_margin: Number = (AnIconRect.Extent.Width - rect_thumbnail.Extent.Width) / 2;
-		rect_thumbnail.Location.X += dbl_margin;
-		rect_thumbnail.Location.Y += dbl_margin;
-		rect_thumbnail.Extent.Height -= dbl_margin*2 + CY_PROGRESS * AParams.VerticalZoom 
-			+ FrameBuilder.adaptToFrame(CY_PROGRESS_BOTTOM_MARGIN);
+		var rect_thumbnail = icon_rect.clone();
+		rect_thumbnail.extent.width *= MenuView.#CY_THUMBNAIL_RELATIVE_TO_ICON;
+		let dbl_margin = (icon_rect.extent.width - rect_thumbnail.extent.width) / 2;
+		rect_thumbnail.location.x += dbl_margin;
+		rect_thumbnail.location.y += dbl_margin;
+		rect_thumbnail.extent.height -= dbl_margin*2 + MenuView.#CY_PROGRESS * params.VerticalZoom 
+			+ FrameBuilder.adapt_to_frame(MenuView.#CY_PROGRESS_BOTTOM_MARGIN);
 
-		ScreenManager.displayImage(new ThumbnailBoxImage, rect_thumbnail, new Angle());
+		//TODO: Sprite creation and showing
+		//ScreenManager.display_image(new ThumbnailBoxImage, rect_thumbnail, new Angle());
 
-		rect_thumbnail.Location.X += rect_thumbnail.Extent.Width * DBL_THUMBNAIL_MINIATURE_SPACING;
-		rect_thumbnail.Location.Y += rect_thumbnail.Extent.Height * DBL_THUMBNAIL_MINIATURE_SPACING;
-		rect_thumbnail.Extent.Width *= (1 - 2*DBL_THUMBNAIL_MINIATURE_SPACING);
-		rect_thumbnail.Extent.Height *= (1 - 2*DBL_THUMBNAIL_MINIATURE_SPACING);
+		rect_thumbnail.location.x += rect_thumbnail.extent.width * MenuView.#THUMBNAIL_MINIATURE_SPACING;
+		rect_thumbnail.location.y += rect_thumbnail.extent.height * MenuView.#THUMBNAIL_MINIATURE_SPACING;
+		rect_thumbnail.extent.width *= (1 - 2*MenuView.#THUMBNAIL_MINIATURE_SPACING);
+		rect_thumbnail.extent.height *= (1 - 2*MenuView.#THUMBNAIL_MINIATURE_SPACING);
 		
-		if (IsBox) {
-			var classSprite: Class = getDefinitionByName(STR_SPRITE_NAME1 + AnItemNumber + STR_SPRITE_NAME2) as Class;
+<<<<<<<<<<<<<<<<======== Current place - level 5 ========
+		if (is_box) {
+			//TODO: Parameterized sprite creation
+			var classSprite: Class = getDefinitionByName(STR_SPRITE_NAME1 + item_number + STR_SPRITE_NAME2) as Class;
 			var clip: Sprite = new classSprite();
-			ScreenManager.displayImage(clip, rect_thumbnail);
+			ScreenManager.display_image(clip, rect_thumbnail);
 		}	
 		else {
-			var airport: Airport = MenuController.getInstance().ThumbnailModels[AnItemNumber - 1];
+			var airport: Airport = MenuController.getInstance().ThumbnailModels[item_number - 1];
 			var rg_model: Region = airport.getAirportModelRegion();
-			var dbl_zoom: Number = Math.max(rg_model.Extent.Width / rect_thumbnail.Extent.Width, 
-				rg_model.Extent.Height / rect_thumbnail.Extent.Height);
+			var dbl_zoom: Number = Math.max(rg_model.extent.width / rect_thumbnail.extent.width, 
+				rg_model.extent.height / rect_thumbnail.extent.height);
 
 			for each (var airfield: IAirfield in airport.Airfields)	{
-				displayAirfield(airfield, rect_thumbnail, dbl_zoom, rg_model.Location);
+				displayAirfield(airfield, rect_thumbnail, dbl_zoom, rg_model.location);
 			}
 		}
 	}
 
-	static private function getBoxByCoords(AnX: Number, AnY: Number): Object
+	static #getBoxByCoords(AnX: Number, AnY: Number): Object
 	{
-		var obj_level_params = getMenuParameters(new Boolean(false));
+		var obj_level_params = MenuView.#get_menu_parameters(new Boolean(false));
 		var obj_result = {BoxNumber: -1, OpeningLevel: -1, IsBoxLocked: true};
 		var n_box_no: int = getMenuIconNumberByCoords(true, AnX, AnY);
 		if (n_box_no >= 0 && n_box_no < GameProgress.N_BOX_COUNT)
 		{
 			obj_result.BoxNumber = n_box_no;
 			obj_result.OpeningLevel = GameProgress.getFirstLevelForBox(n_box_no);
-			obj_result.IsBoxLocked = !GameProgress.IS_BOSS_MODE_ON && n_box_no > 0 && GameProgress.getBoxProgress(n_box_no - 1) < 1;
+			obj_result.IsBoxLocked = !GameProgress.IS_BOSS_MODE_ON && n_box_no > 0 && GameProgress.get_box_progress(n_box_no - 1) < 1;
 		}
 		return obj_result;
 	}
 
-	static private function getLevelByCoords(AnX: Number, AnY: Number): int
+	static #get_level_by_coords(AnX: Number, AnY: Number): int
 	{
-		var obj_params = getMenuParameters(new Boolean(false));
+		var obj_params = MenuView.#get_menu_parameters(new Boolean(false));
 
 		var n_icon_number = getMenuIconNumberByCoords(false, AnX, AnY);
 		var n_level_number = GameProgress.BoxFirstLevel + n_icon_number;
@@ -3234,12 +3181,12 @@ class MenuView
 			return -1;
 	}	
 	
-	static private function getMenuIconNumberByCoords(IsBoxMenu: Boolean, AnX: Number, AnY: Number): int
+	static #getMenuIconNumberByCoords(IsBoxMenu: Boolean, AnX: Number, AnY: Number): int
 	{
-		var obj_params = getMenuParameters(IsBoxMenu);
+		var obj_params = MenuView.#get_menu_parameters(IsBoxMenu);
 		
-		var n_row: int = Math.floor((AnY - FrameBuilder.InfoPanelRect.Extent.Height - obj_params.VerticalMargin)/(obj_params.IconHeight + obj_params.VerticalSpace));
-		if (AnY - FrameBuilder.InfoPanelRect.Extent.Height - obj_params.VerticalMargin - (obj_params.IconHeight + obj_params.VerticalSpace) * n_row > obj_params.IconHeight) return -1;
+		var n_row: int = Math.floor((AnY - FrameBuilder.InfoPanelRect.extent.height - obj_params.VerticalMargin)/(obj_params.IconHeight + obj_params.VerticalSpace));
+		if (AnY - FrameBuilder.InfoPanelRect.extent.height - obj_params.VerticalMargin - (obj_params.IconHeight + obj_params.VerticalSpace) * n_row > obj_params.IconHeight) return -1;
 			
 		var n_column: int = Math.floor((AnX - obj_params.HorizontalMargin)/(obj_params.IconWidth + obj_params.HorizontalSpace));
 		if (AnX - obj_params.HorizontalMargin - (obj_params.IconWidth + obj_params.HorizontalSpace) * n_column > obj_params.IconWidth) return -1;
@@ -3247,7 +3194,7 @@ class MenuView
 		return n_row * obj_params.IconColumns + n_column;
 	}
 
-	static private function getMenuParameters(IsBoxMenu: Boolean)
+	static #get_menu_parameters(IsBoxMenu: Boolean)
 	{
 		var obj_params: Object = {};		
 		if (IsBoxMenu) {
@@ -3258,10 +3205,10 @@ class MenuView
 			obj_params.IconColumns = N_LEVEL_MENU_COLUMNS;
 			obj_params.IconRows = N_LEVEL_MENU_ROWS;
 		}		
-		obj_params.HorizontalMargin = DBL_HORIZONTAL_MARGIN*FrameBuilder.GameZoneRect.Extent.Width;
-		obj_params.VerticalMargin = DBL_VERTICAL_MARGIN*FrameBuilder.GameZoneRect.Extent.Height;
-		var cx_menu: Number = FrameBuilder.GameZoneRect.Extent.Width * (1 - DBL_HORIZONTAL_MARGIN * 2);
-		var cy_menu: Number = FrameBuilder.GameZoneRect.Extent.Height * (1 - DBL_VERTICAL_MARGIN * 2);
+		obj_params.HorizontalMargin = DBL_HORIZONTAL_MARGIN*FrameBuilder.GameZoneRect.extent.width;
+		obj_params.VerticalMargin = DBL_VERTICAL_MARGIN*FrameBuilder.GameZoneRect.extent.height;
+		var cx_menu: Number = FrameBuilder.GameZoneRect.extent.width * (1 - DBL_HORIZONTAL_MARGIN * 2);
+		var cy_menu: Number = FrameBuilder.GameZoneRect.extent.height * (1 - DBL_VERTICAL_MARGIN * 2);
 		var cx_icon: Number =  cx_menu / ((DBL_SPACE_ICON_RATIO + 1)*(obj_params.IconColumns - 1) + 1);;
 		var cy_icon: Number =  cy_menu / ((DBL_SPACE_ICON_RATIO + 1)*(obj_params.IconRows - 1) + 1);		
 		if (cx_icon > cy_icon) {
@@ -3286,15 +3233,19 @@ class MenuView
 		}
 		return obj_params;
 	}
-	
-	//event handlers
-
-	/* private function <#object_OnDelphiStyle#>(<#AnDelphiStyle#>: Event): void
-	{
-	}*/
-}
 }
 
+
+// MenuView -> ControlDispatcher -> Core -> MenuView
+// MenuView -> ControlDispatcher -> Core -> HintPanelView
+// MenuView -> ControlDispatcher -> Core -> InfoBannerView
+// MenuView -> ControlDispatcher -> Core -> BannerView
+// MenuView -> ControlDispatcher -> Core -> AirportView
+
+
+///////////////////////////////////////////////////////////
+//  Core.as
+///////////////////////////////////////////////////////////
 
 class Core //static
 {
@@ -3307,7 +3258,7 @@ class Core //static
 //methods
 	static dispatch_event(event)
 	{
-		<<<<<<<<<<===========
+<<<<<<<<<<<<<<<<======== Current place - level 4 ========
 		if (!MenuView.process_event(event))
 			if (!HintPanelView.process_event(event))
 				if (!InfoPanelView.process_event(event))
@@ -3361,7 +3312,6 @@ class Core //static
 	{
 		Profiler.checkin("Computing");
 
-<<<<<<<<<<===========
 		ControlDispatcher.run();
 
 		Profiler.checkout("Computing");		
@@ -3371,7 +3321,7 @@ class Core //static
 						
 	static #postprocess()
 	{
-		if (ControlDispatcher.CurrentDisplayMode == DisplayMode.Edit)
+		if (ControlDispatcher.current_display_mode == DisplayMode.EDIT)
 		{
 			if (EditController.getInstance().LevelConfig)
 			{	
@@ -3391,7 +3341,7 @@ class Core //static
 
 	static #stage_on_event(event) 
 	{
-		Core.dispatch_event(AnEvent);
+		Core.dispatch_event(event);
 	}
 			
 	static #timer_on_timer(event) 
@@ -3413,7 +3363,6 @@ class ControlDispatcher //static
 	static #title_pause = 0; //frames
 
 //properties
-
 	static get active_controller() //: IController
 	{
 		return this.#active_controller;
@@ -3436,31 +3385,26 @@ class ControlDispatcher //static
 		if (this.#title_pause == 0)
 		{
 			this.#display_mode = display_mode;
-<>>>>>>==========
-			Core.dispatch_event(new Event(Core.DISPLAY_MODE_CHANGE))
-			if (FActiveController) FActiveController.processDispatcherEvent(N_DISPLAY_MODE_CHANGED, null);
+<<<<<<<<<<<<<<<<======== Current place - level 3 ========
+			//TODO Event sending
+			//Core.dispatch_event(new Event(Core.DISPLAY_MODE_CHANGE))
+			if (MenuView.#active_controller) MenuView.#active_controller.processDispatcherEvent(N_DISPLAY_MODE_CHANGED, null);
 			
 			nTitlePause = FDisplayMode.Pause;
 		}
 	}		
 
 //methods
-	//constructor - static, no instantiation!
-	/*public function <#DelphiStyle#> (<#ADelphiStyle#>: <#Type#>)
-	{
-		var <#prefix_underscore_style#>: <#Type#>;
-	}*/		
-
 	//public methods
-	static public function dispatchViewEvent(AType: int, AParamObj: Object = null): Boolean
+	static dispatch_view_event(AType: int, AParamObj: Object = null): Boolean
 	{
 		switch (AType)
 		{
-			case N_AIRPORT_DOUBLE_CLICK:
+			case IncomingDispatcherEventTypes.AIRPORT_DOUBLE_CLICK:
 				return FActiveController.processDispatcherEvent(N_OBJECT_ACTIVATE, AParamObj);
 				
-			case N_AIRPORT_MOUSE_DOWN:
-				if (CurrentDisplayMode.AirportShown)
+			case IncomingDispatcherEventTypes.AIRPORT_MOUSE_DOWN:
+				if (ControlDispatcher.current_display_mode.AirportShown)
 					return FActiveController.processDispatcherEvent(N_OBJECT_SELECT, AParamObj);
 				else
 				{
@@ -3469,108 +3413,108 @@ class ControlDispatcher //static
 					return true;
 				}
 
-			case N_AIRPORT_MOUSE_MOVE:
-				if (CurrentDisplayMode == DisplayMode.Play)
+			case IncomingDispatcherEventTypes.AIRPORT_MOUSE_MOVE:
+				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
 					return GameController.getInstance().processDispatcherEvent(N_PATH_CONTINUE, AParamObj);
 				}
 				break;
 
-			case N_AIRPORT_MOUSE_UP:
-				if (CurrentDisplayMode == DisplayMode.Play)
+			case IncomingDispatcherEventTypes.AIRPORT_MOUSE_UP:
+				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
 					return FActiveController.processDispatcherEvent(N_PATH_FINISH, AParamObj);
 				}
 				break;
 
-			case N_AIRPORT_KEY_PRESSED:
+			case IncomingDispatcherEventTypes.AIRPORT_KEY_PRESSED:
 				if (AParamObj.KeyCode == Keys.I)
 					return FActiveController.processDispatcherEvent(N_OBJECT_INFO);
 				else
 					return FActiveController.processDispatcherEvent(N_KEY_PRESSED, AParamObj);
 				break;
 
-			case N_BANNER_BACK_CLICK:
-				CurrentDisplayMode = DisplayMode.LevelMenu;
+			case IncomingDispatcherEventTypes.BANNER_BACK_CLICK:
+				ControlDispatcher.current_display_mode = DisplayMode.LEVEL_MENU;
 				FActiveController = MenuController.getInstance();								
 				break;
 
-			case N_BANNER_SKIP_LEVEL_CLICK:			
+			case IncomingDispatcherEventTypes.BANNER_SKIP_LEVEL_CLICK:			
 				GameController.getInstance().processDispatcherEvent(N_NEXT_LEVEL, null);
 				//fall to next case
 				
-			case N_BANNER_RESTART_CLICK:
+			case IncomingDispatcherEventTypes.BANNER_RESTART_CLICK:
 				GameController.getInstance().processDispatcherEvent(N_START_LEVEL, null);
 				FActiveController = GameController.getInstance();
 				break;
 
-			case N_BANNER_START_CLICK:
+			case IncomingDispatcherEventTypes.BANNER_START_CLICK:
 				GameController.getInstance().processDispatcherEvent(N_PLAY_LEVEL, null);
 				FActiveController = GameController.getInstance();
 				break;
 				
-			case N_EDITOR_CORNER_CLICK:
-				switch (CurrentDisplayMode)
+			case IncomingDispatcherEventTypes.EDITOR_CORNER_CLICK:
+				switch (ControlDispatcher.current_display_mode)
 				{
-					case DisplayMode.Play:
+					case DisplayMode.PLAY:
 						FActiveController = EditController.getInstance();
 						return true;
 						
-					case DisplayMode.Edit:
+					case DisplayMode.EDIT:
 						return FActiveController.processDispatcherEvent(N_LEVEL_CONFIG_VISIBILITY);
 				}
 				break;
 				
-			case N_INFO_PANEL_MENU_CLICK:
-				switch (CurrentDisplayMode)
+			case IncomingDispatcherEventTypes.INFO_PANEL_MENU_CLICK:
+				switch (ControlDispatcher.current_display_mode)
 				{
-					case DisplayMode.LevelMenu:
+					case DisplayMode.LEVEL_MENU:
 						return FActiveController.processDispatcherEvent(N_BACK_TO_BOXES);
-					case DisplayMode.Play:
-					case DisplayMode.CrashPause:
+					case DisplayMode.PLAY:
+					case DisplayMode.CRASH_PAUSE:
 						nTitlePause = 0;
 						GameProgress.acceptLevelResult(GameController.getInstance().ShiftProgress);
-						CurrentDisplayMode = DisplayMode.LevelFailedBanner;
+						ControlDispatcher.current_display_mode = DisplayMode.LEVEL_FAILED_BANNER;
 				}
 				break;
 				
-			case N_INFO_PANEL_FAST_SIM_CLICK:	
-				if (CurrentDisplayMode == DisplayMode.Play)
+			case IncomingDispatcherEventTypes.INFO_PANEL_FAST_SIM_CLICK:	
+				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
 					return FActiveController.processDispatcherEvent(N_FAST_SIMULATION, AParamObj);
 				}
 				break;
 
-			case N_INFO_PANEL_HINT_CLICK:
-				if (CurrentDisplayMode == DisplayMode.Play)
+			case IncomingDispatcherEventTypes.INFO_PANEL_HINT_CLICK:
+				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
 					return FActiveController.processDispatcherEvent(N_SHOW_HINTS);				
 				}
 				break;
 
-			case N_INFO_PANEL_INFO_CLICK:
-				CurrentDisplayMode = DisplayMode.AboutBanner;
+			case IncomingDispatcherEventTypes.INFO_PANEL_INFO_CLICK:
+				ControlDispatcher.current_display_mode = DisplayMode.ABOUT_BANNER;
 				break;
 				
-			case N_INFO_PANEL_PAUSE_SIM_CLICK:	
-				if (CurrentDisplayMode == DisplayMode.Play)
+			case IncomingDispatcherEventTypes.INFO_PANEL_PAUSE_SIM_CLICK:	
+				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
 					return FActiveController.processDispatcherEvent(N_PAUSE_SIMULATION, AParamObj);
 				}
 				break;
 
-			case N_INFO_PANEL_RESTART_CLICK:	
-				if (CurrentDisplayMode == DisplayMode.Play)
+			case IncomingDispatcherEventTypes.INFO_PANEL_RESTART_CLICK:	
+				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
 					GameProgress.acceptLevelResult(GameController.getInstance().ShiftProgress);
 					return FActiveController.processDispatcherEvent(N_START_LEVEL);				
 				}
 				break;
 				
-			case N_MENU_BOX_SELECT:
+			case IncomingDispatcherEventTypes.MENU_BOX_SELECT:
 				return FActiveController.processDispatcherEvent(N_BOX_OPEN, AParamObj);
 				
-			case N_MENU_LEVEL_SELECT:	
+			case IncomingDispatcherEventTypes.MENU_LEVEL_SELECT:	
 				if (AParamObj.LevelNumber > 0)
 				{
 					GameProgress.selectSpecifiedLevel(AParamObj.LevelNumber);
@@ -3582,68 +3526,61 @@ class ControlDispatcher //static
 		return false;
 	}
 
-	static public function run()
+	static run()
 	{
 		controlDisplayMode();
 		FActiveController.run();
 	}
 
-	//private methods
-
-	static private function controlDisplayMode()
+//private methods
+	static #controlDisplayMode()
 	{
 		if (--nTitlePause <= 0)
 		{
 			nTitlePause = 0;
-			switch (CurrentDisplayMode)
+			switch (ControlDispatcher.current_display_mode)
 			{
-				case DisplayMode.SplashScreen:
-					CurrentDisplayMode = DisplayMode.BoxMenu;
+				case DisplayMode.SPLASH_SCREEN:
+					ControlDispatcher.current_display_mode = DisplayMode.BOX_MENU;
 					FActiveController = MenuController.getInstance();
 					break;
 
-				case DisplayMode.CrashPause:
+				case DisplayMode.CRASH_PAUSE:
 					GameProgress.acceptLevelResult(GameController.getInstance().ShiftProgress);
-					CurrentDisplayMode = DisplayMode.LevelFailedBanner;
+					ControlDispatcher.current_display_mode = DisplayMode.LEVEL_FAILED_BANNER;
 					FActiveController = GameController.getInstance();
 					break;					
-/*				case DisplayMode.LevelCompleteBanner: 
+/*				case DisplayMode.LEVEL_COMPLETE_BANNER: 
 					if (GameProgress.Complete)
 					{
-						CurrentDisplayMode = DisplayMode.AboutBanner;
+						ControlDispatcher.current_display_mode = DisplayMode.ABOUT_BANNER;
 						FActiveController = GameController.getInstance();
 					}
 					break;
-				case DisplayMode.AboutBanner: 
+				case DisplayMode.ABOUT_BANNER: 
 					GameProgress.reset();
-					CurrentDisplayMode = DisplayMode.LevelMenu;
+					ControlDispatcher.current_display_mode = DisplayMode.LEVEL_MENU;
 					FActiveController = MenuController.getInstance();					
 					break;
 					*/
-				case DisplayMode.MissionCompletePause:
-					CurrentDisplayMode = GameProgress.IsLastBox && GameProgress.BoxPassed ? 
-						DisplayMode.AboutBanner 
-						: DisplayMode.LevelCompleteBanner;
+				case DisplayMode.MISSION_COMPLETE_PAUSE:
+					ControlDispatcher.current_display_mode = GameProgress.IsLastBox && GameProgress.BoxPassed ? 
+						DisplayMode.ABOUT_BANNER 
+						: DisplayMode.LEVEL_COMPLETE_BANNER;
 					FActiveController = GameController.getInstance();
 					break;										
-				case DisplayMode.Play:
+				case DisplayMode.PLAY:
 					if (GameController.getInstance().ShiftProgress >= 100)
 					{
 						GameProgress.acceptLevelResult(100);					
-						CurrentDisplayMode = DisplayMode.MissionCompletePause;
+						ControlDispatcher.current_display_mode = DisplayMode.MISSION_COMPLETE_PAUSE;
 						FActiveController = GameController.getInstance();
 					}
 					break;
 			}
 		}
 	}
-
-	//event handlers
-
-	/* private function <#object_OnDelphiStyle#>(<#AnDelphiStyle#>: Event): void
-	{
-	}*/
-}
+}}
 
 
 ///////////////////////////////////////////////////////////
@@ -3691,7 +3628,7 @@ class FrameBuilder //static
 	//	AircraftView.draw
 	//  HintPanelView.show
 	//  HintPanelView.getHintPanelRect
-	//Всегда ли равен по ширене GameZone.Extent.Width?
+	//Всегда ли равен по ширене GameZone.extent.width?
 	static get frame_rect() //: Rect
 	{
 		return this.#frame_rect;
@@ -3704,15 +3641,15 @@ class FrameBuilder //static
 	//Используется в:
 	//	AircraftView.displayArrivalMark
 	//	AirportView.processMouseEvent
-	//  MenuView.getMenuParameters
+	//  MenuView.get_menu_parameters
 	static get game_zone_rect() //: Rect
 	{
 		return this.#game_zone_rect;
 	}
 	//Прямоугольник инфопанели в единицах сцены Flash
 	//Задается как:
-	//	Location = new Point(0, 0);
-	//	Extent = new Size(InfoPanelView.Height, InfoPanelView.Height);
+	//	location = new Point(0, 0);
+	//	extent = new Size(InfoPanelView.height, InfoPanelView.height);
 	//Не изменяется ли динамически 
 	//Всегда равен FrameRect за вычетом панели
 	//Используется в:
@@ -3735,7 +3672,6 @@ class FrameBuilder //static
 	
 //methods
 	//public methods
-	
 	static adapt_to_frame(length) //: Number 
 	{
 		return length * FrameBuilder.#dbl_frame_adaptation_ratio;
@@ -3750,25 +3686,25 @@ class FrameBuilder //static
 	{
 		set_frame_dimensions(ScreenManager.create_frame());
 
-<<<<--------
-		if (!ControlDispatcher.CurrentDisplayMode.IsSplashScreen) {
+<<<<<<<<<<<<<<<<======== Current place - level 2 ========
+		if (!ControlDispatcher.current_display_mode.is_splash_screen) {
 			displayGameZoneBackground();
 		}
 		
-		if (ControlDispatcher.CurrentDisplayMode.AirportShown) {
+		if (ControlDispatcher.current_display_mode.AirportShown) {
 			AirportView.display(apAirport, ControlDispatcher.ActiveController.getControllerType() == 0);
 			StarView.display();
 		}
 		
-		if (ControlDispatcher.CurrentDisplayMode.MenuShown) {
+		if (ControlDispatcher.current_display_mode.MenuShown) {
 			MenuView.display();
 		}
 
-		if (ControlDispatcher.CurrentDisplayMode.BannerShown) {
+		if (ControlDispatcher.current_display_mode.BannerShown) {
 			BannerView.display();
 		}
 
-		if (ControlDispatcher.CurrentDisplayMode == DisplayMode.Edit) {
+		if (ControlDispatcher.current_display_mode == DisplayMode.EDIT) {
 			var edit_controller: EditController = EditController.getInstance();
 			if (edit_controller.LevelConfig) {
 				displayLevelConfig(edit_controller.LevelConfig);
@@ -3777,7 +3713,7 @@ class FrameBuilder //static
 		
 		HintPanelView.display();
 		
-		if (!ControlDispatcher.CurrentDisplayMode.IsSplashScreen) {
+		if (!ControlDispatcher.current_display_mode.IsSplashScreen) {
 			InfoPanelView.display(apAirport);
 			
 			displayFrameMargins();
@@ -3789,55 +3725,55 @@ class FrameBuilder //static
 		
 	}
 	
-	static public function center_in_frame(ARect: Rect): Rect
+	static center_in_frame(ARect: Rect): Rect
 	{
 		var rect_result = ARect.clone();
-		rect_result.Location.X = (FFrameRect.Extent.Width - rect_result.Extent.Width) / 2;
-		rect_result.Location.Y = (FFrameRect.Extent.Height - rect_result.Extent.Height) / 2;
+		rect_result.location.x = (FFrameRect.extent.width - rect_result.extent.width) / 2;
+		rect_result.location.y = (FFrameRect.extent.height - rect_result.extent.height) / 2;
 		return rect_result;
 	}
 
-	static public function convert_to_model_length(ALength: Number): Number 
+	static convert_to_model_length(ALength: Number): Number 
 	{
 		return ALength * FZoom;
 	}
 	
-	static public function convert_to_model_point(APoint: Point): Point
+	static convert_to_model_point(APoint: Point): Point
 	{
-		return new Point((APoint.X - FOrigin.X) * FZoom, (APoint.Y - FOrigin.Y - FInfoPanelRect.Extent.Height) * FZoom);
+		return new Point((APoint.x - FOrigin.x) * FZoom, (APoint.Y - FOrigin.Y - FInfoPanelRect.extent.height) * FZoom);
 	}
 	
-	static public function convert_to_model_rect(ARect: Rect): Rect
+	static convert_to_model_rect(ARect: Rect): Rect
 	{
-		return new Rect (convertToModelPoint(ARect.Location), convertToModelSize(ARect.Extent));
+		return new Rect (convertToModelPoint(ARect.location), convertToModelSize(ARect.extent));
 	}
 	
-	static public function convert_to_model_size(ASize: Size): Size 
+	static convert_to_model_size(ASize: Size): Size 
 	{
-		return new Size(convertToModelLength(ASize.Width), convertToModelLength(ASize.Height));
+		return new Size(convertToModelLength(ASize.width), convertToModelLength(ASize.height));
 	}
 	
-	static public function convert_to_screen_length(ALength: Number): Number
+	static convert_to_screen_length(ALength: Number): Number
 	{
 		return ALength / FZoom;
 	}
 	
-	static public function convert_to_screen_point(APoint: Point): Point
+	static convert_to_screen_point(APoint: Point): Point
 	{
-		return new Point(APoint.X / FZoom + FOrigin.X, APoint.Y / FZoom + FOrigin.Y + FInfoPanelRect.Extent.Height);
+		return new Point(APoint.x / FZoom + FOrigin.x, APoint.Y / FZoom + FOrigin.Y + FInfoPanelRect.extent.height);
 	}
 	
-	static public function convert_to_screen_rect(ARect: Rect): Rect 
+	static convert_to_screen_rect(ARect: Rect): Rect 
 	{
-		return new Rect (convertToScreenPoint(ARect.Location), convertToScreenSize(ARect.Extent));
+		return new Rect (convertToScreenPoint(ARect.location), convertToScreenSize(ARect.extent));
 	}
 	
-	static public function convert_to_screen_size(ASize: Size): Size
+	static convert_to_screen_size(ASize: Size): Size
 	{
-		return new Size(convertToScreenLength(ASize.Width), convertToScreenLength(ASize.Height));
+		return new Size(convertToScreenLength(ASize.width), convertToScreenLength(ASize.height));
 	}		
 				
-	static public function init(AnAirport: Airport)		
+	static init(AnAirport: Airport)		
 	{
 		apAirport = AnAirport;		
 
@@ -3845,20 +3781,20 @@ class FrameBuilder //static
 		apAirport.OnResized.addEventListener(CustomDispatcher.ON_RESIZED, Airport_OnResized);
 	}
 
-	static public function fit_to_frame(ARect: Rect): Rect
+	static fit_to_frame(ARect: Rect): Rect
 	{
 		var rect_result = ARect.clone();
-		var dbl_hor_scale = FFrameRect.Extent.Width / ARect.Extent.Width;    //10x50 / 500x100 //50
-		var dbl_ver_scale = FFrameRect.Extent.Height / ARect.Extent.Height;//2
+		var dbl_hor_scale = FFrameRect.extent.width / ARect.extent.width;    //10x50 / 500x100 //50
+		var dbl_ver_scale = FFrameRect.extent.height / ARect.extent.height;//2
 		var dbl_scale = Math.min(dbl_hor_scale, dbl_ver_scale);
-		rect_result.Extent.Width *= dbl_scale; 
-		rect_result.Extent.Height *= dbl_scale;			
+		rect_result.extent.width *= dbl_scale; 
+		rect_result.extent.height *= dbl_scale;			
 		
 		return centerInFrame(rect_result);
 	}
 //private methods
 
-	static private function #display_frame_margins()
+	static #display_frame_margins()
 	{
 		Profiler.checkin("margins");
 		for (var x = -1; x <= 1; x++)
@@ -3866,35 +3802,35 @@ class FrameBuilder //static
 				displayMargin(x, y);
 		
 		//рамка	
-		ScreenManager.displayImage(new BorderImage(), GameZoneRect);
+		ScreenManager.display_image(new BorderImage(), GameZoneRect);
 		Profiler.checkout("margins");
 	}
 
-	static private function #display_game_zone_background()
+	static #display_game_zone_background()
 	{
 		Profiler.checkin("background");
-		ScreenManager.displayImage(new GameZoneBgImage(), GameZoneRect);
+		ScreenManager.display_image(new GameZoneBgImage(), GameZoneRect);
 		Profiler.checkout("background");
 	}
 	
-	static private function #display_level_config(AConfig: XML)
+	static #display_level_config(AConfig: XML)
 	{
 		ScreenManager.displayText(AConfig.toString(), new Rect(new Point(20, 50), new Size(500, -1)), 
-			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_MEDIUM), Colors.White, true, true)		
+			FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_MEDIUM), Colors.White, true, true)		
 	}	
 
-	static private function #display_margin(AnX: int, AnY: int)
+	static #display_margin(AnX: int, AnY: int)
 	{
-		var dbl_margin_width = adaptToFrame(N_MARGIN_WIDTH);
-		var x: Number = AnX ? ((AnX < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.Extent.Width): 0;
-		var y: Number = AnY ? ((AnY < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.Extent.Height): 0;
-		var cx: Number = AnX ? dbl_margin_width : FrameBuilder.FrameRect.Extent.Width;
-		var cy: Number = AnY ? dbl_margin_width : FrameBuilder.FrameRect.Extent.Height;		
+		var dbl_margin_width = FrameBuilder.adapt_to_frame(N_MARGIN_WIDTH);
+		var x: Number = AnX ? ((AnX < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.width): 0;
+		var y: Number = AnY ? ((AnY < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.height): 0;
+		var cx: Number = AnX ? dbl_margin_width : FrameBuilder.FrameRect.extent.width;
+		var cy: Number = AnY ? dbl_margin_width : FrameBuilder.FrameRect.extent.height;		
 	
-		ScreenManager.displayImage(new MarginImage(), new Rect(new Point(x, y), new Size(cx, cy)));
+		ScreenManager.display_image(new MarginImage(), new Rect(new Point(x, y), new Size(cx, cy)));
 	}
 
-	static private function #display_performance_metrics() 
+	static #display_performance_metrics() 
 	{
 		nFrameCount++;
 		var dt: Date = new Date();
@@ -3925,42 +3861,42 @@ class FrameBuilder //static
 		+ "\n\t" + Profiler.getWatch("banner")
 		+ "\n" + Profiler.getWatch("Computing")
 		+ "\nDisplay objects: " + ScreenManager.DisplayObjectsCount;
-		ScreenManager.displayText(str_text, new Rect(new Point(50, 50), new Size(-1, -1)), FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL));
+		ScreenManager.displayText(str_text, new Rect(new Point(50, 50), new Size(-1, -1)), FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_SMALL));
 	}
 		
-	static private function #scale_scene()
+	static #scale_scene()
 	{
 		BeforeRescale.fireBeforeRescale();
 		
-		FZoom = apAirport.Extent.Width/GameZoneRect.Extent.Width;//after fix apAirport.CY / cyScreen == apAirport.CX / cxScreen
+		FZoom = apAirport.extent.width/GameZoneRect.extent.width;//after fix apAirport.CY / cyScreen == apAirport.CX / cxScreen
 		//1. 0 аэропорта совпадает с 0 экрана
-		//2. - apAirport.X/FZoom - сдвигаем 0 аэропорта чтобы 0 экрана совпал с левой границей аэропорта
+		//2. - apAirport.x/FZoom - сдвигаем 0 аэропорта чтобы 0 экрана совпал с левой границей аэропорта
 		//3. apAirport.CX/FZoom  - получаем размер аэропорта в экранном размере
 		//4. cxScreen -                    - получаем лишнее, свободное место экрана не занятое аэропортом
 		//5. /2.0                          - делим лишнее место, чтобы получить ширину поля слева (справа будет равное)
 		//6. +                             - сдвигаем аэропорт на ширину левого поля 
-		FOrigin.X = - apAirport.Location.X/FZoom + (GameZoneRect.Extent.Width - apAirport.Extent.Width/FZoom)/2.0;
-		FOrigin.Y = - apAirport.Location.Y/FZoom + (GameZoneRect.Extent.Height - apAirport.Extent.Height/FZoom)/2.0;		
+		FOrigin.x = - apAirport.location.x/FZoom + (GameZoneRect.extent.width - apAirport.extent.width/FZoom)/2.0;
+		FOrigin.Y = - apAirport.location.Y/FZoom + (GameZoneRect.extent.height - apAirport.extent.height/FZoom)/2.0;		
 	}
 
-	static private function #set_frame_dimensions(AFrameSize: Size)
+	static #set_frame_dimensions(AFrameSize: Size)
 	{
 		FFrameRect = new Rect(new Point(), ScreenManager.StageSize);	
 
-		if (FFrameRect.Extent.Width > FFrameRect.Extent.Height)
-			dblFrameAdaptationRatio = FFrameRect.Extent.Height / DBL_STANDARD_FRAME_HEIGHT;
+		if (FFrameRect.extent.width > FFrameRect.extent.height)
+			dblFrameAdaptationRatio = FFrameRect.extent.height / DBL_STANDARD_FRAME_HEIGHT;
 		else
-			dblFrameAdaptationRatio = FFrameRect.Extent.Width / DBL_STANDARD_FRAME_WIDTH;
+			dblFrameAdaptationRatio = FFrameRect.extent.width / DBL_STANDARD_FRAME_WIDTH;
 
-		FInfoPanelRect = new Rect(new Point(), new Size(FFrameRect.Extent.Width, adaptToFrame(CY_INFO_PANEL_HEIGHT)));		
+		FInfoPanelRect = new Rect(new Point(), new Size(FFrameRect.extent.width, FrameBuilder.adapt_to_frame(CY_INFO_PANEL_HEIGHT)));		
 		
 		var sz_game_zone: Size = ScreenManager.StageSize.clone();
-		sz_game_zone.Height -= FInfoPanelRect.Extent.Height;
-		FGameZoneRect = new Rect(new Point(0, FInfoPanelRect.Extent.Height), sz_game_zone);		
+		sz_game_zone.height -= FInfoPanelRect.extent.height;
+		FGameZoneRect = new Rect(new Point(0, FInfoPanelRect.extent.height), sz_game_zone);		
 	}
 
 	//event handlers	
-	static private function #airport_on_resized(AnEvent: Event):void 
+	static #airport_on_resized(event) //:void 
 	{
 		scaleScene();
 	}
@@ -3972,10 +3908,10 @@ function start()
 {
 		let ap_airport = new Airport();
 		console.log("Executed!!!");
-				<<=========== HERE
+<<<<<<<<<<<<<<<<======== Current place - level 1 ========
 		FrameBuilder.init(ap_airport);
 
-		ControlDispatcher.CurrentDisplayMode = DisplayMode.SplashScreen;
+		ControlDispatcher.current_display_mode = DisplayMode.SPLASH_SCREEN;
 		MenuController.getInstance();
 		ControlDispatcher.ActiveController = GameController.getInstance(ap_airport);
 		EditController.getInstance(ap_airport);
