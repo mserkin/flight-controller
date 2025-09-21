@@ -2981,6 +2981,86 @@ class GameProgress //static
 	}
 }
 
+///////////////////////////////////////////////////////////
+//  MenuController.as
+///////////////////////////////////////////////////////////
+
+class MenuController //implements IController //singleton
+{
+//private fields & consts
+	//property fields
+	thumbnail_models = []; // Vector.<Airport>;
+	static #controller_instance = []//: MenuController;
+	
+//properties
+	get thumbnail_models() //:Vector.<Airport>
+	{
+		return this.#thumbnail_models;
+	}
+
+//methods
+	//constructor
+	//private constructors not supported by actionscript
+	//use getInstance instead!	
+	constructor ()
+	{
+		this.#load_thumbnail_models();
+	}		
+
+//public methods
+	get_controller_type() //: int
+	{
+		return Controllers.MENU_CONTROLLER;
+	}	
+	
+	static get_instance() //: MenuController
+	{
+		if (!MenuController.#controller_instance)
+		{
+			MenuController.#controller_instance = new MenuController();
+		}
+		return MenuController.#controller_instance;
+	}
+		
+	process_dispatcher_event(event_type, param_obj=null)//: Boolean
+	{
+		switch (event_type)
+		{
+			case OutcomingDispatcherEventTypes.BACK_TO_BOXES:
+				ControlDispatcher.current_display_mode = DisplayMode.BOX_MENU;
+				return true;
+				
+			case OutcomingDispatcherEventTypes.BOX_OPEN:
+				if (!param_obj.IsBoxLocked)
+				{
+					ControlDispatcher.current_display_mode = DisplayMode.LEVEL_MENU; 
+					GameProgress.select_specified_level(param_obj.OpeningLevel);
+					return true;
+				}
+				break;											
+		}
+		
+		return false;
+	}
+	
+	run() //: void
+    {
+	}
+	
+//private methods
+	#load_thumbnail_models()
+	{
+		this.#thumbnail_models = [] //new Vector.<Airport>(GameProgress.N_LEVEL_COUNT, true);
+		for (let i = 1; i <= GameProgress.LEVEL_COUNT; i++)
+		{
+			let ap_model = new Airport(true);
+			this.#thumbnail_models[i-1] = ap_model;
+			//TODO: Loading level
+			//ap_model.load_level("levels/Level" + i.toString() + ".xml");		
+		}
+	}
+}
+
 
 ///////////////////////////////////////////////////////////
 //  MenuView.as
@@ -3136,93 +3216,98 @@ class MenuView
 		rect_thumbnail.extent.width *= (1 - 2*MenuView.#THUMBNAIL_MINIATURE_SPACING);
 		rect_thumbnail.extent.height *= (1 - 2*MenuView.#THUMBNAIL_MINIATURE_SPACING);
 		
-<<<<<<<<<<<<<<<<======== Current place - level 5 ========
 		if (is_box) {
 			//TODO: Parameterized sprite creation
-			var classSprite: Class = getDefinitionByName(STR_SPRITE_NAME1 + item_number + STR_SPRITE_NAME2) as Class;
-			var clip: Sprite = new classSprite();
-			ScreenManager.display_image(clip, rect_thumbnail);
+			//var classSprite: Class = getDefinitionByName(STR_SPRITE_NAME1 + item_number + STR_SPRITE_NAME2) as Class;
+			//var clip: Sprite = new classSprite();
+			//ScreenManager.display_image(clip, rect_thumbnail);
 		}	
 		else {
-			var airport: Airport = MenuController.getInstance().ThumbnailModels[item_number - 1];
-			var rg_model: Region = airport.getAirportModelRegion();
-			var dbl_zoom: Number = Math.max(rg_model.extent.width / rect_thumbnail.extent.width, 
+			let airport = MenuController.get_instance().thumbnail_models[item_number - 1];
+			var rg_model = airport.get_airport_model_region();
+			var dbl_zoom = Math.max(rg_model.extent.width / rect_thumbnail.extent.width, 
 				rg_model.extent.height / rect_thumbnail.extent.height);
 
-			for each (var airfield: IAirfield in airport.Airfields)	{
-				displayAirfield(airfield, rect_thumbnail, dbl_zoom, rg_model.location);
+			for (var airfield of airport.airfields)	{
+				MenuView.display_airfield(airfield, rect_thumbnail, dbl_zoom, rg_model.location);
 			}
 		}
 	}
 
-	static #getBoxByCoords(AnX: Number, AnY: Number): Object
+	static #get_box_by_coords(x, y) //: Object
 	{
 		var obj_level_params = MenuView.#get_menu_parameters(new Boolean(false));
 		var obj_result = {BoxNumber: -1, OpeningLevel: -1, IsBoxLocked: true};
-		var n_box_no: int = getMenuIconNumberByCoords(true, AnX, AnY);
-		if (n_box_no >= 0 && n_box_no < GameProgress.N_BOX_COUNT)
+		var n_box_no = MenuView.#get_menu_icon_number_by_coords(true, x, y);
+		if (n_box_no >= 0 && n_box_no < GameProgress.BOX_COUNT)
 		{
 			obj_result.BoxNumber = n_box_no;
-			obj_result.OpeningLevel = GameProgress.getFirstLevelForBox(n_box_no);
+			obj_result.OpeningLevel = GameProgress.get_first_level_for_box(n_box_no);
 			obj_result.IsBoxLocked = !GameProgress.IS_BOSS_MODE_ON && n_box_no > 0 && GameProgress.get_box_progress(n_box_no - 1) < 1;
 		}
 		return obj_result;
 	}
 
-	static #get_level_by_coords(AnX: Number, AnY: Number): int
+	static #get_level_by_coords(x, y) //: int
 	{
 		var obj_params = MenuView.#get_menu_parameters(new Boolean(false));
 
-		var n_icon_number = getMenuIconNumberByCoords(false, AnX, AnY);
-		var n_level_number = GameProgress.BoxFirstLevel + n_icon_number;
-		if (n_icon_number >= 0 && n_level_number <= GameProgress.BoxLastLevel)
+		var n_icon_number = MenuView.#get_menu_icon_number_by_coords(false, x, y);
+		var n_level_number = GameProgress.box_first_level + n_icon_number;
+		if (n_icon_number >= 0 && n_level_number <= GameProgress.box_last_level)
 			return n_level_number;
 		else
 			return -1;
 	}	
 	
-	static #getMenuIconNumberByCoords(IsBoxMenu: Boolean, AnX: Number, AnY: Number): int
+	static #get_menu_icon_number_by_coords(is_box_menu, x, y) //: int
 	{
-		var obj_params = MenuView.#get_menu_parameters(IsBoxMenu);
+		var obj_params = MenuView.#get_menu_parameters(is_box_menu);
 		
-		var n_row: int = Math.floor((AnY - FrameBuilder.InfoPanelRect.extent.height - obj_params.VerticalMargin)/(obj_params.IconHeight + obj_params.VerticalSpace));
-		if (AnY - FrameBuilder.InfoPanelRect.extent.height - obj_params.VerticalMargin - (obj_params.IconHeight + obj_params.VerticalSpace) * n_row > obj_params.IconHeight) return -1;
+		let n_row: int = Math.floor((y - FrameBuilder.info_panel_rect.extent.height - obj_params.VerticalMargin)/(obj_params.IconHeight + obj_params.VerticalSpace));
+		if (y - FrameBuilder.info_panel_rect.extent.height - obj_params.VerticalMargin - (obj_params.IconHeight + obj_params.VerticalSpace) * n_row > obj_params.IconHeight) 
+		{
+			return -1;
+		}
 			
-		var n_column: int = Math.floor((AnX - obj_params.HorizontalMargin)/(obj_params.IconWidth + obj_params.HorizontalSpace));
-		if (AnX - obj_params.HorizontalMargin - (obj_params.IconWidth + obj_params.HorizontalSpace) * n_column > obj_params.IconWidth) return -1;
+		let n_column = Math.floor((x - obj_params.HorizontalMargin)/(obj_params.IconWidth + obj_params.HorizontalSpace));
+		if (x - obj_params.HorizontalMargin - (obj_params.IconWidth + obj_params.HorizontalSpace) * n_column > obj_params.IconWidth) 
+		{
+			return -1;
+		}
 		
 		return n_row * obj_params.IconColumns + n_column;
 	}
 
-	static #get_menu_parameters(IsBoxMenu: Boolean)
+	static #get_menu_parameters(is_box_menu)
 	{
 		var obj_params: Object = {};		
-		if (IsBoxMenu) {
-			obj_params.IconColumns = N_BOX_MENU_COLUMNS;
-			obj_params.IconRows = N_BOX_MENU_ROWS;
+		if (is_box_menu) {
+			obj_params.IconColumns = MenuView.#BOX_MENU_COLUMNS;
+			obj_params.IconRows = MenuView.#BOX_MENU_ROWS;
 		}
 		else {
-			obj_params.IconColumns = N_LEVEL_MENU_COLUMNS;
-			obj_params.IconRows = N_LEVEL_MENU_ROWS;
+			obj_params.IconColumns = MenuView.#LEVEL_MENU_COLUMNS;
+			obj_params.IconRows = MenuView.#LEVEL_MENU_ROWS;
 		}		
-		obj_params.HorizontalMargin = DBL_HORIZONTAL_MARGIN*FrameBuilder.GameZoneRect.extent.width;
-		obj_params.VerticalMargin = DBL_VERTICAL_MARGIN*FrameBuilder.GameZoneRect.extent.height;
-		var cx_menu: Number = FrameBuilder.GameZoneRect.extent.width * (1 - DBL_HORIZONTAL_MARGIN * 2);
-		var cy_menu: Number = FrameBuilder.GameZoneRect.extent.height * (1 - DBL_VERTICAL_MARGIN * 2);
-		var cx_icon: Number =  cx_menu / ((DBL_SPACE_ICON_RATIO + 1)*(obj_params.IconColumns - 1) + 1);;
-		var cy_icon: Number =  cy_menu / ((DBL_SPACE_ICON_RATIO + 1)*(obj_params.IconRows - 1) + 1);		
+		obj_params.HorizontalMargin = MenuView.#HORIZONTAL_MARGIN*FrameBuilder.game_zone_rect.extent.width;
+		obj_params.VerticalMargin = MenuView.#VERTICAL_MARGIN*FrameBuilder.game_zone_rect.extent.height;
+		var cx_menu = FrameBuilder.game_zone_rect.extent.width * (1 - MenuView.#HORIZONTAL_MARGIN * 2);
+		var cy_menu = FrameBuilder.game_zone_rect.extent.height * (1 - MenuView.#VERTICAL_MARGIN * 2);
+		var cx_icon =  cx_menu / ((MenuView.#SPACE_ICON_RATIO + 1)*(obj_params.IconColumns - 1) + 1);;
+		var cy_icon =  cy_menu / ((MenuView.#SPACE_ICON_RATIO + 1)*(obj_params.IconRows - 1) + 1);		
 		if (cx_icon > cy_icon) {
 			obj_params.HorizontalSpace = (cx_menu - cy_icon*obj_params.IconColumns)/(obj_params.IconColumns - 1);
 			if (obj_params.HorizontalSpace > cy_icon) {
 				obj_params.HorizontalSpace = cy_icon;
 				obj_params.HorizontalMargin += (cx_menu - cy_icon*(obj_params.IconColumns*2 - 1))/2;
 			}
-			obj_params.VerticalSpace = cy_icon * DBL_SPACE_ICON_RATIO;
+			obj_params.VerticalSpace = cy_icon * MenuView.#SPACE_ICON_RATIO;
 			obj_params.IconWidth = cy_icon;
 			obj_params.IconHeight = cy_icon;
 		}
 		else {
-			obj_params.HorizontalSpace = cx_icon * DBL_SPACE_ICON_RATIO;
+			obj_params.HorizontalSpace = cx_icon * MenuView.#SPACE_ICON_RATIO;
 			obj_params.VerticalSpace = (cy_menu - cx_icon*obj_params.IconRows)/(obj_params.IconRows - 1);
 			if (obj_params.VerticalSpace > cx_icon) {
 				obj_params.VerticalSpace = cx_icon;
@@ -3236,11 +3321,609 @@ class MenuView
 }
 
 
-// MenuView -> ControlDispatcher -> Core -> MenuView
-// MenuView -> ControlDispatcher -> Core -> HintPanelView
-// MenuView -> ControlDispatcher -> Core -> InfoBannerView
-// MenuView -> ControlDispatcher -> Core -> BannerView
-// MenuView -> ControlDispatcher -> Core -> AirportView
+///////////////////////////////////////////////////////////
+//  HintPanelView.as
+///////////////////////////////////////////////////////////
+
+
+class HintPanelView //static
+{
+//public fields & consts		
+	//events
+	static on_hidden = new CustomDispatcher();
+	static on_hiding = new CustomDispatcher();
+	static on_shown = new CustomDispatcher();
+
+//private fields & consts
+	//private consts
+	static #CX_HINT_MARGIN = 0.1; //of hint window size
+	static #HINT_FONT_SIZE = 20;
+	static #SHOW_RATE: Number = 0.05;
+	static #FORCED_SHOW_PERIOD = 1;
+	static #HIDDEN_PERIOD = 4000;
+	static #SHOWN_PERIOD = 30000;
+	
+	//panel states in order of occurrence
+	static #STATE_HIDDEN = 0;
+	static #STATE_SHOWING = 1;
+	static #STATE_SHOWN = 2;
+	static #STATE_HIDING = 3;
+	
+	//property fields
+	static #clip_ids = [] //: Vector.<String> = new Vector.<String>();
+	static #hints = [] //: Vector.<String> = new Vector.<String>();
+
+	//other fields
+	static #shown_part = 0;
+	static #hint_to_show_index = 0;
+	static #state = HintPanelView.#STATE_HIDDEN;
+	static #target_rect = null;  
+	//TODO: Timer
+	static #hint_timer = null; // new Timer(100); 
+//properties
+	static get clip_ids () //: Vector.<String>
+	{
+		return HintPanelView.#clip_ids;
+	}
+
+	static get hints () //: Vector.<String>
+	{
+		return HintPanelView.#hints;
+	}
+
+	static get is_shown () //: Boolean
+	{
+		return HintPanelView.#state != HintPanelView.#STATE_HIDDEN;
+	}
+
+//public methods
+	static display()
+	{
+		Profiler.checkin("hint");
+		try
+		{
+			if (HintPanelView.#state == HintPanelView.#STATE_HIDDEN) return;
+			
+			//TODO: Creating and showing sprite
+			//var hp = new HintPanel();
+			//hp.HintTextField.text = HintPanelView.#hints[HintPanelView.#hint_to_show_index];
+			//hp.HintTextField.setTextFormat(new TextFormat("Arial", FrameBuilder.adaptToFrame(HintPanelView.#HINT_FONT_SIZE), Colors.White));
+			//ScreenManager.displayImage(hp, getHintPanelRect(), new Angle());
+
+			//TODO: Creating and showing sprite		
+			// var str_class_name = HintPanelView.#clip_ids[HintPanelView.#hint_to_show_index];
+			// if (str_class_name != "")
+			// {
+			// 	var classClip = getDefinitionByName(str_class_name) as Class;
+			// 	var clip = new classClip(); //: MovieClip
+			// 	var rect_panel = HintPanelView.#get_hint_panel_rect();
+				
+			// 	ScreenManager.display_image(
+			// 		clip, 
+			// 		new Rect(
+			// 			rect_panel.location.add(new Point(rect_panel.extent.width*HintPanelView.#CX_HINT_MARGIN, hp.AnimationPlaceholder.y)), 
+			// 			FrameBuilder.adapt_size_to_frame(new Size(hp.AnimationPlaceholder.width, hp.AnimationPlaceholder.height))
+			// 		), 
+			// 		new Angle()
+			// 	);
+			// }
+		}
+		finally
+		{
+			Profiler.checkout("hint");
+		}
+	}
+
+	//GameController use it on display mode change
+	static hide(is_forced_hide=false)
+	{
+		switch(HintPanelView.#state)
+		{
+			case HintPanelView.#STATE_HIDDEN:
+			case HintPanelView.#STATE_HIDING:
+				return;
+			default: 
+				HintPanelView.#state = HintPanelView.#STATE_SHOWN;
+				HintPanelView.#control_state();
+		}
+	}
+
+	static process_event(event) //: Boolean
+	{
+		//TODO: Event processing
+		// if (event is MouseEvent && event.type == MouseEvent.CLICK)
+		// {
+		// 	let mouse_event = MouseEvent(event);
+		// 	let point = new Point(mouse_event.stageX, mouse_event.stageY);
+		// 	if (HintPanelView.is_shown && HintPanelView.#is_inside(point))
+		// 	{
+		// 		HintPanelView.hide();
+		// 		return true;
+		// 	}
+		// }
+		//else if (event.type == Core.DISPLAY_MODE_CHANGE)
+			// {
+			// 	if(ControlDispatcher.current_display_mode != DisplayMode.PLAY) {
+			// 		HintPanelView.reset();				
+			// 	}
+			// }
+
+		return false;
+	}	
+
+	static reset()
+	{
+		HintPanelView.#hints.length = [];
+		HintPanelView.#clip_ids = [];
+		HintPanelView.#hint_to_show_index = 0;
+		HintPanelView.#shown_part = 0;
+		HintPanelView.#state = HintPanelView.#STATE_HIDING;
+		HintPanelView.#control_state();
+	}
+	
+	static show(is_forces_show=false)
+	{
+		if (HintPanelView.#state != HintPanelView.#STATE_HIDDEN) return false;
+		if (!is_forces_show || HintPanelView.#hint_to_show_index >= HintPanelView.#hints.length) HintPanelView.#hint_to_show_index = 0;
+		
+		HintPanelView.#target_rect = FrameBuilder.frame_rect.clone();
+		HintPanelView.#target_rect.extent.height /= 2;
+		HintPanelView.#target_rect.location.y = HintPanelView.#target_rect.extent.height;
+		
+		//TODO: Timer
+		// HintPanelView.#hint_timer.addEventListener(TimerEvent.TIMER, HintPanelView.#on_timer);
+		// HintPanelView.#hint_timer.delay = is_forces_show ? HintPanelView.#FORCED_SHOW_PERIOD : HintPanelView.#HIDDEN_PERIOD;
+		// HintPanelView.#hint_timer.start();
+		
+		return true;
+	}
+
+//private methods
+	static #control_state()
+	{
+		switch (HintPanelView.#state)
+		{
+			case HintPanelView.#STATE_HIDDEN:
+				if (HintPanelView.#hint_to_show_index < HintPanelView.#hints.length)
+				{
+					HintPanelView.#state = HintPanelView.#STATE_SHOWING;
+					HintPanelView.#hint_timer.delay = 1000 / Core.FRAME_RATE;
+				}
+				//TODO: Timer
+				//else
+					//HintPanelView.#hint_timer.stop();
+				return;
+			case HintPanelView.#STATE_SHOWING:
+				HintPanelView.#shown_part += HintPanelView.#SHOW_RATE;
+				if (HintPanelView.#shown_part >= 1)
+				{
+					HintPanelView.#shown_part = 1;
+					HintPanelView.#state = HintPanelView.#STATE_SHOWN;
+					HintPanelView.#hint_timer.delay = HintPanelView.#SHOWN_PERIOD;
+					//TODO: firing event
+					//HintPanelView.on_shown.fireOnShown();
+				}
+				break;
+			case HintPanelView.#STATE_SHOWN:
+				HintPanelView.#state = HintPanelView.#STATE_HIDING;
+				//TODO: Timer 
+				//HintPanelView.#hint_timer.delay = 1000 / Core.N_FRAME_RATE;
+				//TODO: firing event
+				//HintPanelView.on_hiding.fireOnHiding();
+				break;
+			case HintPanelView.#STATE_HIDING:
+				HintPanelView.#shown_part -= HintPanelView.#SHOW_RATE;
+				if (HintPanelView.#shown_part <= 0)
+				{
+					HintPanelView.#shown_part = 0;
+					HintPanelView.#state = HintPanelView.#STATE_HIDDEN;
+					HintPanelView.#hint_to_show_index++;
+					HintPanelView.#hint_timer.delay = HintPanelView.#HIDDEN_PERIOD;
+					//TODO: firing event
+					//HintPanelView.on_hidden.fireOnHidden();
+				}
+				break;
+		}
+	}
+	
+	static #get_hint_panel_rect() //: Rect
+	{
+		var dbl_frame_bottom = FrameBuilder.frame_rect.extent.height;
+		var rect = HintPanelView.#target_rect.clone();
+		rect.location.y = dbl_frame_bottom - (dbl_frame_bottom - rect.location.y) * HintPanelView.#shown_part;
+		
+		return rect;
+	}
+	
+	static #is_inside(location) //: Boolean
+	{
+		let rect = HintPanelView.#get_hint_panel_rect();
+		return rect.is_inside(location);
+	}
+	
+	//event handlers
+	static #on_timer(event) 
+	{
+		HintPanelView.#control_state();
+	}
+}
+
+
+///////////////////////////////////////////////////////////
+//  InfoPanelView.as
+///////////////////////////////////////////////////////////
+
+class InfoPanelView //static
+{
+	//зависимые константы - порядок важен
+	static #WIND_ARROW_HEIGHT = InfoPanelView.#WIND_INDICATOR_LENGTH*0.6;  
+	static #WIND_ARROW_WIDTH = DBL_WIND_ARROW_HEIGHT
+	static #WIND_INDICATOR_LENGTH = 20;
+	static #WIND_INDICATOR_SIZE = new Size(InfoPanelView.#WIND_INDICATOR_LENGTH, InfoPanelView.#WIND_INDICATOR_LENGTH);
+	
+	//event handling 
+	static #TO_HANDLE_CLICK = 1;
+	static #TO_HANDLE_PAINT = 2;
+	static #TO_HANDLE_TOGGLE = 4;
+
+	//toolbar item indices
+	static #BUTTON_INDEX_LEVEL_NUMBER = 0;
+	static #BUTTON_INDEX_WIND_INDICATOR = 1;
+	static #BUTTON_INDEX_PROGRESS = 2;
+	static #BUTTON_INDEX_POINTS = 3;
+	static #BUTTON_INDEX_FAST_PLAY = 4;
+	static #BUTTON_INDEX_PAUSE_PLAY = 5;
+	static #BUTTON_INDEX_RESTART = 6;
+	static #BUTTON_INDEX_HINT = 7;
+	static #BUTTON_INDEX_BACK_TO_MENU = 8;
+	static #BUTTON_INDEX_INFO = 9;		
+	
+	//in order of depedance
+	static #play_only = DisplayMode.PLAY.value;
+	static #DISPLAY_MODES = [
+		InfoPanelView.#play_only, 
+		InfoPanelView.#play_only, 
+		InfoPanelView.#play_only, 
+		InfoPanelView.#play_only, 
+		InfoPanelView.#play_only,
+		InfoPanelView.#play_only, 
+		InfoPanelView.#play_only, 
+		InfoPanelView.#play_only, 
+		DisplayMode.PLAY.value | DisplayMode.LEVEL_MENU.value, 
+		DisplayMode.BOX_MENU.value);
+	static #TOOLBAR_ITEMS_NUMBER = 10;
+	static #ITEMS = [];
+	static #BUTTON_SIZE = new Size(20, 20);
+	static #LEVEL_NUMBER_LABEL_SIZE = new Size(70, 20);
+	static #POINTS_LABEL_SIZE = new Size(120, 20);
+	static #PROGRESS_INDICATOR_SIZE = new Size(60, 20);
+	static #SIZES = [
+		InfoPanelView.#LEVEL_NUMBER_LABEL_SIZE, 
+		InfoPanelView.#WIND_INDICATOR_SIZE, 
+		InfoPanelView.#PROGRESS_INDICATOR_SIZE,
+		InfoPanelView.#POINTS_LABEL_SIZE, 
+		InfoPanelView.#BUTTON_SIZE, 
+		InfoPanelView.#BUTTON_SIZE, 
+		InfoPanelView.#BUTTON_SIZE, 
+		InfoPanelView.#BUTTON_SIZE, 
+		InfoPanelView.#BUTTON_SIZE, 
+		InfoPanelView.#BUTTON_SIZE];
+	
+	//other toolbar items' properties
+	static #GRAVITY_VALUES = [Number.MAX_SAFE_INTEGER, 
+		0, 
+		0, 
+		Number.MIN_SAFE_INTEGER, 
+		Number.MAX_SAFE_INTEGER, 
+		Number.MAX_SAFE_INTEGER - 1, 
+		0, 
+		Number.MIN_SAFE_INTEGER + 1, 
+		Number.MIN_SAFE_INTEGER, 
+		0];
+	static #HANDLED_EVENTS = [
+		InfoPanelView.#TO_HANDLE_PAINT, 
+		InfoPanelView.#TO_HANDLE_PAINT, 
+		InfoPanelView.#TO_HANDLE_PAINT, 
+		InfoPanelView.#TO_HANDLE_PAINT, 
+		InfoPanelView.#TO_HANDLE_TOGGLE, 
+		InfoPanelView.#TO_HANDLE_TOGGLE, 
+		InfoPanelView.#TO_HANDLE_CLICK, 
+		InfoPanelView.#TO_HANDLE_CLICK, 
+		InfoPanelView.#TO_HANDLE_CLICK, 
+		InfoPanelView.#TO_HANDLE_CLICK];
+	static #ITEMS_ALIGNMENT = [
+		ToolBar.ALIGNMENT_LEFT, 
+		ToolBar.ALIGNMENT_CENTER,
+		ToolBar.ALIGNMENT_LEFT, 
+		ToolBar.ALIGNMENT_LEFT, 
+		ToolBar.ALIGNMENT_RIGHT, 
+		ToolBar.ALIGNMENT_RIGHT, 
+		ToolBar.ALIGNMENT_RIGHT, 
+		ToolBar.ALIGNMENT_RIGHT, 
+		ToolBar.ALIGNMENT_RIGHT, 
+		ToolBar.ALIGNMENT_RIGHT];
+	//TODO: Image creation
+	static #NORMAL_IMAGES = [
+		null, 
+		null, 
+		null, 
+		null, 
+		null, //new ButtonNormalFastImage(), 
+		null, //new ButtonNormalPauseImage(), 
+		null, //new ButtonNormalRestartLevelImage(), 
+		null, //new ButtonNormalHintImage(), 
+		null, //new ButtonNormalBackToMenuImage(), 
+		null, //new ButtonNormalInfoImage()
+	];
+	static #PRESSED_IMAGES = [
+		null, 
+		null, 
+		null, 
+		null, 
+		null, //new ButtonPressedFastImage(),
+		null, //new ButtonPressedPauseImage(), 
+		null, //new ButtonPressedRestartLevelImage(), 
+		null, //new ButtonPressedHintImage(), 
+		null, //new ButtonPressedBackToMenuImage(),
+		null, //new ButtonPressedInfoImage()
+	];
+	
+	//остальные константы
+	static #CY_OP_PADDING = 2.0; //вертикальные поля 
+	static #TOOLBAR_HORIZONTAL_MARGIN = 0.01; //of toolbar width
+	static #TOOLBAR_VERTICAL_MARGIN = 0.05; //of toolbar height 
+
+	static #Y_TITLE_LEVEL_NUMBER = 0;
+	static #Y_TITLE_POINTS_NUMBER = 0;
+
+	//other fields
+	static #airport = null;
+	static #last_display_mode = null;	
+	static #tool_bar = null;
+
+//public methods
+	static public function display(AnAirport: Airport) 
+	{
+<<<<<<<<<<<<<<<<======== Current place - level 5 ========
+		InfoPanelView.#airport = AnAirport;
+			
+		//панель
+		ScreenManager.displayImage(new InfoPanelImage(), 
+			FrameBuilder.InfoPanelRect, new Angle());
+		
+		displayToolBar();
+	}	
+
+	static public function processEvent(AnEvent: Event): Boolean
+	{
+		if (AnEvent.type == Core.DISPLAY_MODE_CHANGE)
+		{
+			uncheckButton(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_FAST_PLAY]);
+			uncheckButton(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_PAUSE_PLAY]);
+		}
+		
+		if (!InfoPanelView.#tool_bar) return false;
+		return InfoPanelView.#tool_bar.processEvent(AnEvent);
+	}
+
+//private methods
+	static private function addButtons()
+	{
+		for (var i: int = 0; i < InfoPanelView.#TOOLBAR_ITEMS_NUMBER; i++)
+		{
+			if ((ControlDispatcher.CurrentDisplayMode.Id & InfoPanelView.#DISPLAY_MODES[i]) == 0) continue;
+			InfoPanelView.#ITEMS[i] = addToolBarItem(
+				InfoPanelView.#ITEMS[i], 
+				InfoPanelView.#SIZES[i], 
+				InfoPanelView.#HANDLED_EVENTS[i], 
+				InfoPanelView.#ITEMS_ALIGNMENT[i], 
+				InfoPanelView.#GRAVITY_VALUES[i], 
+				InfoPanelView.#NORMAL_IMAGES[i], 
+				InfoPanelView.#PRESSED_IMAGES[i]);
+		}
+	
+		if (HintPanelView.Hints.length == 0) InfoPanelView.#tool_bar.removeItem(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT]);
+	}
+
+	static private function addToolBarItem(AToolBarItem: ToolBarItem, ASize: Size, 
+		AHandledEvents: int = InfoPanelView.#TO_HANDLE_CLICK, AnAlignment: int = 0, AGravity: Number = 0,
+		ANormalImage: Sprite = null, APressedImage: Sprite = null): ToolBarItem
+	{
+		if (!AToolBarItem) {
+			if ((AHandledEvents & InfoPanelView.#TO_HANDLE_TOGGLE) != 0) {
+				var tbtb: ToolBarToggleButton;
+				tbtb = new ToolBarToggleButton(ASize.clone(), AnAlignment, AGravity, ANormalImage, APressedImage);
+				tbtb.OnToggle.addEventListener(ToolBarEventDispatcher.ON_TOGGLE, toolBarToggleButton_OnToggle);
+				AToolBarItem = tbtb;
+			}
+			else {
+				AToolBarItem = new ToolBarItem(ASize.clone(), AnAlignment, AGravity, ANormalImage, APressedImage);
+			}
+			
+			if ((AHandledEvents & InfoPanelView.#TO_HANDLE_CLICK) != 0)
+				AToolBarItem.OnClick.addEventListener(ToolBarEventDispatcher.ON_CLICK, toolBarItem_OnClick);					
+
+			if ((AHandledEvents & InfoPanelView.#TO_HANDLE_PAINT) != 0)
+				AToolBarItem.OnPaint.addEventListener(ToolBarEventDispatcher.ON_PAINT, toolBarItem_OnPaint);													
+		}
+		InfoPanelView.#tool_bar.addItem(AToolBarItem);
+		return AToolBarItem;
+	}
+	
+	static private function controlButtonsState()
+	{
+		if (ControlDispatcher.CurrentDisplayMode != DisplayMode.Play) return;
+
+		InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT].Pressed = HintPanelView.IsShown;
+	}
+
+	static private function createToolBar()
+	{	
+		var rect_info_panel: Rect = FrameBuilder.InfoPanelRect;
+		var pnt_margins: Point = new Point(rect_info_panel.Extent.Width*InfoPanelView.#TOOLBAR_HORIZONTAL_MARGIN, 
+			rect_info_panel.Extent.Height*InfoPanelView.#TOOLBAR_VERTICAL_MARGIN);
+		var sz_tool_bar = new Size(rect_info_panel.Extent.Width - pnt_margins.X*2,
+			rect_info_panel.Extent.Height - pnt_margins.Y*2);
+		
+		InfoPanelView.#tool_bar = new ToolBar(
+			rect_info_panel.Location.add(pnt_margins), 
+			sz_tool_bar
+		);
+	}		
+
+	static private function displayLevelNumber(ADisplayRect: Rect)
+	{
+		ADisplayRect.Location.Y = ADisplayRect.Location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_LEVEL_NUMBER);
+		ADisplayRect.Extent = new Size(-1, -1);
+		ScreenManager.displayText("Level " + GameProgress.Level.toString(), ADisplayRect,
+			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL), Colors.Brown);
+	}	
+
+	static private function displayPoints(ADisplayRect: Rect)
+	{
+		ADisplayRect.Location.Y = ADisplayRect.Location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_POINTS_NUMBER);
+		ADisplayRect.Extent = new Size(-1, -1);
+		ScreenManager.displayText("Points: " + GameProgress.Points.toString(), ADisplayRect,
+			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL), Colors.Brown);	
+	}
+
+	static private function displayProgressWidget(ADisplayRect: Rect)
+	{
+		//звездочки
+		var sp_progress: Sprite = new ProgressImage();
+//		var cy_padding: Number = FrameBuilder.adaptToFrame(InfoPanelView.#CY_OP_PADDING);
+		ADisplayRect.Location.Y = ADisplayRect.Location.Y /*+ cy_padding*/ + ADisplayRect.Extent.Height / 2;
+//		ADisplayRect.Extent.Height = ADisplayRect.Extent.Height - cy_padding*2;
+		var dbl_zoom: Number = ADisplayRect.Extent.Height / sp_progress.height;
+		ADisplayRect.Extent.Width = sp_progress.width * dbl_zoom;
+
+		//заполнитель
+		var rect_filler: Rect = ADisplayRect.clone();
+		var sp_filler: Sprite = new ProgressFillerImage();
+		var gc: GameController = GameController.getInstance();
+		rect_filler.Extent.Width = sp_filler.width * dbl_zoom * gc.LandingsDone / gc.LandingsToDo;
+
+		ScreenManager.displayImage(sp_filler, rect_filler);
+		ScreenManager.displayImage(sp_progress, ADisplayRect);
+	}
+
+	static private function displayToolBar()
+	{
+		var dm_current_mode: DisplayMode = ControlDispatcher.CurrentDisplayMode;
+		if (dm_current_mode != InfoPanelView.#last_display_mode) {
+			InfoPanelView.#last_display_mode = dm_current_mode;
+			if (!InfoPanelView.#tool_bar) createToolBar();
+			InfoPanelView.#tool_bar.removeAllItems();
+
+			if (ControlDispatcher.CurrentDisplayMode.AirportShown && ControlDispatcher.CurrentDisplayMode != DisplayMode.Edit
+				|| ControlDispatcher.CurrentDisplayMode == DisplayMode.LevelMenu
+				|| ControlDispatcher.CurrentDisplayMode == DisplayMode.BoxMenu)
+			{
+				addButtons();
+			}
+		}
+		controlButtonsState();
+		InfoPanelView.#tool_bar.display();
+	}	
+
+	static private function displayWindIndicatorWidget(ADisplayRect: Rect)
+	{
+		var sp_frame: Sprite = new WindIndicatorFrameImage();
+		var sp_arrow: Sprite = new WindIndicatorArrowImage();
+		var sp_filler: Sprite = new WindIndicatorFillerImage();
+
+		ADisplayRect.Location.X = ADisplayRect.Location.X + ADisplayRect.Extent.Width/2;
+		ADisplayRect.Location.Y = ADisplayRect.Location.Y + ADisplayRect.Extent.Height/2;
+		//displaying frame
+		//var dbl_wind_indi_size: Number = FrameBuilder.adaptToFrame(InfoPanelView.#WIND_INDICATOR_LENGTH);
+		var dbl_zoom: Number = ADisplayRect.Extent.Height / InfoPanelView.#WIND_INDICATOR_LENGTH;
+		
+		ScreenManager.displayImage(sp_frame, ADisplayRect);
+
+		//dispalying wind arrow
+		var cy_arrow = DBL_WIND_ARROW_HEIGHT * dbl_zoom;
+
+		ADisplayRect.Extent.Height = cy_arrow; //* ratio
+		ADisplayRect.Extent.Width = InfoPanelView.#WIND_ARROW_WIDTH * dbl_zoom; //* ratio
+		ADisplayRect.Location.X -= cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.sin();
+		ADisplayRect.Location.Y += cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.cos();
+		ScreenManager.displayImage(sp_arrow, ADisplayRect, InfoPanelView.#airport.CurrentWind.Direction);
+
+		//displaying undispaled sector :)
+		var ratio: Number =  (InfoPanelView.#airport.CurrentWind.DBL_MAX_WIND_SPEED - InfoPanelView.#airport.CurrentWind.Speed)
+			/InfoPanelView.#airport.CurrentWind.DBL_MAX_WIND_SPEED;
+		ADisplayRect.Extent.Height = (cy_arrow - 1) * ratio;
+		ADisplayRect.Extent.Width = (InfoPanelView.#WIND_ARROW_WIDTH - FrameBuilder.adaptToFrame(2))*dbl_zoom;
+		ScreenManager.displayImage(sp_filler, ADisplayRect, InfoPanelView.#airport.CurrentWind.Direction);
+	}
+
+//event handlers
+	static private function toolBarItem_OnClick(AnEvent: ObjectEvent): void
+	{
+		var tbi_source: ToolBarItem = ToolBarItem(AnEvent.SourceObject);
+		switch (tbi_source)
+		{
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_BACK_TO_MENU]:
+				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_INFO_PANEL_MENU_CLICK);
+			break;
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT]:
+				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_INFO_PANEL_HINT_CLICK);
+			break;
+
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_INFO]:
+				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_INFO_PANEL_INFO_CLICK);
+			break;
+
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_RESTART]:
+				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_INFO_PANEL_RESTART_CLICK);
+			break;
+		}
+	}
+
+	static private function toolBarItem_OnPaint(AnEvent: ObjectEvent): void
+	{
+		var tbi_source: ToolBarItem = ToolBarItem(AnEvent.SourceObject);
+		var rect_tbi: Rect = tbi_source.clone();
+		rect_tbi.Location = rect_tbi.Location.add(InfoPanelView.#tool_bar.Location);
+		switch (tbi_source)
+		{
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_LEVEL_NUMBER]:
+				displayLevelNumber(rect_tbi);
+			break;
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_POINTS]:
+				displayPoints(rect_tbi);
+			break;
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_PROGRESS]:
+				displayProgressWidget(rect_tbi);
+			break;
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_WIND_INDICATOR]:
+				displayWindIndicatorWidget(rect_tbi);
+			break;
+		}
+	}
+
+	static private function toolBarToggleButton_OnToggle(AnEvent: ObjectEvent): void
+	{
+		var tbtb_source: ToolBarToggleButton = ToolBarToggleButton(AnEvent.SourceObject);
+		switch(tbtb_source) {
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_FAST_PLAY]:
+				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_INFO_PANEL_FAST_SIM_CLICK, 
+					{FastMode: tbtb_source.Checked});
+			break;	
+			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_PAUSE_PLAY]:
+				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_INFO_PANEL_PAUSE_SIM_CLICK,
+					{PauseMode: tbtb_source.Checked});
+			break;			
+		}
+	}
+	
+	static private function uncheckButton(obj_button: Object)
+	{
+		if (!obj_button) return;
+		var tbtb: ToolBarToggleButton = ToolBarToggleButton(obj_button);
+		tbtb.Checked = false;
+	}
+}
 
 
 ///////////////////////////////////////////////////////////
@@ -3258,9 +3941,9 @@ class Core //static
 //methods
 	static dispatch_event(event)
 	{
-<<<<<<<<<<<<<<<<======== Current place - level 4 ========
 		if (!MenuView.process_event(event))
 			if (!HintPanelView.process_event(event))
+<<<<<<<<<<<<<<<<======== Current place - level 4 ========
 				if (!InfoPanelView.process_event(event))
 					if (!BannerView.process_event(event))
 						AirportView.process_event(event);
@@ -3282,7 +3965,7 @@ class Core //static
 		Core.suspend();
 		
 		//TODO: Bind timer listener (and start)
-		//timerMain.addEventListener(TimerEvent.TIMER, Timer_OnTimer);
+		//timerMain.addEventListener(TimerEvent.TIMER, Core.#on_timer);
 
 		//TODO: Bind stage listeners
 
@@ -3344,7 +4027,7 @@ class Core //static
 		Core.dispatch_event(event);
 	}
 			
-	static #timer_on_timer(event) 
+	static #on_timer(event) 
 	{
 		createFrame();
 		
@@ -3396,16 +4079,16 @@ class ControlDispatcher //static
 
 //methods
 	//public methods
-	static dispatch_view_event(AType: int, AParamObj: Object = null): Boolean
+	static dispatch_view_event(event_type: int, param_obj: Object = null): Boolean
 	{
-		switch (AType)
+		switch (event_type)
 		{
 			case IncomingDispatcherEventTypes.AIRPORT_DOUBLE_CLICK:
-				return FActiveController.processDispatcherEvent(N_OBJECT_ACTIVATE, AParamObj);
+				return FActiveController.processDispatcherEvent(N_OBJECT_ACTIVATE, param_obj);
 				
 			case IncomingDispatcherEventTypes.AIRPORT_MOUSE_DOWN:
 				if (ControlDispatcher.current_display_mode.AirportShown)
-					return FActiveController.processDispatcherEvent(N_OBJECT_SELECT, AParamObj);
+					return FActiveController.processDispatcherEvent(N_OBJECT_SELECT, param_obj);
 				else
 				{
 					nTitlePause = 0;
@@ -3416,22 +4099,22 @@ class ControlDispatcher //static
 			case IncomingDispatcherEventTypes.AIRPORT_MOUSE_MOVE:
 				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
-					return GameController.getInstance().processDispatcherEvent(N_PATH_CONTINUE, AParamObj);
+					return GameController.getInstance().processDispatcherEvent(N_PATH_CONTINUE, param_obj);
 				}
 				break;
 
 			case IncomingDispatcherEventTypes.AIRPORT_MOUSE_UP:
 				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
-					return FActiveController.processDispatcherEvent(N_PATH_FINISH, AParamObj);
+					return FActiveController.processDispatcherEvent(N_PATH_FINISH, param_obj);
 				}
 				break;
 
 			case IncomingDispatcherEventTypes.AIRPORT_KEY_PRESSED:
-				if (AParamObj.KeyCode == Keys.I)
+				if (param_obj.KeyCode == Keys.I)
 					return FActiveController.processDispatcherEvent(N_OBJECT_INFO);
 				else
-					return FActiveController.processDispatcherEvent(N_KEY_PRESSED, AParamObj);
+					return FActiveController.processDispatcherEvent(N_KEY_PRESSED, param_obj);
 				break;
 
 			case IncomingDispatcherEventTypes.BANNER_BACK_CLICK:
@@ -3481,7 +4164,7 @@ class ControlDispatcher //static
 			case IncomingDispatcherEventTypes.INFO_PANEL_FAST_SIM_CLICK:	
 				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
-					return FActiveController.processDispatcherEvent(N_FAST_SIMULATION, AParamObj);
+					return FActiveController.processDispatcherEvent(N_FAST_SIMULATION, param_obj);
 				}
 				break;
 
@@ -3499,7 +4182,7 @@ class ControlDispatcher //static
 			case IncomingDispatcherEventTypes.INFO_PANEL_PAUSE_SIM_CLICK:	
 				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
-					return FActiveController.processDispatcherEvent(N_PAUSE_SIMULATION, AParamObj);
+					return FActiveController.processDispatcherEvent(N_PAUSE_SIMULATION, param_obj);
 				}
 				break;
 
@@ -3512,12 +4195,12 @@ class ControlDispatcher //static
 				break;
 				
 			case IncomingDispatcherEventTypes.MENU_BOX_SELECT:
-				return FActiveController.processDispatcherEvent(N_BOX_OPEN, AParamObj);
+				return FActiveController.processDispatcherEvent(N_BOX_OPEN, param_obj);
 				
 			case IncomingDispatcherEventTypes.MENU_LEVEL_SELECT:	
-				if (AParamObj.LevelNumber > 0)
+				if (param_obj.LevelNumber > 0)
 				{
-					GameProgress.selectSpecifiedLevel(AParamObj.LevelNumber);
+					GameProgress.selectSpecifiedLevel(param_obj.LevelNumber);
 					FActiveController = GameController.getInstance();
 					return FActiveController.processDispatcherEvent(N_START_LEVEL);
 				}
@@ -3533,7 +4216,7 @@ class ControlDispatcher //static
 	}
 
 //private methods
-	static #controlDisplayMode()
+	static #control_display_mode()
 	{
 		if (--nTitlePause <= 0)
 		{
@@ -3635,7 +4318,7 @@ class FrameBuilder //static
 	}
 	
 	//Прямоугольник игровой области в единицах сцены Flash без величины панели
-	//Задается как: FrameRect - InfoPanelRect
+	//Задается как: FrameRect - info_panel_rect
 	//Не изменяется ли динамически 
 	//Всегда равен FrameRect за вычетом панели
 	//Используется в:
@@ -3740,7 +4423,7 @@ class FrameBuilder //static
 	
 	static convert_to_model_point(APoint: Point): Point
 	{
-		return new Point((APoint.x - FOrigin.x) * FZoom, (APoint.Y - FOrigin.Y - FInfoPanelRect.extent.height) * FZoom);
+		return new Point((APoint.x - FOrigin.x) * FZoom, (APoint.Y - FOrigin.Y - FrameBuilder.#info_panel_rect.extent.height) * FZoom);
 	}
 	
 	static convert_to_model_rect(ARect: Rect): Rect
@@ -3760,7 +4443,7 @@ class FrameBuilder //static
 	
 	static convert_to_screen_point(APoint: Point): Point
 	{
-		return new Point(APoint.x / FZoom + FOrigin.x, APoint.Y / FZoom + FOrigin.Y + FInfoPanelRect.extent.height);
+		return new Point(APoint.x / FZoom + FOrigin.x, APoint.Y / FZoom + FOrigin.Y + FrameBuilder.#info_panel_rect.extent.height);
 	}
 	
 	static convert_to_screen_rect(ARect: Rect): Rect 
@@ -3802,14 +4485,14 @@ class FrameBuilder //static
 				displayMargin(x, y);
 		
 		//рамка	
-		ScreenManager.display_image(new BorderImage(), GameZoneRect);
+		ScreenManager.display_image(new BorderImage(), this.#game_zone_rect);
 		Profiler.checkout("margins");
 	}
 
 	static #display_game_zone_background()
 	{
 		Profiler.checkin("background");
-		ScreenManager.display_image(new GameZoneBgImage(), GameZoneRect);
+		ScreenManager.display_image(new GameZoneBgImage(), this.#game_zone_rect);
 		Profiler.checkout("background");
 	}
 	
@@ -3819,13 +4502,13 @@ class FrameBuilder //static
 			FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_MEDIUM), Colors.White, true, true)		
 	}	
 
-	static #display_margin(AnX: int, AnY: int)
+	static #display_margin(x: int, y: int)
 	{
 		var dbl_margin_width = FrameBuilder.adapt_to_frame(N_MARGIN_WIDTH);
-		var x: Number = AnX ? ((AnX < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.width): 0;
-		var y: Number = AnY ? ((AnY < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.height): 0;
-		var cx: Number = AnX ? dbl_margin_width : FrameBuilder.FrameRect.extent.width;
-		var cy: Number = AnY ? dbl_margin_width : FrameBuilder.FrameRect.extent.height;		
+		var x: Number = x ? ((x < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.width): 0;
+		var y: Number = y ? ((y < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.height): 0;
+		var cx: Number = x ? dbl_margin_width : FrameBuilder.FrameRect.extent.width;
+		var cy: Number = y ? dbl_margin_width : FrameBuilder.FrameRect.extent.height;		
 	
 		ScreenManager.display_image(new MarginImage(), new Rect(new Point(x, y), new Size(cx, cy)));
 	}
@@ -3868,15 +4551,15 @@ class FrameBuilder //static
 	{
 		BeforeRescale.fireBeforeRescale();
 		
-		FZoom = apAirport.extent.width/GameZoneRect.extent.width;//after fix apAirport.CY / cyScreen == apAirport.CX / cxScreen
+		FZoom = apAirport.extent.width/this.#game_zone_rect.extent.width;//after fix apAirport.CY / cyScreen == apAirport.CX / cxScreen
 		//1. 0 аэропорта совпадает с 0 экрана
 		//2. - apAirport.x/FZoom - сдвигаем 0 аэропорта чтобы 0 экрана совпал с левой границей аэропорта
 		//3. apAirport.CX/FZoom  - получаем размер аэропорта в экранном размере
 		//4. cxScreen -                    - получаем лишнее, свободное место экрана не занятое аэропортом
 		//5. /2.0                          - делим лишнее место, чтобы получить ширину поля слева (справа будет равное)
 		//6. +                             - сдвигаем аэропорт на ширину левого поля 
-		FOrigin.x = - apAirport.location.x/FZoom + (GameZoneRect.extent.width - apAirport.extent.width/FZoom)/2.0;
-		FOrigin.Y = - apAirport.location.Y/FZoom + (GameZoneRect.extent.height - apAirport.extent.height/FZoom)/2.0;		
+		FOrigin.x = - apAirport.location.x/FZoom + (this.#game_zone_rect.extent.width - apAirport.extent.width/FZoom)/2.0;
+		FOrigin.Y = - apAirport.location.Y/FZoom + (this.#game_zone_rect.extent.height - apAirport.extent.height/FZoom)/2.0;		
 	}
 
 	static #set_frame_dimensions(AFrameSize: Size)
@@ -3888,11 +4571,11 @@ class FrameBuilder //static
 		else
 			dblFrameAdaptationRatio = FFrameRect.extent.width / DBL_STANDARD_FRAME_WIDTH;
 
-		FInfoPanelRect = new Rect(new Point(), new Size(FFrameRect.extent.width, FrameBuilder.adapt_to_frame(CY_INFO_PANEL_HEIGHT)));		
+		FrameBuilder.#info_panel_rect = new Rect(new Point(), new Size(FFrameRect.extent.width, FrameBuilder.adapt_to_frame(CY_INFO_PANEL_HEIGHT)));		
 		
 		var sz_game_zone: Size = ScreenManager.StageSize.clone();
 		sz_game_zone.height -= FInfoPanelRect.extent.height;
-		FGameZoneRect = new Rect(new Point(0, FInfoPanelRect.extent.height), sz_game_zone);		
+		this.#game_zone_rect = new Rect(new Point(0, FInfoPanelRect.extent.height), sz_game_zone);		
 	}
 
 	//event handlers	
@@ -3901,7 +4584,7 @@ class FrameBuilder //static
 		scaleScene();
 	}
 }
-}
+
 
 
 function start()
