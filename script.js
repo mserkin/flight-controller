@@ -3550,6 +3550,167 @@ class HintPanelView //static
 
 
 ///////////////////////////////////////////////////////////
+//  ToolBar.as
+///////////////////////////////////////////////////////////
+
+class ToolBar extends Rect
+{
+//public consts		
+	static get ALIGNMENT_LEFT() {return 0};
+	static get ALIGNMENT_CENTER() {return 1};
+	static get ALIGNMENT_RIGHT() {return 2};
+
+//private consts
+	private const #HORIZONTAL_MARGIN = 1/10; //of toolbar width
+	private const #VERTICAL_MARGIN = 1/12; //of toolbar height
+
+//property fields
+	private var center_aligned_items = []; // new Vector.<ToolBarItem>;
+	private var left_aligned_items = []; // new Vector.<ToolBarItem>;
+	private var right_aligned_items = [] //new Vector.<ToolBarItem>;
+
+//constructor
+	constructors (location=null, extent=null)
+	{
+		super(location, extent);
+	}		
+
+//public methods
+<<<<<<<<<<<<<<<<======== Current place - level 6 ========	
+	public function addItem(AnItem: ToolBarItem)
+	{
+		switch(AnItem.Alignment)
+		{
+			case ALIGNMENT_LEFT: 
+				ToolBar.#left_aligned_items.push(AnItem);
+				break;
+			case ALIGNMENT_CENTER:
+				ToolBar.#center_aligned_items.push(AnItem);
+				break;
+			case ALIGNMENT_RIGHT: 
+				ToolBar.#right_aligned_items.push(AnItem);
+				break;
+		}
+	}
+	
+	public function display()
+	{
+		arrangeItems();
+		var tbi_item: ToolBarItem = null;
+		for each(tbi_item in ToolBar.#left_aligned_items) tbi_item.display(Location);
+		for each(tbi_item in ToolBar.#center_aligned_items) tbi_item.display(Location);
+		for each(tbi_item in ToolBar.#right_aligned_items) tbi_item.display(Location);
+	}
+	
+	public function processEvent(AnEvent: Event): Boolean
+	{
+		if (AnEvent is MouseEvent)
+		{
+			var mouse_event: MouseEvent = MouseEvent(AnEvent);
+			var pnt_screen: Point = new Point(mouse_event.stageX, mouse_event.stageY);
+			if (!isInside(pnt_screen)) 
+			{
+				return false;
+			}
+			
+			var str_event_type = mouse_event.type;
+			var pnt_client: Point = pnt_screen.sub(Location);
+			var tbi_item: ToolBarItem = null;
+			for each(tbi_item in ToolBar.#left_aligned_items) tbi_item.processEvent(str_event_type, pnt_client);
+			for each(tbi_item in ToolBar.#center_aligned_items) tbi_item.processEvent(str_event_type, pnt_client);
+			for each(tbi_item in ToolBar.#right_aligned_items) tbi_item.processEvent(str_event_type, pnt_client);
+			return true;
+		}
+		return false;
+	}	
+	
+	public function removeItem(AnItem: ToolBarItem)
+	{		
+		performItemRemoval(ToolBar.#left_aligned_items, AnItem);
+		performItemRemoval(ToolBar.#center_aligned_items, AnItem);
+		performItemRemoval(ToolBar.#right_aligned_items, AnItem);
+	}	
+	
+	public function removeAllItems()
+	{
+		ToolBar.#center_aligned_items.length = 0;
+		ToolBar.#left_aligned_items.length = 0;
+		ToolBar.#right_aligned_items.length = 0;
+	}
+
+//private methods
+	
+	private function arrangeAlignedItems(AnAlignment: int, AnItemVector: Vector.<ToolBarItem>, 
+		AMargin: Size, AnItemHeight: Number)
+	{
+		var dbl_total_width: Number = AMargin.Width;
+		var dbl_bound: Number;
+		var tbi_item: ToolBarItem;
+
+		var vector: Vector.<ToolBarItem> = AnItemVector.sort(compareItems);
+		
+		for (var i: int = 0; i < vector.length; i++)
+		{
+			tbi_item = vector[i];
+			var dbl_width: Number = AnItemHeight/tbi_item.Extent.Height*tbi_item.Extent.Width;
+			tbi_item.Location.Y = AMargin.Height;
+			tbi_item.Extent.Width = dbl_width;
+			tbi_item.Extent.Height = AnItemHeight;
+			dbl_total_width += dbl_width + AMargin.Width;
+		}
+		
+		switch (AnAlignment) {
+			case ALIGNMENT_RIGHT:
+				dbl_bound = Extent.Width - AMargin.Width;
+				break;
+			case ALIGNMENT_LEFT:
+				dbl_bound = AMargin.Width;
+				break;
+			case ALIGNMENT_CENTER:
+				dbl_bound = Extent.Width/2 - dbl_total_width/2 + AMargin.Width;
+				break;
+		}
+
+		for (var n: int = 0; n < vector.length; n++)
+		{
+			tbi_item = vector[n];
+			
+			tbi_item.Location.X = dbl_bound - ((AnAlignment == ALIGNMENT_RIGHT) ? tbi_item.Extent.Width : 0);
+			dbl_bound = tbi_item.Location.X + ((AnAlignment == ALIGNMENT_RIGHT) ? -AMargin.Width : tbi_item.Extent.Width + AMargin.Width); 
+		}
+	}
+	
+	private function arrangeItems()
+	{
+		var sz_margin: Size = new Size(Extent.Height*ToolBar.#HORIZONTAL_MARGIN, Extent.Height*ToolBar.#VERTICAL_MARGIN);
+		var dbl_height: Number = Extent.Height*(1 - ToolBar.#VERTICAL_MARGIN*2);
+		
+		arrangeAlignedItems(ALIGNMENT_LEFT, ToolBar.#left_aligned_items, sz_margin, dbl_height); 
+
+		arrangeAlignedItems(ALIGNMENT_RIGHT, ToolBar.#right_aligned_items, sz_margin, dbl_height); 
+			
+		arrangeAlignedItems(ALIGNMENT_CENTER, ToolBar.#center_aligned_items, sz_margin, dbl_height); 
+
+	}
+
+	private function compareItems(item1: ToolBarItem, item2: ToolBarItem): Number
+	{
+		return item2.Gravity - item1.Gravity;
+	}
+
+	private function performItemRemoval(AList: Vector.<ToolBarItem>, AnItem: ToolBarItem)
+	{
+		for (var i: int = 0; i < AList.length; i++) {
+			if (AList[i] == AnItem) {
+				AList.splice(i, 1);
+				return;
+			}
+		}
+	}
+}
+
+
+///////////////////////////////////////////////////////////
 //  InfoPanelView.as
 ///////////////////////////////////////////////////////////
 
@@ -3682,28 +3843,29 @@ class InfoPanelView //static
 	static #tool_bar = null;
 
 //public methods
-	static public function display(AnAirport: Airport) 
+	static display(airport) 
 	{
-<<<<<<<<<<<<<<<<======== Current place - level 5 ========
-		InfoPanelView.#airport = AnAirport;
+		InfoPanelView.#airport = airport;
 			
 		//панель
-		ScreenManager.displayImage(new InfoPanelImage(), 
-			FrameBuilder.InfoPanelRect, new Angle());
+		//TODO: creating and displaying image
+		// ScreenManager.display_image(new InfoPanelImage(), 
+		// 	FrameBuilder.info_panel_rect, new Angle());
 		
-		displayToolBar();
+		InfoPanelView.#display_tool_bar();
 	}	
 
-	static public function processEvent(AnEvent: Event): Boolean
+	static process_event(event) //: Boolean
 	{
-		if (AnEvent.type == Core.DISPLAY_MODE_CHANGE)
+		if (event.type == Core.DISPLAY_MODE_CHANGE)
 		{
-			uncheckButton(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_FAST_PLAY]);
-			uncheckButton(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_PAUSE_PLAY]);
+			InfoPanelView.#uncheckButton(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_FAST_PLAY]);
+			InfoPanelView.#uncheckButton(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_PAUSE_PLAY]);
 		}
 		
 		if (!InfoPanelView.#tool_bar) return false;
-		return InfoPanelView.#tool_bar.processEvent(AnEvent);
+<<<<<<<<<<<<<<<<======== Current place - level 5 ========
+		return InfoPanelView.#tool_bar.process_event(event);
 	}
 
 //private methods
@@ -3807,7 +3969,7 @@ class InfoPanelView //static
 		ScreenManager.displayImage(sp_progress, ADisplayRect);
 	}
 
-	static private function displayToolBar()
+	static #display_tool_bar()
 	{
 		var dm_current_mode: DisplayMode = ControlDispatcher.CurrentDisplayMode;
 		if (dm_current_mode != InfoPanelView.#last_display_mode) {
@@ -3858,9 +4020,9 @@ class InfoPanelView //static
 	}
 
 //event handlers
-	static private function toolBarItem_OnClick(AnEvent: ObjectEvent): void
+	static private function toolBarItem_OnClick(event: ObjectEvent): void
 	{
-		var tbi_source: ToolBarItem = ToolBarItem(AnEvent.SourceObject);
+		var tbi_source: ToolBarItem = ToolBarItem(event.SourceObject);
 		switch (tbi_source)
 		{
 			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_BACK_TO_MENU]:
@@ -3880,9 +4042,9 @@ class InfoPanelView //static
 		}
 	}
 
-	static private function toolBarItem_OnPaint(AnEvent: ObjectEvent): void
+	static private function toolBarItem_OnPaint(event: ObjectEvent): void
 	{
-		var tbi_source: ToolBarItem = ToolBarItem(AnEvent.SourceObject);
+		var tbi_source: ToolBarItem = ToolBarItem(event.SourceObject);
 		var rect_tbi: Rect = tbi_source.clone();
 		rect_tbi.Location = rect_tbi.Location.add(InfoPanelView.#tool_bar.Location);
 		switch (tbi_source)
@@ -3902,9 +4064,9 @@ class InfoPanelView //static
 		}
 	}
 
-	static private function toolBarToggleButton_OnToggle(AnEvent: ObjectEvent): void
+	static private function toolBarToggleButton_OnToggle(event: ObjectEvent): void
 	{
-		var tbtb_source: ToolBarToggleButton = ToolBarToggleButton(AnEvent.SourceObject);
+		var tbtb_source: ToolBarToggleButton = ToolBarToggleButton(event.SourceObject);
 		switch(tbtb_source) {
 			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_FAST_PLAY]:
 				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_INFO_PANEL_FAST_SIM_CLICK, 
@@ -3917,7 +4079,7 @@ class InfoPanelView //static
 		}
 	}
 	
-	static private function uncheckButton(obj_button: Object)
+	static #uncheckButton(obj_button)
 	{
 		if (!obj_button) return;
 		var tbtb: ToolBarToggleButton = ToolBarToggleButton(obj_button);
@@ -4290,11 +4452,11 @@ class FrameBuilder //static
 	//Используется в:
 	//	функциях конвертации между моделью и игровой зоной
 	static #origin = null;
-	static #performance_metrics_shown: Boolean = false;
-	static #zoom: Number;	
+	static #performance_metrics_shown = false;
+	static #zoom = null;	
 	
 	//other fields
-	static #ap_airport: Airport = null;
+	static #airport = null;
 	static #dbl_frame_adaptation_ratio = 1;
 	static #dt_frame_count = new Date(0);
 	static #n_frame_count = 0;
@@ -4375,7 +4537,7 @@ class FrameBuilder //static
 		}
 		
 		if (ControlDispatcher.current_display_mode.AirportShown) {
-			AirportView.display(apAirport, ControlDispatcher.ActiveController.getControllerType() == 0);
+			AirportView.display(FrameBuilder.#airport, ControlDispatcher.ActiveController.getControllerType() == 0);
 			StarView.display();
 		}
 		
@@ -4397,7 +4559,7 @@ class FrameBuilder //static
 		HintPanelView.display();
 		
 		if (!ControlDispatcher.current_display_mode.IsSplashScreen) {
-			InfoPanelView.display(apAirport);
+			InfoPanelView.display(FrameBuilder.#airport);
 			
 			displayFrameMargins();
 		}
@@ -4456,12 +4618,12 @@ class FrameBuilder //static
 		return new Size(convertToScreenLength(ASize.width), convertToScreenLength(ASize.height));
 	}		
 				
-	static init(AnAirport: Airport)		
+	static init(airport)		
 	{
-		apAirport = AnAirport;		
+		FrameBuilder.#airport = airport;		
 
 		FOrigin = new Point();
-		apAirport.OnResized.addEventListener(CustomDispatcher.ON_RESIZED, Airport_OnResized);
+		FrameBuilder.#airport.OnResized.addEventListener(CustomDispatcher.ON_RESIZED, Airport_OnResized);
 	}
 
 	static fit_to_frame(ARect: Rect): Rect
@@ -4551,15 +4713,15 @@ class FrameBuilder //static
 	{
 		BeforeRescale.fireBeforeRescale();
 		
-		FZoom = apAirport.extent.width/this.#game_zone_rect.extent.width;//after fix apAirport.CY / cyScreen == apAirport.CX / cxScreen
+		FZoom = FrameBuilder.#airport.extent.width/this.#game_zone_rect.extent.width;//after fix FrameBuilder.#airport.CY / cyScreen == FrameBuilder.#airport.CX / cxScreen
 		//1. 0 аэропорта совпадает с 0 экрана
-		//2. - apAirport.x/FZoom - сдвигаем 0 аэропорта чтобы 0 экрана совпал с левой границей аэропорта
-		//3. apAirport.CX/FZoom  - получаем размер аэропорта в экранном размере
+		//2. - FrameBuilder.#airport.x/FZoom - сдвигаем 0 аэропорта чтобы 0 экрана совпал с левой границей аэропорта
+		//3. FrameBuilder.#airport.CX/FZoom  - получаем размер аэропорта в экранном размере
 		//4. cxScreen -                    - получаем лишнее, свободное место экрана не занятое аэропортом
 		//5. /2.0                          - делим лишнее место, чтобы получить ширину поля слева (справа будет равное)
 		//6. +                             - сдвигаем аэропорт на ширину левого поля 
-		FOrigin.x = - apAirport.location.x/FZoom + (this.#game_zone_rect.extent.width - apAirport.extent.width/FZoom)/2.0;
-		FOrigin.Y = - apAirport.location.Y/FZoom + (this.#game_zone_rect.extent.height - apAirport.extent.height/FZoom)/2.0;		
+		FOrigin.x = - FrameBuilder.#airport.location.x/FZoom + (this.#game_zone_rect.extent.width - FrameBuilder.#airport.extent.width/FZoom)/2.0;
+		FOrigin.Y = - FrameBuilder.#airport.location.Y/FZoom + (this.#game_zone_rect.extent.height - FrameBuilder.#airport.extent.height/FZoom)/2.0;		
 	}
 
 	static #set_frame_dimensions(AFrameSize: Size)
@@ -4589,15 +4751,15 @@ class FrameBuilder //static
 
 function start()
 {
-		let ap_airport = new Airport();
+		let airport = new Airport();
 		console.log("Executed!!!");
 <<<<<<<<<<<<<<<<======== Current place - level 1 ========
-		FrameBuilder.init(ap_airport);
+		FrameBuilder.init(airport);
 
 		ControlDispatcher.current_display_mode = DisplayMode.SPLASH_SCREEN;
 		MenuController.getInstance();
-		ControlDispatcher.ActiveController = GameController.getInstance(ap_airport);
-		EditController.getInstance(ap_airport);
+		ControlDispatcher.ActiveController = GameController.getInstance(airport);
+		EditController.getInstance(airport);
 		
 		Core.run(AStage);
 }
