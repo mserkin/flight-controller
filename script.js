@@ -3550,6 +3550,136 @@ class HintPanelView //static
 
 
 ///////////////////////////////////////////////////////////
+//  ToolBarItem.as
+///////////////////////////////////////////////////////////
+class ToolBarItem extends Rect
+{
+//property fields
+	#alignment = 0;
+	#gravity = 0;
+	#pressed: Boolean = false;
+	
+//other fields
+	#normalImage = null; //: Sprite;
+	#pressedImage = null; //: Sprite;
+
+//properties
+	get alignment () //: int
+	{
+		return this.#alignment;
+	}
+
+	set alignment (alignment)
+	{
+		this.#alignment = alignment;
+	}
+	
+	get gravity () //: Number
+	{
+		return this.#gravity;
+	}
+	
+	set gravity (value)
+	{
+		this.#gravity = value;
+	}	
+	
+	get pressed () //: Boolean
+	{
+		return this.#pressed;
+	}
+	
+	set pressed (value)
+	{
+		this.#pressed = value;
+	}
+
+//constructor
+	constructor (size, alignment, gravity, normal_image, pressed_image=null)
+	{
+		super(new Point(), size);
+		this.on_click = new ToolBarEventDispatcher();
+		this.on_pressed = new ToolBarEventDispatcher();
+		this.on_released = new ToolBarEventDispatcher();
+		this.on_paint = new ToolBarEventDispatcher();
+		this.#gravity = gravity;
+		this.#alignment = alignment;
+		this.#normal_image = normal_image;
+		this.#pressed_image = pressed_image;
+	}		
+
+//public methods
+	display(offset)
+	{
+		var rect = this.clone();
+		rect.location = rect.location.add(offset);
+		let n_state = this._display_hook();
+		var sp_image = null; //: Sprite;
+		if (n_state == 0) 
+		{
+			sp_image = this.#pressed ? this.#pressedImage : this.#normalImage;
+		}
+		else 
+		{
+			sp_image = (n_state > 0) ? this.#pressedImage : this.#normalImage;
+		}
+		
+		if (sp_image)
+		{
+			//TODO: Displaying image
+			//ScreenManager.display_image(sp_image, rect);
+		}
+		else
+		{
+			this.on_paint.fireOnPaint(this);
+		}
+	}
+
+	process_event(event_type, location)
+	{
+		//TODO: Events
+		// switch(event_type) {
+		// 	case MouseEvent.CLICK:
+		// 		if (this.is_inside(location))
+		// 		{
+		// 			this._on_click_hook();
+		// 			this.on_click.fireOnClick(this);
+		// 		}
+		// 		break;
+		// 	case MouseEvent.MOUSE_UP:
+		// 		if (this.#pressed)
+		// 		{
+		// 			this.#pressed = false;
+		// 			on_released.fireOnReleased(this)
+		// 		}
+		// 		break;
+		// 	case MouseEvent.MOUSE_DOWN:
+		// 		if (this.is_inside(location))
+		// 		{
+		// 			this.#pressed = true;
+		// 			this.on_pressed.fireOnPressed(this);
+		// 		}
+		// 		break;
+		//}
+	}
+		
+//protected methods
+	//function returns 1 if the button should be displayed pressed
+	//function returns -1 if the button should be displayed unpressed	
+	//function returns 0 if makes no decision on that
+	_display_hook() 
+	{
+		return 0;
+	}
+
+	_on_click_hook()
+	{
+		return;
+	}
+}
+
+
+///////////////////////////////////////////////////////////
 //  ToolBar.as
 ///////////////////////////////////////////////////////////
 
@@ -3561,13 +3691,13 @@ class ToolBar extends Rect
 	static get ALIGNMENT_RIGHT() {return 2};
 
 //private consts
-	private const #HORIZONTAL_MARGIN = 1/10; //of toolbar width
-	private const #VERTICAL_MARGIN = 1/12; //of toolbar height
+	#HORIZONTAL_MARGIN = 1/10; //of toolbar width
+	#VERTICAL_MARGIN = 1/12; //of toolbar height
 
 //property fields
-	private var center_aligned_items = []; // new Vector.<ToolBarItem>;
-	private var left_aligned_items = []; // new Vector.<ToolBarItem>;
-	private var right_aligned_items = [] //new Vector.<ToolBarItem>;
+	#center_aligned_items = []; // new Vector.<ToolBarItem>;
+	#left_aligned_items = []; // new Vector.<ToolBarItem>;
+	#right_aligned_items = [] //new Vector.<ToolBarItem>;
 
 //constructor
 	constructors (location=null, extent=null)
@@ -3576,133 +3706,147 @@ class ToolBar extends Rect
 	}		
 
 //public methods
-<<<<<<<<<<<<<<<<======== Current place - level 6 ========	
-	public function addItem(AnItem: ToolBarItem)
+	add_item(item)
 	{
-		switch(AnItem.Alignment)
+		switch(item.alignment)
 		{
-			case ALIGNMENT_LEFT: 
-				ToolBar.#left_aligned_items.push(AnItem);
+			case ToolBar.ALIGNMENT_LEFT: 
+				this.#left_aligned_items.push(item);
 				break;
-			case ALIGNMENT_CENTER:
-				ToolBar.#center_aligned_items.push(AnItem);
+			case ToolBar.ALIGNMENT_CENTER:
+				this.#center_aligned_items.push(item);
 				break;
-			case ALIGNMENT_RIGHT: 
-				ToolBar.#right_aligned_items.push(AnItem);
+			case ToolBar.ALIGNMENT_RIGHT: 
+				this.#right_aligned_items.push(item);
 				break;
 		}
 	}
 	
-	public function display()
+	display()
 	{
-		arrangeItems();
-		var tbi_item: ToolBarItem = null;
-		for each(tbi_item in ToolBar.#left_aligned_items) tbi_item.display(Location);
-		for each(tbi_item in ToolBar.#center_aligned_items) tbi_item.display(Location);
-		for each(tbi_item in ToolBar.#right_aligned_items) tbi_item.display(Location);
+		this.#arrange_items();
+		for(let tbi_item of this.#left_aligned_items)
+		{
+			tbi_item.display(this.location);
+		}
+		for(let tbi_item of this.#center_aligned_items)
+		{
+			tbi_item.display(this.location);
+		}
+		for(let tbi_item of this.#right_aligned_items)
+		{
+			tbi_item.display(this.location);
+		}
 	}
 	
-	public function processEvent(AnEvent: Event): Boolean
+	process_event(event) //: Boolean
 	{
-		if (AnEvent is MouseEvent)
+		if (event is MouseEvent)
 		{
-			var mouse_event: MouseEvent = MouseEvent(AnEvent);
-			var pnt_screen: Point = new Point(mouse_event.stageX, mouse_event.stageY);
-			if (!isInside(pnt_screen)) 
-			{
-				return false;
-			}
+			// TODO: events
+			// var mouse_event = MouseEvent(event);
+			// var pnt_screen = new Point(mouse_event.stageX, mouse_event.stageY);
+			// if (!this.is_inside(pnt_screen)) 
+			// {
+			// 	return false;
+			// }
 			
-			var str_event_type = mouse_event.type;
-			var pnt_client: Point = pnt_screen.sub(Location);
-			var tbi_item: ToolBarItem = null;
-			for each(tbi_item in ToolBar.#left_aligned_items) tbi_item.processEvent(str_event_type, pnt_client);
-			for each(tbi_item in ToolBar.#center_aligned_items) tbi_item.processEvent(str_event_type, pnt_client);
-			for each(tbi_item in ToolBar.#right_aligned_items) tbi_item.processEvent(str_event_type, pnt_client);
-			return true;
+			// var str_event_type = mouse_event.type;
+			// var pnt_client = pnt_screen.sub(this.location);
+			// var tbi_item = null;
+			// for (tbi_item of this.#left_aligned_items) 
+			// {
+			// 	tbi_item.process_event(str_event_type, pnt_client);
+			// }
+			// for (tbi_item of this.#center_aligned_items) 
+			// {
+			// 	tbi_item.process_event(str_event_type, pnt_client);
+			// }
+			// for (tbi_item of this.#right_aligned_items) 
+			// {
+			// 	tbi_item.process_event(str_event_type, pnt_client);
+			// }
+			// return true;
 		}
 		return false;
 	}	
 	
-	public function removeItem(AnItem: ToolBarItem)
+	remove_item(item)
 	{		
-		performItemRemoval(ToolBar.#left_aligned_items, AnItem);
-		performItemRemoval(ToolBar.#center_aligned_items, AnItem);
-		performItemRemoval(ToolBar.#right_aligned_items, AnItem);
+		this.#perform_item_removal(this.#left_aligned_items, item);
+		this.#perform_item_removal(this.#center_aligned_items, item);
+		this.#perform_item_removal(this.#right_aligned_items, item);
 	}	
 	
-	public function removeAllItems()
+	remove_all_items()
 	{
-		ToolBar.#center_aligned_items.length = 0;
-		ToolBar.#left_aligned_items.length = 0;
-		ToolBar.#right_aligned_items.length = 0;
+		this.#center_aligned_items = [];
+		this.#left_aligned_items = [];
+		this.#right_aligned_items = [];
 	}
 
 //private methods
-	
-	private function arrangeAlignedItems(AnAlignment: int, AnItemVector: Vector.<ToolBarItem>, 
-		AMargin: Size, AnItemHeight: Number)
+	#arrange_aligned_items(alignment, items, margin, item_height)
 	{
-		var dbl_total_width: Number = AMargin.Width;
-		var dbl_bound: Number;
-		var tbi_item: ToolBarItem;
-
-		var vector: Vector.<ToolBarItem> = AnItemVector.sort(compareItems);
+		let dbl_total_width = margin.width;
+		let dbl_bound = 0;
+		let tbi_item = null;
+		let vector = items.sort(this.#compareItems);
 		
-		for (var i: int = 0; i < vector.length; i++)
+		for (let i = 0; i < vector.length; i++)
 		{
 			tbi_item = vector[i];
-			var dbl_width: Number = AnItemHeight/tbi_item.Extent.Height*tbi_item.Extent.Width;
-			tbi_item.Location.Y = AMargin.Height;
-			tbi_item.Extent.Width = dbl_width;
-			tbi_item.Extent.Height = AnItemHeight;
-			dbl_total_width += dbl_width + AMargin.Width;
+			var dbl_width: Number = item_height/tbi_item.extent.height*tbi_item.extent.width;
+			tbi_item.location.y = margin.height;
+			tbi_item.extent.width = dbl_width;
+			tbi_item.extent.height = item_height;
+			dbl_total_width += dbl_width + margin.width;
 		}
 		
-		switch (AnAlignment) {
-			case ALIGNMENT_RIGHT:
-				dbl_bound = Extent.Width - AMargin.Width;
+		switch (alignment) {
+			case ToolBar.ALIGNMENT_RIGHT:
+				dbl_bound = extent.width - margin.width;
 				break;
-			case ALIGNMENT_LEFT:
-				dbl_bound = AMargin.Width;
+			case ToolBar.ALIGNMENT_LEFT:
+				dbl_bound = margin.width;
 				break;
-			case ALIGNMENT_CENTER:
-				dbl_bound = Extent.Width/2 - dbl_total_width/2 + AMargin.Width;
+			case ToolBar.ALIGNMENT_CENTER:
+				dbl_bound = extent.width/2 - dbl_total_width/2 + margin.width;
 				break;
 		}
 
-		for (var n: int = 0; n < vector.length; n++)
+		for (let n = 0; n < vector.length; n++)
 		{
 			tbi_item = vector[n];
 			
-			tbi_item.Location.X = dbl_bound - ((AnAlignment == ALIGNMENT_RIGHT) ? tbi_item.Extent.Width : 0);
-			dbl_bound = tbi_item.Location.X + ((AnAlignment == ALIGNMENT_RIGHT) ? -AMargin.Width : tbi_item.Extent.Width + AMargin.Width); 
+			tbi_item.location.x = dbl_bound - ((alignment == ToolBar.ALIGNMENT_RIGHT) ? tbi_item.extent.width : 0);
+			dbl_bound = tbi_item.location.x + ((alignment == ToolBar.ALIGNMENT_RIGHT) ? -margin.width : tbi_item.extent.width + margin.width); 
 		}
 	}
 	
-	private function arrangeItems()
+	#arrange_items()
 	{
-		var sz_margin: Size = new Size(Extent.Height*ToolBar.#HORIZONTAL_MARGIN, Extent.Height*ToolBar.#VERTICAL_MARGIN);
-		var dbl_height: Number = Extent.Height*(1 - ToolBar.#VERTICAL_MARGIN*2);
+		var sz_margin = new Size(extent.height*ToolBar.#HORIZONTAL_MARGIN, extent.height*ToolBar.#VERTICAL_MARGIN);
+		var dbl_height = extent.height*(1 - ToolBar.#VERTICAL_MARGIN*2);
 		
-		arrangeAlignedItems(ALIGNMENT_LEFT, ToolBar.#left_aligned_items, sz_margin, dbl_height); 
+		this.#arrange_aligned_items(ToolBar.ALIGNMENT_LEFT, this.#left_aligned_items, sz_margin, dbl_height); 
 
-		arrangeAlignedItems(ALIGNMENT_RIGHT, ToolBar.#right_aligned_items, sz_margin, dbl_height); 
+		this.#arrange_aligned_items(ToolBar.ALIGNMENT_RIGHT, this.#right_aligned_items, sz_margin, dbl_height); 
 			
-		arrangeAlignedItems(ALIGNMENT_CENTER, ToolBar.#center_aligned_items, sz_margin, dbl_height); 
+		this.#arrange_aligned_items(ToolBar.ALIGNMENT_CENTER, this.#center_aligned_items, sz_margin, dbl_height); 
 
 	}
 
-	private function compareItems(item1: ToolBarItem, item2: ToolBarItem): Number
+	#compare_items(item1, item2) //: Number
 	{
-		return item2.Gravity - item1.Gravity;
+		return item2.gravity - item1.gravity;
 	}
 
-	private function performItemRemoval(AList: Vector.<ToolBarItem>, AnItem: ToolBarItem)
+	#perform_item_removal(list, item)
 	{
-		for (var i: int = 0; i < AList.length; i++) {
-			if (AList[i] == AnItem) {
-				AList.splice(i, 1);
+		for (let i = 0; i < list.length; i++) {
+			if (list[i] == item) {
+				list.splice(i, 1);
 				return;
 			}
 		}
@@ -3869,7 +4013,7 @@ class InfoPanelView //static
 	}
 
 //private methods
-	static private function addButtons()
+	static #addButtons()
 	{
 		for (var i: int = 0; i < InfoPanelView.#TOOLBAR_ITEMS_NUMBER; i++)
 		{
@@ -3884,86 +4028,86 @@ class InfoPanelView //static
 				InfoPanelView.#PRESSED_IMAGES[i]);
 		}
 	
-		if (HintPanelView.Hints.length == 0) InfoPanelView.#tool_bar.removeItem(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT]);
+		if (HintPanelView.Hints.length == 0) InfoPanelView.#tool_bar.remove_item(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT]);
 	}
 
-	static private function addToolBarItem(AToolBarItem: ToolBarItem, ASize: Size, 
-		AHandledEvents: int = InfoPanelView.#TO_HANDLE_CLICK, AnAlignment: int = 0, AGravity: Number = 0,
-		ANormalImage: Sprite = null, APressedImage: Sprite = null): ToolBarItem
+	static #addToolBarItem(AToolBarItem: ToolBarItem, size: Size, 
+		AHandledEvents: int = InfoPanelView.#TO_HANDLE_CLICK, alignment: int = 0, gravity: Number = 0,
+		normal_image: Sprite = null, pressed_image: Sprite = null): ToolBarItem
 	{
 		if (!AToolBarItem) {
 			if ((AHandledEvents & InfoPanelView.#TO_HANDLE_TOGGLE) != 0) {
 				var tbtb: ToolBarToggleButton;
-				tbtb = new ToolBarToggleButton(ASize.clone(), AnAlignment, AGravity, ANormalImage, APressedImage);
+				tbtb = new ToolBarToggleButton(size.clone(), alignment, gravity, normal_image, pressed_image);
 				tbtb.OnToggle.addEventListener(ToolBarEventDispatcher.ON_TOGGLE, toolBarToggleButton_OnToggle);
 				AToolBarItem = tbtb;
 			}
 			else {
-				AToolBarItem = new ToolBarItem(ASize.clone(), AnAlignment, AGravity, ANormalImage, APressedImage);
+				AToolBarItem = new ToolBarItem(size.clone(), alignment, gravity, normal_image, pressed_image);
 			}
 			
 			if ((AHandledEvents & InfoPanelView.#TO_HANDLE_CLICK) != 0)
-				AToolBarItem.OnClick.addEventListener(ToolBarEventDispatcher.ON_CLICK, toolBarItem_OnClick);					
+				AToolBarItem.on_click.addEventListener(ToolBarEventDispatcher.ON_CLICK, toolBarItem_OnClick);					
 
 			if ((AHandledEvents & InfoPanelView.#TO_HANDLE_PAINT) != 0)
-				AToolBarItem.OnPaint.addEventListener(ToolBarEventDispatcher.ON_PAINT, toolBarItem_OnPaint);													
+				AToolBarItem.on_paint.addEventListener(ToolBarEventDispatcher.ON_PAINT, toolBarItem_OnPaint);													
 		}
-		InfoPanelView.#tool_bar.addItem(AToolBarItem);
+		InfoPanelView.#tool_bar.add_item(AToolBarItem);
 		return AToolBarItem;
 	}
 	
-	static private function controlButtonsState()
+	static #controlButtonsState()
 	{
 		if (ControlDispatcher.CurrentDisplayMode != DisplayMode.Play) return;
 
-		InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT].Pressed = HintPanelView.IsShown;
+		InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT].pressed = HintPanelView.IsShown;
 	}
 
-	static private function createToolBar()
+	static #createToolBar()
 	{	
 		var rect_info_panel: Rect = FrameBuilder.InfoPanelRect;
-		var pnt_margins: Point = new Point(rect_info_panel.Extent.Width*InfoPanelView.#TOOLBAR_HORIZONTAL_MARGIN, 
-			rect_info_panel.Extent.Height*InfoPanelView.#TOOLBAR_VERTICAL_MARGIN);
-		var sz_tool_bar = new Size(rect_info_panel.Extent.Width - pnt_margins.X*2,
-			rect_info_panel.Extent.Height - pnt_margins.Y*2);
+		var pnt_margins: Point = new Point(rect_info_panel.extent.width*InfoPanelView.#TOOLBAR_HORIZONTAL_MARGIN, 
+			rect_info_panel.extent.height*InfoPanelView.#TOOLBAR_VERTICAL_MARGIN);
+		var sz_tool_bar = new Size(rect_info_panel.extent.width - pnt_margins.x*2,
+			rect_info_panel.extent.height - pnt_margins.y*2);
 		
 		InfoPanelView.#tool_bar = new ToolBar(
-			rect_info_panel.Location.add(pnt_margins), 
+			rect_info_panel.location.add(pnt_margins), 
 			sz_tool_bar
 		);
 	}		
 
-	static private function displayLevelNumber(ADisplayRect: Rect)
+	static #displayLevelNumber(ADisplayRect: Rect)
 	{
-		ADisplayRect.Location.Y = ADisplayRect.Location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_LEVEL_NUMBER);
-		ADisplayRect.Extent = new Size(-1, -1);
+		ADisplayRect.location.Y = ADisplayRect.location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_LEVEL_NUMBER);
+		ADisplayRect.extent = new Size(-1, -1);
 		ScreenManager.displayText("Level " + GameProgress.Level.toString(), ADisplayRect,
 			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL), Colors.Brown);
 	}	
 
-	static private function displayPoints(ADisplayRect: Rect)
+	static #displayPoints(ADisplayRect: Rect)
 	{
-		ADisplayRect.Location.Y = ADisplayRect.Location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_POINTS_NUMBER);
-		ADisplayRect.Extent = new Size(-1, -1);
+		ADisplayRect.location.Y = ADisplayRect.location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_POINTS_NUMBER);
+		ADisplayRect.extent = new Size(-1, -1);
 		ScreenManager.displayText("Points: " + GameProgress.Points.toString(), ADisplayRect,
 			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL), Colors.Brown);	
 	}
 
-	static private function displayProgressWidget(ADisplayRect: Rect)
+	static #displayProgressWidget(ADisplayRect: Rect)
 	{
 		//звездочки
 		var sp_progress: Sprite = new ProgressImage();
 //		var cy_padding: Number = FrameBuilder.adaptToFrame(InfoPanelView.#CY_OP_PADDING);
-		ADisplayRect.Location.Y = ADisplayRect.Location.Y /*+ cy_padding*/ + ADisplayRect.Extent.Height / 2;
-//		ADisplayRect.Extent.Height = ADisplayRect.Extent.Height - cy_padding*2;
-		var dbl_zoom: Number = ADisplayRect.Extent.Height / sp_progress.height;
-		ADisplayRect.Extent.Width = sp_progress.width * dbl_zoom;
+		ADisplayRect.location.Y = ADisplayRect.location.Y /*+ cy_padding*/ + ADisplayRect.extent.height / 2;
+//		ADisplayRect.extent.height = ADisplayRect.extent.height - cy_padding*2;
+		var dbl_zoom: Number = ADisplayRect.extent.height / sp_progress.height;
+		ADisplayRect.extent.width = sp_progress.width * dbl_zoom;
 
 		//заполнитель
 		var rect_filler: Rect = ADisplayRect.clone();
 		var sp_filler: Sprite = new ProgressFillerImage();
 		var gc: GameController = GameController.getInstance();
-		rect_filler.Extent.Width = sp_filler.width * dbl_zoom * gc.LandingsDone / gc.LandingsToDo;
+		rect_filler.extent.width = sp_filler.width * dbl_zoom * gc.LandingsDone / gc.LandingsToDo;
 
 		ScreenManager.displayImage(sp_filler, rect_filler);
 		ScreenManager.displayImage(sp_progress, ADisplayRect);
@@ -3975,7 +4119,7 @@ class InfoPanelView //static
 		if (dm_current_mode != InfoPanelView.#last_display_mode) {
 			InfoPanelView.#last_display_mode = dm_current_mode;
 			if (!InfoPanelView.#tool_bar) createToolBar();
-			InfoPanelView.#tool_bar.removeAllItems();
+			InfoPanelView.#tool_bar.remove_all_items();
 
 			if (ControlDispatcher.CurrentDisplayMode.AirportShown && ControlDispatcher.CurrentDisplayMode != DisplayMode.Edit
 				|| ControlDispatcher.CurrentDisplayMode == DisplayMode.LevelMenu
@@ -3988,39 +4132,39 @@ class InfoPanelView //static
 		InfoPanelView.#tool_bar.display();
 	}	
 
-	static private function displayWindIndicatorWidget(ADisplayRect: Rect)
+	static #displayWindIndicatorWidget(ADisplayRect: Rect)
 	{
 		var sp_frame: Sprite = new WindIndicatorFrameImage();
 		var sp_arrow: Sprite = new WindIndicatorArrowImage();
 		var sp_filler: Sprite = new WindIndicatorFillerImage();
 
-		ADisplayRect.Location.X = ADisplayRect.Location.X + ADisplayRect.Extent.Width/2;
-		ADisplayRect.Location.Y = ADisplayRect.Location.Y + ADisplayRect.Extent.Height/2;
+		ADisplayRect.location.x = ADisplayRect.location.x + ADisplayRect.extent.width/2;
+		ADisplayRect.location.Y = ADisplayRect.location.Y + ADisplayRect.extent.height/2;
 		//displaying frame
 		//var dbl_wind_indi_size: Number = FrameBuilder.adaptToFrame(InfoPanelView.#WIND_INDICATOR_LENGTH);
-		var dbl_zoom: Number = ADisplayRect.Extent.Height / InfoPanelView.#WIND_INDICATOR_LENGTH;
+		var dbl_zoom: Number = ADisplayRect.extent.height / InfoPanelView.#WIND_INDICATOR_LENGTH;
 		
 		ScreenManager.displayImage(sp_frame, ADisplayRect);
 
 		//dispalying wind arrow
 		var cy_arrow = DBL_WIND_ARROW_HEIGHT * dbl_zoom;
 
-		ADisplayRect.Extent.Height = cy_arrow; //* ratio
-		ADisplayRect.Extent.Width = InfoPanelView.#WIND_ARROW_WIDTH * dbl_zoom; //* ratio
-		ADisplayRect.Location.X -= cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.sin();
-		ADisplayRect.Location.Y += cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.cos();
+		ADisplayRect.extent.height = cy_arrow; //* ratio
+		ADisplayRect.extent.width = InfoPanelView.#WIND_ARROW_WIDTH * dbl_zoom; //* ratio
+		ADisplayRect.location.x -= cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.sin();
+		ADisplayRect.location.Y += cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.cos();
 		ScreenManager.displayImage(sp_arrow, ADisplayRect, InfoPanelView.#airport.CurrentWind.Direction);
 
 		//displaying undispaled sector :)
 		var ratio: Number =  (InfoPanelView.#airport.CurrentWind.DBL_MAX_WIND_SPEED - InfoPanelView.#airport.CurrentWind.Speed)
 			/InfoPanelView.#airport.CurrentWind.DBL_MAX_WIND_SPEED;
-		ADisplayRect.Extent.Height = (cy_arrow - 1) * ratio;
-		ADisplayRect.Extent.Width = (InfoPanelView.#WIND_ARROW_WIDTH - FrameBuilder.adaptToFrame(2))*dbl_zoom;
+		ADisplayRect.extent.height = (cy_arrow - 1) * ratio;
+		ADisplayRect.extent.width = (InfoPanelView.#WIND_ARROW_WIDTH - FrameBuilder.adaptToFrame(2))*dbl_zoom;
 		ScreenManager.displayImage(sp_filler, ADisplayRect, InfoPanelView.#airport.CurrentWind.Direction);
 	}
 
 //event handlers
-	static private function toolBarItem_OnClick(event: ObjectEvent): void
+	static #toolBarItem_OnClick(event: ObjectEvent): void
 	{
 		var tbi_source: ToolBarItem = ToolBarItem(event.SourceObject);
 		switch (tbi_source)
@@ -4042,11 +4186,11 @@ class InfoPanelView //static
 		}
 	}
 
-	static private function toolBarItem_OnPaint(event: ObjectEvent): void
+	static #toolBarItem_OnPaint(event: ObjectEvent): void
 	{
 		var tbi_source: ToolBarItem = ToolBarItem(event.SourceObject);
 		var rect_tbi: Rect = tbi_source.clone();
-		rect_tbi.Location = rect_tbi.Location.add(InfoPanelView.#tool_bar.Location);
+		rect_tbi.location = rect_tbi.location.add(InfoPanelView.#tool_bar.location);
 		switch (tbi_source)
 		{
 			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_LEVEL_NUMBER]:
@@ -4064,7 +4208,7 @@ class InfoPanelView //static
 		}
 	}
 
-	static private function toolBarToggleButton_OnToggle(event: ObjectEvent): void
+	static #toolBarToggleButton_OnToggle(event: ObjectEvent): void
 	{
 		var tbtb_source: ToolBarToggleButton = ToolBarToggleButton(event.SourceObject);
 		switch(tbtb_source) {
@@ -4593,9 +4737,9 @@ class FrameBuilder //static
 		return new Rect (convertToModelPoint(ARect.location), convertToModelSize(ARect.extent));
 	}
 	
-	static convert_to_model_size(ASize: Size): Size 
+	static convert_to_model_size(size: Size): Size 
 	{
-		return new Size(convertToModelLength(ASize.width), convertToModelLength(ASize.height));
+		return new Size(convertToModelLength(size.width), convertToModelLength(size.height));
 	}
 	
 	static convert_to_screen_length(ALength: Number): Number
@@ -4613,9 +4757,9 @@ class FrameBuilder //static
 		return new Rect (convertToScreenPoint(ARect.location), convertToScreenSize(ARect.extent));
 	}
 	
-	static convert_to_screen_size(ASize: Size): Size
+	static convert_to_screen_size(size: Size): Size
 	{
-		return new Size(convertToScreenLength(ASize.width), convertToScreenLength(ASize.height));
+		return new Size(convertToScreenLength(size.width), convertToScreenLength(size.height));
 	}		
 				
 	static init(airport)		
