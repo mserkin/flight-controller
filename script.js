@@ -3855,6 +3855,95 @@ class ToolBar extends Rect
 
 
 ///////////////////////////////////////////////////////////
+//  ToolBarEventDispatcher.as
+///////////////////////////////////////////////////////////
+
+class ToolBarEventDispatcher extends EventDispatcher 
+{
+//public consts
+	static ON_CLICK() {return "OnClick";}	
+	static ON_PAINT() {return "OnPaint";}
+	static ON_PRESSED() {return "OnPressed";}
+	static ON_RELEASED() {return "OnReleased";}
+	static ON_TOGGLE() {return "OnToggle";}
+
+//public methods
+	
+	public function fireOnClick(source) {
+		//TODO: Event
+		//dispatchEvent(new ObjectEvent(ON_CLICK, source));
+	}
+
+	public function fireOnPaint(source) {
+		//TODO: Event
+		//dispatchEvent(new ObjectEvent(ON_PAINT, source));
+	}
+
+	public function fireOnPressed(source) {
+		//TODO: Event
+		//dispatchEvent(new ObjectEvent(ON_PRESSED, source));
+	}
+
+	public function fireOnReleased(source) {
+		//TODO: Event
+		//dispatchEvent(new ObjectEvent(ON_RELEASED, source));
+	}
+
+	public function fireOnToggle(source) {
+		//TODO: Event
+		//dispatchEvent(new ObjectEvent(ON_TOGGLE, source));
+	}
+}
+
+///////////////////////////////////////////////////////////
+//  ToolBarToggleButton.as
+///////////////////////////////////////////////////////////
+
+class ToolBarToggleButton extends ToolBarItem
+{
+//property fields
+	#checked = false;
+
+//properties
+	get checked () //: Boolean
+	{
+		return this.#checked;
+	}
+	
+	set checked (value)
+	{
+		this.#checked = value;
+		this.on_toggle.fireOnToggle(this);		
+	}
+
+//constructor
+	constructor (size, alignment, gravity=0, normal_image=null, pressed_image=null)
+	{
+		super(size, alignment, gravity, normal_image, pressed_image);
+		this.on_toggle = new ToolBarEventDispatcher();
+	}
+
+	//public methods
+
+	processEvent(event_type, location)
+	{
+		super.process_event(event_type, location);
+	}
+		
+//protected methods
+
+	_display_hook() {
+		return this.#checked ? 1 : 0;
+	}	
+	
+	_on_click_hook(){
+		this.#checked = !this.#checked;
+		this.on_toggle.fireOnToggle(this);
+	}
+}
+
+
+///////////////////////////////////////////////////////////
 //  InfoPanelView.as
 ///////////////////////////////////////////////////////////
 
@@ -4003,22 +4092,22 @@ class InfoPanelView //static
 	{
 		if (event.type == Core.DISPLAY_MODE_CHANGE)
 		{
-			InfoPanelView.#uncheckButton(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_FAST_PLAY]);
-			InfoPanelView.#uncheckButton(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_PAUSE_PLAY]);
+			InfoPanelView.#uncheck_button(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_FAST_PLAY]);
+			InfoPanelView.#uncheck_button(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_PAUSE_PLAY]);
 		}
 		
 		if (!InfoPanelView.#tool_bar) return false;
-<<<<<<<<<<<<<<<<======== Current place - level 5 ========
-		return InfoPanelView.#tool_bar.process_event(event);
+		//TODO: Event processing
+		return null; //InfoPanelView.#tool_bar.process_event(event);
 	}
 
 //private methods
-	static #addButtons()
+	static #add_buttons()
 	{
-		for (var i: int = 0; i < InfoPanelView.#TOOLBAR_ITEMS_NUMBER; i++)
+		for (let i = 0; i < InfoPanelView.#TOOLBAR_ITEMS_NUMBER; i++)
 		{
-			if ((ControlDispatcher.CurrentDisplayMode.Id & InfoPanelView.#DISPLAY_MODES[i]) == 0) continue;
-			InfoPanelView.#ITEMS[i] = addToolBarItem(
+			if ((ControlDispatcher.current_display_mode.id & InfoPanelView.#DISPLAY_MODES[i]) == 0) continue;
+			InfoPanelView.#ITEMS[i] = InfoPanelView.#add_tool_bar_item(
 				InfoPanelView.#ITEMS[i], 
 				InfoPanelView.#SIZES[i], 
 				InfoPanelView.#HANDLED_EVENTS[i], 
@@ -4028,42 +4117,42 @@ class InfoPanelView //static
 				InfoPanelView.#PRESSED_IMAGES[i]);
 		}
 	
-		if (HintPanelView.Hints.length == 0) InfoPanelView.#tool_bar.remove_item(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT]);
+		if (HintPanelView.hints.length == 0) InfoPanelView.#tool_bar.remove_item(InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT]);
 	}
 
-	static #addToolBarItem(AToolBarItem: ToolBarItem, size: Size, 
-		AHandledEvents: int = InfoPanelView.#TO_HANDLE_CLICK, alignment: int = 0, gravity: Number = 0,
-		normal_image: Sprite = null, pressed_image: Sprite = null): ToolBarItem
+	static #add_tool_bar_item(tool_bar_item, size, handled_events=InfoPanelView.#TO_HANDLE_CLICK, alignment=0, 
+		gravity=0, normal_image=null, pressed_image=null) //: ToolBarItem
 	{
-		if (!AToolBarItem) {
-			if ((AHandledEvents & InfoPanelView.#TO_HANDLE_TOGGLE) != 0) {
-				var tbtb: ToolBarToggleButton;
+		if (!tool_bar_item) {
+			if ((handled_events & InfoPanelView.#TO_HANDLE_TOGGLE) != 0) {
+				var tbtb = null;
+<<<<<<<<<<<<<<<<======== Current place - level 5 ========
 				tbtb = new ToolBarToggleButton(size.clone(), alignment, gravity, normal_image, pressed_image);
-				tbtb.OnToggle.addEventListener(ToolBarEventDispatcher.ON_TOGGLE, toolBarToggleButton_OnToggle);
-				AToolBarItem = tbtb;
+				tbtb.OnToggle.addEventListener(ToolBarEventDispatcher.ON_TOGGLE, InfoPanelView.#tool_bar_toggle_button_on_toggle);
+				tool_bar_item = tbtb;
 			}
 			else {
-				AToolBarItem = new ToolBarItem(size.clone(), alignment, gravity, normal_image, pressed_image);
+				tool_bar_item = new ToolBarItem(size.clone(), alignment, gravity, normal_image, pressed_image);
 			}
 			
-			if ((AHandledEvents & InfoPanelView.#TO_HANDLE_CLICK) != 0)
-				AToolBarItem.on_click.addEventListener(ToolBarEventDispatcher.ON_CLICK, toolBarItem_OnClick);					
+			if ((handled_events & InfoPanelView.#TO_HANDLE_CLICK) != 0)
+				tool_bar_item.on_click.addEventListener(ToolBarEventDispatcher.ON_CLICK, InfoPanelView.#tool_bar_item_on_click);					
 
-			if ((AHandledEvents & InfoPanelView.#TO_HANDLE_PAINT) != 0)
-				AToolBarItem.on_paint.addEventListener(ToolBarEventDispatcher.ON_PAINT, toolBarItem_OnPaint);													
+			if ((handled_events & InfoPanelView.#TO_HANDLE_PAINT) != 0)
+				tool_bar_item.on_paint.addEventListener(ToolBarEventDispatcher.ON_PAINT, toolBarItem_OnPaint);													
 		}
-		InfoPanelView.#tool_bar.add_item(AToolBarItem);
-		return AToolBarItem;
+		InfoPanelView.#tool_bar.add_item(tool_bar_item);
+		return tool_bar_item;
 	}
 	
-	static #controlButtonsState()
+	static #control_buttons_state()
 	{
 		if (ControlDispatcher.CurrentDisplayMode != DisplayMode.Play) return;
 
 		InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT].pressed = HintPanelView.IsShown;
 	}
 
-	static #createToolBar()
+	static #create_tool_bar()
 	{	
 		var rect_info_panel: Rect = FrameBuilder.InfoPanelRect;
 		var pnt_margins: Point = new Point(rect_info_panel.extent.width*InfoPanelView.#TOOLBAR_HORIZONTAL_MARGIN, 
@@ -4077,7 +4166,7 @@ class InfoPanelView //static
 		);
 	}		
 
-	static #displayLevelNumber(ADisplayRect: Rect)
+	static #display_level_number(ADisplayRect: Rect)
 	{
 		ADisplayRect.location.Y = ADisplayRect.location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_LEVEL_NUMBER);
 		ADisplayRect.extent = new Size(-1, -1);
@@ -4085,7 +4174,7 @@ class InfoPanelView //static
 			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL), Colors.Brown);
 	}	
 
-	static #displayPoints(ADisplayRect: Rect)
+	static #display_points(ADisplayRect: Rect)
 	{
 		ADisplayRect.location.Y = ADisplayRect.location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_POINTS_NUMBER);
 		ADisplayRect.extent = new Size(-1, -1);
@@ -4093,7 +4182,7 @@ class InfoPanelView //static
 			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL), Colors.Brown);	
 	}
 
-	static #displayProgressWidget(ADisplayRect: Rect)
+	static #display_progress_widget(ADisplayRect: Rect)
 	{
 		//звездочки
 		var sp_progress: Sprite = new ProgressImage();
@@ -4118,21 +4207,21 @@ class InfoPanelView //static
 		var dm_current_mode: DisplayMode = ControlDispatcher.CurrentDisplayMode;
 		if (dm_current_mode != InfoPanelView.#last_display_mode) {
 			InfoPanelView.#last_display_mode = dm_current_mode;
-			if (!InfoPanelView.#tool_bar) createToolBar();
+			if (!InfoPanelView.#tool_bar) InfoPanelView.#create_tool_bar();
 			InfoPanelView.#tool_bar.remove_all_items();
 
 			if (ControlDispatcher.CurrentDisplayMode.AirportShown && ControlDispatcher.CurrentDisplayMode != DisplayMode.Edit
 				|| ControlDispatcher.CurrentDisplayMode == DisplayMode.LevelMenu
 				|| ControlDispatcher.CurrentDisplayMode == DisplayMode.BoxMenu)
 			{
-				addButtons();
+				InfoPanelView.#add_buttons();
 			}
 		}
-		controlButtonsState();
+		InfoPanelView.#control_buttons_state();
 		InfoPanelView.#tool_bar.display();
 	}	
 
-	static #displayWindIndicatorWidget(ADisplayRect: Rect)
+	static #display_wind_indicator_widget(ADisplayRect: Rect)
 	{
 		var sp_frame: Sprite = new WindIndicatorFrameImage();
 		var sp_arrow: Sprite = new WindIndicatorArrowImage();
@@ -4164,7 +4253,7 @@ class InfoPanelView //static
 	}
 
 //event handlers
-	static #toolBarItem_OnClick(event: ObjectEvent): void
+	static #tool_bar_item_on_click(event: ObjectEvent): void
 	{
 		var tbi_source: ToolBarItem = ToolBarItem(event.SourceObject);
 		switch (tbi_source)
@@ -4186,7 +4275,7 @@ class InfoPanelView //static
 		}
 	}
 
-	static #toolBarItem_OnPaint(event: ObjectEvent): void
+	static #tool_bar_item_on_paint(event: ObjectEvent): void
 	{
 		var tbi_source: ToolBarItem = ToolBarItem(event.SourceObject);
 		var rect_tbi: Rect = tbi_source.clone();
@@ -4194,21 +4283,21 @@ class InfoPanelView //static
 		switch (tbi_source)
 		{
 			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_LEVEL_NUMBER]:
-				displayLevelNumber(rect_tbi);
+				InfoPanelView.#display_level_number(rect_tbi);
 			break;
 			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_POINTS]:
-				displayPoints(rect_tbi);
+				InfoPanelView.#display_points(rect_tbi);
 			break;
 			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_PROGRESS]:
-				displayProgressWidget(rect_tbi);
+				InfoPanelView.#display_progress_widget(rect_tbi);
 			break;
 			case InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_WIND_INDICATOR]:
-				displayWindIndicatorWidget(rect_tbi);
+				InfoPanelView.#display_wind_indicator_widget(rect_tbi);
 			break;
 		}
 	}
 
-	static #toolBarToggleButton_OnToggle(event: ObjectEvent): void
+	static #tool_bar_toggle_button_on_toggle(event: ObjectEvent): void
 	{
 		var tbtb_source: ToolBarToggleButton = ToolBarToggleButton(event.SourceObject);
 		switch(tbtb_source) {
@@ -4223,7 +4312,7 @@ class InfoPanelView //static
 		}
 	}
 	
-	static #uncheckButton(obj_button)
+	static #uncheck_button(obj_button)
 	{
 		if (!obj_button) return;
 		var tbtb: ToolBarToggleButton = ToolBarToggleButton(obj_button);
