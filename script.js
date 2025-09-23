@@ -2214,9 +2214,10 @@ class Airport
 	#extent;
 
 	constructor(is_thumbnail_mode = false) {
-		//this.OnGateLoaded : CustomDispatcher = new CustomDispatcher();
-		//this.OnLevelLoaded: CustomDispatcher = new CustomDispatcher();
-		//this.OnResized: CustomDispatcher = new CustomDispatcher();
+		//TODO: events
+		// this.on_gate_loaded  = new CustomDispatcher();
+		// this.on_level_loaded = new CustomDispatcher();
+		// this.on_resized = new CustomDispatcher();
 		this.#aircrafts = [];
 		this.#airfields = [];
 		this.#aprons = [];
@@ -2397,8 +2398,8 @@ class Airport
 	
 	#load_level_cont()
 	{
-		//TODO: load level continuation let xml_doc = new XML(ulLoader.data);
-		//ulLoader.close();
+		//TODO: load level continuation let xml_doc = new XML(this.#url_loader.data);
+		//this.#url_loader.close();
 
 		let xml_airport = xml_doc.airport[0];
 
@@ -3944,6 +3945,786 @@ class ToolBarToggleButton extends ToolBarItem
 
 
 ///////////////////////////////////////////////////////////
+//  IController.as
+///////////////////////////////////////////////////////////
+
+class IController //interface
+{
+	get_controller_type() {return 0};
+
+	process_dispatcher_event(type, param_obj=null) {return false;}
+
+	run() {}
+}
+
+
+///////////////////////////////////////////////////////////
+//  GameController.as
+///////////////////////////////////////////////////////////
+
+class GameController implements IController //Singleton
+{
+//private consts
+	#CLOSE_ARRIVAL = 1000;
+	#CLOUD_QUANTITY_RATE = 0.001;
+	#LEAVE_BOUND = -300;
+	#MAX_CLOUD_LENGTH = 10000;
+	#MAX_CLOUD_RATIO = 2;	
+	#MAX_CLOUD_WIDTH = 8000;
+	#MAX_SIMULATION_RATE = 3; //frames per frame
+	#MIN_CLOUD_LENGTH = 2000;
+	#MIN_CLOUD_SPEED = 30;
+	#MIN_CLOUD_WIDTH = 4000;
+	#MIN_FUEL = 0.3; 
+	#MIN_SIMULATION_RATE = 1; //frames per frame
+	#NORMAL_WIND_SPEED = 40;
+	#RUNWAY_CAPTURE_ZONE = 0.75;
+	#RUNWAY_RELEASE_DISTANCE = 1.3; //lengths of the runway
+	#FULL_TANK_POINTS = 1000; 
+	#MAX_ACTIVE_AIRCRAFT_COUNT = 13;
+	#MIN_ACTIVE_AIRCRAFT_COUNT = 3;
+	#MIN_EMIT_INTERVAL = 128; //frames
+	#SIMULSTION_ACCELERATION = 3; //times
+	#WAYPOINT_CREATION_TIMEOUT = 50; //milliseconds between waypoint creation
+
+//property fields
+	#landings_done = 0;
+	#landings_to_do = 0;
+	#simulation_rate = 1;	
+
+//other private fields
+	#airport = null;
+	static #controller_instance = null;
+	#previous_simulation_rate = 0;
+	#waypoint_created: = null;
+	#is_creating_path = false;
+	#is_loading_level = false;
+	#is_new_path = false;
+	#emit_frames_interval = 0; //frames	
+    #selected_aircraft = null;
+    #selected_airfield = null;
+	#sound_channel = null;
+	#url_loader = null;	
+
+//properties
+
+	get landings_done() //: int
+    {
+    	return this.#landings_done;
+    }
+
+	get landings_to_do() //: int
+    {
+    	return this.#landings_to_do;
+    }
+	
+	get shift_progress() //: int
+    {
+    	return int(this.#landings_done * 100 / this.#landings_to_do);
+    }
+
+    get simulation_rate() //: Number
+    {
+    	return this.#simulation_rate;
+    }
+
+//methods
+	//constructor 
+	//private constructors not supported by actionscript
+	//use getInstance instead!
+   	constructor(airport)
+	{
+		this.airport = airport;
+		//TODO: events
+		// this.airport.on_level_loaded.addEventListener(CustomDispatcher.ON_LEVEL_LOADED, airport_on_level_loaded);
+		// this.airport.on_gate_loaded.addEventListener(CustomDispatcher.ON_GATE_LOADED, airport_on_gate_loaded);
+		//FrameBuilder.before_rescale.add_event_listener(CustomDispatcher.BEFORE_RESCALE, frame_builder_before_rescale);
+		//HintPanelView.on_hiding.addEventListener(CustomDispatcher.ON_HIDING, hint_panel_view_on_hiding);
+		//HintPanelView.on_shown.addEventListener(CustomDispatcher.ON_SHOWN, hint_panel_view_on_shown);
+	}
+
+	//public methods
+<<<<<<<<<<<<<<<<======== Current place - level 6 ========
+	public function fixAirportRect(AHorZoom: Number, AVertZoom: Number): void
+    {
+		this.airport.fixAirportRect(AHorZoom, AVertZoom);
+	}
+
+	public function getControllerType(): int 
+	{
+		return ControlDispatcher.N_GAME_CONTROLLER;
+	}
+
+	static public function getInstance(airport: Airport = null): GameController
+	{
+		if (!GameController.#controller_instance)
+		{
+			GameController.#controller_instance = new GameController(airport);
+		}
+		return GameController.#controller_instance;
+	}
+
+	public function processDispatcherEvent(AType: int, AParamObj: Object = null): Boolean
+	{
+		switch (AType)
+		{
+			case ControlDispatcher.N_FAST_SIMULATION:
+				if (AParamObj.FastMode && (this.#simulation_rate == 1 
+					|| this.#simulation_rate == 0 && this.#previous_simulation_rate == 1)) 
+				{
+					accelerate();
+				}
+				else if (!AParamObj.FastMode && (this.#simulation_rate > 1 
+					|| this.#simulation_rate == 0 && this.#previous_simulation_rate > 1)) 
+				{
+					decelerate();
+				}
+				return true;
+				
+			case ControlDispatcher.N_NEXT_LEVEL:
+				nextLevel();
+				return true;	
+
+			case ControlDispatcher.N_PATH_FINISH:
+				return finishPath(AParamObj.Position);
+				
+			case ControlDispatcher.N_PATH_CONTINUE:
+				return continuePath(AParamObj.Position);
+				
+			case ControlDispatcher.N_PAUSE_SIMULATION:
+				if (AParamObj.PauseMode && (this.#simulation_rate > 0)) {
+					pause();
+				}
+				else if (!AParamObj.PauseMode && (this.#simulation_rate == 0)) {
+					resume();
+				}			
+				return true;
+				
+			case ControlDispatcher.N_START_LEVEL:
+				startLevel();
+				return true;	
+
+			case ControlDispatcher.N_OBJECT_ACTIVATE:
+				select(AParamObj.Position, true);
+				return true;
+				
+			case ControlDispatcher.N_OBJECT_INFO:
+				return traceObjectInfo();
+				
+			case ControlDispatcher.N_OBJECT_SELECT:
+				select(AParamObj.Position, false);
+				return true;
+
+			case ControlDispatcher.N_SHOW_HINTS:
+				if (HintPanelView.IsShown)
+					return HintPanelView.hide(true);
+				else
+					return HintPanelView.show(true);
+
+			case ControlDispatcher.N_PLAY_LEVEL:
+				playLevel();
+				return true;	
+				
+			case ControlDispatcher.N_DISPLAY_MODE_CHANGED:
+				if (ControlDispatcher.CurrentDisplayMode != DisplayMode.Play) {
+					stopPlayingMelody();
+				}
+				return true;
+		}
+		return false;
+	}
+
+	public function run(): void
+    {
+		var n_frames: int = int(this.#simulation_rate*2);
+		
+		for (var j = 0; j < n_frames; j++)
+		{
+			if (ControlDispatcher.CurrentDisplayMode == DisplayMode.Play)
+			{
+				detectCollisions();
+			}
+			
+			if (ControlDispatcher.CurrentDisplayMode != DisplayMode.Play) return;
+				
+			this.airport.updateWind();
+			
+			for each (var airfield: IAirfield in this.airport.Airfields)
+			{
+				airfield.updateWind(this.airport.CurrentWind.Direction);
+			}
+			
+			controlAircraftQuantity(moveAircrafts());
+			controlClouds();
+		}
+    }
+
+	//protected methods
+
+	/* protected function <#camelStyle#>(<#ADelphiStyle#>: <#Type#>)
+	{
+	}*/
+
+	//private methods
+	private function accelerate(): void
+	{
+		if (this.#simulation_rate == 0) {
+			this.#previous_simulation_rate = Math.min(this.#previous_simulation_rate*GameController.#SIMULSTION_ACCELERATION, GameController.#MAX_SIMULATION_RATE);
+		}
+		else {
+			this.#simulation_rate = Math.min(this.#simulation_rate*GameController.#SIMULSTION_ACCELERATION, GameController.#MAX_SIMULATION_RATE);
+		}
+	}
+
+	private function addWaypoint(AnAircraft: Aircraft, APosition: Point)
+	{
+		if (this.#is_new_path)
+		{			
+			AnAircraft.Path.removeAll();
+			AnAircraft.TargetAirfield = null;
+			this.#is_new_path =  false;
+		}
+		
+		//проверяем на принадлежность ВВП
+		for each (var airfield: IAirfield in this.airport.Airfields)
+		{
+			if (checkAirfieldCapture(airfield, APosition, AnAircraft)) return;
+		}
+			
+		AnAircraft.Path.append(APosition);
+		this.#waypoint_created = new Date(); 
+		
+		//отрыв пути от ВПП
+		if (AnAircraft.TargetAirfield)
+		{
+			var obj_dist2: Object = {Distance: 0};
+			Angle.direction(airfield.Location, APosition, obj_dist2);
+			if (obj_dist2.Distance > AnAircraft.TargetAirfield.Length * GameController.#RUNWAY_RELEASE_DISTANCE)
+			{
+				AnAircraft.TargetAirfield = null;					
+				deselect(false);								
+			}
+		}
+	}
+	
+	private function checkAirfieldCapture(AnAirfield: IAirfield, APosition: Point, AnAircraft: Aircraft): Boolean
+	{
+		if (Instruments.xor(AnAircraft.Type == AircraftType.Copter, AnAirfield is Runway) && AnAirfield.inArea(APosition))
+		{
+			var to_capture: Boolean = false;
+			if (AnAirfield.IsRunway)
+			{
+				var obj_dist: Object = {Distance: 0};
+				Angle.direction(AnAirfield.Location, APosition, obj_dist);
+				to_capture = (obj_dist.Distance / (AnAirfield.Length / 2) > GameController.#RUNWAY_CAPTURE_ZONE);
+			}
+			
+			//захват ВПП
+			if (!AnAirfield.IsRunway || to_capture)
+			{
+				AnAircraft.TargetAirfield = AnAirfield;
+				deselect(false);					
+				selectAirfield(AnAirfield);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private function continuePath(APosition: Point): Boolean
+    {
+		if (this.#is_creating_path)
+		{
+			var dt_current_time: Date = new Date();
+
+			if (dt_current_time.valueOf() - this.#waypoint_created.valueOf() > GameController.#WAYPOINT_CREATION_TIMEOUT)
+			{
+				addWaypoint(this.#selected_aircraft, APosition);
+			}
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private function controlAircraftQuantity(AnAircraftQuantity: int)
+	{
+		this.#emit_frames_interval += 1;
+			
+		if (this.#landings_done + AnAircraftQuantity < this.#landings_to_do)
+		{
+			if (AnAircraftQuantity < GameController.#MIN_ACTIVE_AIRCRAFT_COUNT)
+			{
+				this.#emit_frames_interval = GameController.#MIN_EMIT_INTERVAL;
+				emitAircrafts(false);
+			}
+			else
+			{
+				if (Math.random() < this.airport.TrafficIntensity && AnAircraftQuantity < GameController.#MAX_ACTIVE_AIRCRAFT_COUNT)
+					emitAircrafts(true); 
+			}
+		}
+	}
+
+	private function controlClouds()
+	{
+		if (this.airport.CurrentWind.Speed > GameController.#MIN_CLOUD_SPEED && Math.random() < this.airport.CloudProbability)
+		{
+			emitCloud();
+		}
+		
+		for (var i: int; i < this.airport.Clouds.length; i++)
+		{
+			var cloud: Cloud = this.airport.Clouds[i];
+			cloud.move(this.airport.CurrentWind);
+			if (isCloudLeft(cloud))
+			{
+				this.airport.Clouds.splice(i, 1);
+			}
+		}
+	}		
+
+	private function createAircraft(AType: AircraftType, ALocation:Point, ACourse:Angle, AnAirportRect: Rect, AState:AircraftState, AFuelResidue: Number, AGate: Gate = null): Aircraft
+	{
+		if (AType == AircraftType.Copter)
+			return new Copter(AType, ALocation, ACourse, AnAirportRect, AState, AFuelResidue, AGate);
+		else
+			return new Plane(AType, ALocation, ACourse, AnAirportRect, AState, AFuelResidue, AGate);
+	}
+
+	private function decelerate(): void
+	{
+		if (this.#simulation_rate == 0) {
+			this.#previous_simulation_rate = Math.max(this.#simulation_rate/GameController.#SIMULSTION_ACCELERATION, GameController.#MIN_SIMULATION_RATE);
+		}
+		else {
+			this.#simulation_rate = Math.max(this.#simulation_rate/GameController.#SIMULSTION_ACCELERATION, GameController.#MIN_SIMULATION_RATE);
+		}
+	}
+	
+	private function deselect(DeselectAircraft: Boolean = true, DeselectAirfield: Boolean = true)
+	{
+		if (DeselectAircraft)
+		{
+			if (this.#selected_aircraft != null) { this.#selected_aircraft.Selected = false; this.#selected_aircraft = null; }
+		}
+		
+		if(DeselectAirfield)
+		{
+			if (this.#selected_airfield != null) { this.#selected_airfield.Selected = false; this.#selected_airfield = null; }
+		}
+	}
+
+	private function detectCloseArrivals(ALocation: Point)
+	{
+		for each(var aircraft: Aircraft in this.airport.Aircrafts)
+		{
+			if (Math.abs(aircraft.Location.X - ALocation.X) < GameController.#CLOSE_ARRIVAL 
+				|| Math.abs(aircraft.Location.Y - ALocation.Y) < GameController.#CLOSE_ARRIVAL)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private function detectCollisions()
+	{
+		for (var i: int = 0; i < this.airport.Aircrafts.length; i++)
+		{
+			for (var j: int = i + 1; j < this.airport.Aircrafts.length; j++)
+			{
+				if (this.airport.Aircrafts[i].checkCollision(this.airport.Aircrafts[j]))
+					ControlDispatcher.CurrentDisplayMode = DisplayMode.CrashPause;
+			}
+		}		
+	}
+	
+	private function emitAircrafts(IsArriving: Boolean)
+	{
+		if (this.#emit_frames_interval < GameController.#MIN_EMIT_INTERVAL || this.#landings_done == this.#landings_to_do) return;
+		
+		var mo_place: SelectableObject = null;
+		var i: int = 0;
+		do 
+		{
+			mo_place = getRandomBoundaryPosition(new Angle(Math.random()*360 - 180, Angle.DEGREE));		
+		}
+		while (detectCloseArrivals(mo_place.Location) && ++i < 20);		
+		if (!mo_place) return;
+
+		var dbl_wind_koef: Number = 1 + (this.airport.CurrentWind.MaximalSpeed - GameController.#NORMAL_WIND_SPEED) 
+			/ (this.airport.CurrentWind.DBL_MAX_WIND_SPEED - GameController.#NORMAL_WIND_SPEED);
+		if (dbl_wind_koef < 1) dbl_wind_koef = 1;
+		var aircraft: Aircraft = createAircraft(pickAircraftType(), mo_place.Location, mo_place.Course, this.airport, 
+			IsArriving ? AircraftState.Arriving : AircraftState.Undirected, 
+			Math.random()*(1 - GameController.#MIN_FUEL*dbl_wind_koef) + GameController.#MIN_FUEL*dbl_wind_koef);
+		
+		
+		aircraft.OnLanded.addEventListener(CustomDispatcher.ON_LANDED, Aircraft_OnLanded);
+
+		this.airport.Aircrafts.push(aircraft);
+				
+		this.#emit_frames_interval = 0;
+	}
+
+	private function emitCloud(OnBoundaryOnly: Boolean = true)
+	{
+		var dbl_len: Number = Math.max(Math.random()*GameController.#MAX_CLOUD_LENGTH, GameController.#MIN_CLOUD_LENGTH);
+		var dbl_width: Number = Math.max(Math.random()*GameController.#MAX_CLOUD_WIDTH, GameController.#MIN_CLOUD_WIDTH);
+		var n_density: int = int(Math.floor(Math.random()*Cloud.N_MAX_DENSITY*this.airport.CloudProbability/Cloud.N_AVG_PROBABILITY)) + 1;
+		var dbl_ratio: Number =  dbl_len / dbl_width;
+		if (dbl_ratio < 1)
+		{
+			var dbl_swap: Number = dbl_len;
+			dbl_len = dbl_width;
+			dbl_width = dbl_swap;
+			dbl_ratio = 1 / dbl_ratio;
+		}
+		if (dbl_ratio > GameController.#MAX_CLOUD_RATIO) dbl_width = dbl_len / GameController.#MAX_CLOUD_RATIO;
+
+		var pnt_location: Point;
+		if (OnBoundaryOnly)
+		{
+			pnt_location = getRandomBoundaryPosition(this.airport.CurrentWind.Direction).Location;
+		}
+		else
+		{
+			pnt_location = new Point(this.airport.Location.X + this.airport.Extent.Width*Math.random(), this.airport.Location.Y + this.airport.Extent.Height*Math.random());
+		}
+		
+		this.airport.Clouds.push(new Cloud(pnt_location, new Size(dbl_width, dbl_len), 
+			new Angle(Math.random()*360 - 180, Angle.DEGREE), n_density));
+	}
+	
+	private function finishPath(APosition: Point): Boolean
+    {			
+		if (this.#is_creating_path)
+		{
+			addWaypoint(this.#selected_aircraft, APosition);
+			this.#is_creating_path = false;
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private function getCloudDensity(AnAircraft: Aircraft): int
+	{
+		var n_clouds: int = 0;
+		for each (var cloud: Cloud in this.airport.Clouds)
+		{
+			var pnt_diff: Point = cloud.Location.sub(AnAircraft.Location);
+			if ((Math.max(Math.abs(pnt_diff.X), Math.abs(pnt_diff.Y)) <= Math.max(cloud.Extent.Width/2, cloud.Extent.Height/2))
+				&& cloud.inArea(AnAircraft.Location))
+			{
+				n_clouds += cloud.Density;
+			}
+		}
+		return n_clouds;
+	}
+		
+	private function getRandomBoundaryPosition(ACourse: Angle): SelectableObject
+	{		
+		var dbl_angle: Number = ACourse.Degree;
+		var dbl_x_var: Number = (dbl_angle > 45 && dbl_angle <= 135) ? 0 : ((dbl_angle < -45 && dbl_angle > -135) ? 1 : Math.random());
+		var dbl_y_var: Number = (dbl_angle > 45 && dbl_angle <= 135 || dbl_angle < -45 && dbl_angle > -135) ? Math.random()
+			: ((dbl_angle >= -45 && dbl_angle <= 45) ? 1 : 0);
+		
+		var x: Number = this.airport.Location.X + this.airport.Extent.Width*dbl_x_var;
+		var y: Number = this.airport.Location.Y + this.airport.Extent.Height*dbl_y_var; 
+		return new SelectableObject(new Point(x, y), new Size(0, 0), ACourse);		
+	}
+	
+	private function initLevel()
+	{
+		this.airport.Airfields.length = 0;
+		this.airport.Aircrafts.length = 0;
+		this.airport.Aprons.length = 0;
+		this.airport.Gates.length = 0;
+		this.airport.Clouds.length = 0;
+		this.#simulation_rate = 1;
+		this.#landings_done = 0;
+	}
+
+	private function isCloudLeft(ACloud: Cloud): Boolean
+	{
+		//если центр облака ушел
+		if (this.airport.isInside(ACloud.Location)) return false;
+
+		//смотрим ушли ли угловые точки
+		var apnt: Vector.<Point> = ACloud.CornerPoints;
+		for (var i = 0; i < apnt.length; i++)
+		{
+			if (this.airport.isInside(apnt[i]))
+			{
+				return false;
+			}				
+		}
+		return true;
+	}	
+		
+	private function loadLevel()
+    {
+		var strFile: String = "levels/Level" + GameProgress.Level.toString() + ".xml";
+		this.#url_loader = new URLLoader();
+		var urlr_file: URLRequest = new URLRequest(strFile);
+		try {
+			this.#url_loader.addEventListener(Event.COMPLETE, URLLoader_OnComplete);			
+			this.#url_loader.load(urlr_file);
+		} 
+		catch (error:Error) 
+		{
+			trace("  Unable to load file " + strFile);
+		}		
+    }
+
+	private function loadLevelCont()
+	{
+		var xml_doc: XML = new XML(this.#url_loader.data);
+		this.#url_loader.close();
+
+		var xml_airport: XML = xml_doc.airport[0];
+		if (!xml_airport)
+		{
+			trace("Failed to load level: airport tag not found.");
+			return;
+		}
+		
+		this.#landings_to_do = xml_doc.@targetLandings;		
+		HintPanelView.Hints.length = 0;
+		HintPanelView.ClipIds.length = 0;
+		for each (var xml_hint: XML in xml_doc.hints.hint)
+		{
+			HintPanelView.Hints.push(xml_hint);
+			HintPanelView.ClipIds.push(xml_hint.@clipId);
+		}
+		this.airport.loadLevel("levels/Level" + GameProgress.Level.toString() + ".xml");		
+	}
+
+	private function moveAircrafts(): int
+    {
+		var n_aircrafts_count: int = 0;
+		for (var i: int = 0; i < this.airport.Aircrafts.length; i++)
+		{
+			var aircraft: Aircraft = this.airport.Aircrafts[i];
+			//проверяем попадание в облако
+			aircraft.move(this.airport.CurrentWind, getCloudDensity(aircraft));
+			
+			if (aircraft.State == AircraftState.TakingOff
+				&& (
+					aircraft.Location.X - this.airport.Location.X < GameController.#LEAVE_BOUND 
+					|| this.airport.Location.X + this.airport.Extent.Width - aircraft.Location.X < GameController.#LEAVE_BOUND 
+					|| aircraft.Location.Y - this.airport.Location.Y < GameController.#LEAVE_BOUND 
+					|| this.airport.Location.Y + this.airport.Extent.Height - aircraft.Location.Y < GameController.#LEAVE_BOUND
+				)
+			)
+			{
+				this.airport.Aircrafts.splice(i, 1);
+			}
+			else
+				if (aircraft.State.IsComing || aircraft.State == AircraftState.TaxiingToGate || aircraft.State == AircraftState.Arriving)
+					n_aircrafts_count++;
+		}
+		return n_aircrafts_count;
+	}	
+
+	private function nextLevel(): void
+    {
+		GameProgress.nextLevel();
+		initLevel();		
+	}
+
+	private function pause(): void
+	{
+		this.#previous_simulation_rate = this.#simulation_rate;
+		this.#simulation_rate = 0;
+	}
+
+	private function pickAircraftType(CanPickCopter: Boolean = true): AircraftType
+	{
+		var dbl_random: Number = Math.random();
+		var dbl_copter: Number = this.airport.CopterRate;
+		var dbl_prop: Number = this.airport.PropRate;
+		
+		if (CanPickCopter && dbl_random < dbl_copter)
+			return AircraftType.Copter;		
+		if (dbl_random < dbl_copter + dbl_prop)
+			return AircraftType.Propeller;
+		else if (dbl_random < dbl_copter + dbl_prop + this.airport.LinerRate)
+			return AircraftType.Liner;
+		else
+			return AircraftType.Supersonic;
+	}
+
+	private function playLevel()
+	{
+		if (this.#is_loading_level) return;
+		this.#is_loading_level = true;
+		
+		initLevel();
+		loadLevel();
+	}	
+
+	private function prepareGameStart()
+    {
+		ControlDispatcher.CurrentDisplayMode = DisplayMode.Play;
+				
+		for(var i: int = 0; i < this.airport.CloudProbability / GameController.#CLOUD_QUANTITY_RATE; i++)
+			emitCloud(false);
+		
+		HintPanelView.show();
+		StarView.clear();
+		startPlayingMelody(GameProgress.Level);
+		
+		this.#is_loading_level = false;
+	}
+
+	private function resume(): void
+	{
+		this.#simulation_rate = this.#previous_simulation_rate;
+	}
+
+    private function select(APoint:Point, IsDoubleClicked: Boolean): void
+    {
+		for each(var aircraft: Aircraft in this.airport.Aircrafts)
+		{
+			if (!aircraft.inArea(APoint) || aircraft.State == AircraftState.TakingOff) continue;
+
+			if (!IsDoubleClicked && aircraft.State.IsComing)
+			{
+				this.#is_new_path = true;
+				this.#is_creating_path = true;
+				this.#waypoint_created = new Date();
+			}
+			
+			selectAircraft(aircraft);
+			
+			if (IsDoubleClicked)
+				aircraft.depart();
+			
+			return;
+		}
+		
+		if (this.#selected_aircraft == null) return;
+		
+		for each (var airfield: IAirfield in this.airport.Airfields)
+		{
+			if (!airfield.inArea(APoint)) continue;
+			
+			selectAirfield(airfield);
+			return;
+		}		
+    }
+
+	private function selectAircraft(AnAircraft: Aircraft): void
+	{
+		deselect(true, true);
+		
+		AnAircraft.Selected = true;					
+		this.#selected_aircraft = AnAircraft;
+		
+		if (this.#selected_aircraft.TargetAirfield != null && AnAircraft.State == AircraftState.Directed || AnAircraft.State == AircraftState.Landing)
+			selectAirfield(this.#selected_aircraft.TargetAirfield);
+	}
+
+	private function selectAirfield(AnAirfield: IAirfield): void
+	{
+		//Если самолет на земле, то не направляем его на ВВП если: самолет уже покинул гейт или гейт не относится к этой полосе		 
+		if (!this.#selected_aircraft.State.IsComing && (!this.#selected_aircraft.OccupiedGate || !this.#selected_aircraft.OccupiedGate.isHostedBy(AnAirfield))) return;
+
+		deselect(false, true);		
+							
+		AnAirfield.Selected = true;					
+		this.#selected_airfield = AnAirfield;
+		
+		this.#selected_aircraft.TargetAirfield = AnAirfield;		
+	}
+
+	private function startLevel()
+	{
+		initLevel();
+		ControlDispatcher.CurrentDisplayMode = DisplayMode.LevelStartBanner;
+	}
+	
+	private function startPlayingMelody(ALevelNumber: int)
+	{
+		var transform: SoundTransform = new SoundTransform(0.3, 0);
+		var n_melody: int = ALevelNumber % 6;
+		var class_sound: Class = getDefinitionByName("Melody"+n_melody.toString()) as Class;
+		var snd_melody: Sound = new class_sound();
+		this.#sound_channel = snd_melody.play(10000, 0);
+		this.#sound_channel.soundTransform = transform;
+	}
+			
+	private function stopPlayingMelody()
+	{
+		if(this.#sound_channel) this.#sound_channel.stop();
+	}			
+			
+	private function traceObjectInfo(): Boolean
+	{
+		var is_traced: Boolean = false;
+		if (this.#selected_aircraft)
+		{
+			trace(this.#selected_aircraft);
+			is_traced = true;
+		}
+		if (this.#selected_airfield)
+		{
+			trace(this.#selected_airfield);
+			is_traced = true;			
+		}
+		
+		return is_traced;
+	}	
+	
+	//event handlers
+	private function Airport_OnGateLoaded(AnEvent: Event): void
+	{
+		var gate: Gate = Gate(ObjectEvent(AnEvent).SourceObject)
+		if (!gate.Free)
+		{
+			var aircraft: Aircraft = createAircraft((gate is Helipad) ? AircraftType.Copter : pickAircraftType(false),
+				gate.Location, new Angle(), this.airport, AircraftState.PreparingToTakeoff, Math.random(), gate);
+			
+			this.airport.Aircrafts.push(aircraft);
+		}
+	}	
+	
+	private function Airport_OnLevelLoaded(AnEvent: Event):void {
+		prepareGameStart();
+	}
+
+	private function FrameBuilder_BeforeRescale(AnEvent: Event):void {
+		fixAirportRect(this.airport.Extent.Width / FrameBuilder.GameZoneRect.Extent.Width, this.airport.Extent.Height / FrameBuilder.GameZoneRect.Extent.Height);	
+	}
+
+	private function Aircraft_OnLanded(AnEvent: ObjectEvent):void 
+	{
+		this.#landings_done += 1;
+		var aircraft: Aircraft  = (Aircraft)(AnEvent.SourceObject); 
+		GameProgress.addPoints(int(aircraft.Fuel*GameController.#FULL_TANK_POINTS));
+		StarView.addStar(FrameBuilder.convertToScreenPoint(aircraft.Location));
+	}
+
+	private function HintPanelView_OnHiding(AnEvent: Event):void 
+	{
+		Core.resume();
+	}
+	
+	private function HintPanelView_OnShown(AnEvent: Event):void 
+	{
+		Core.suspend();
+	}	
+
+	private function URLLoader_OnComplete(AnEvent: Event): void
+	{
+		loadLevelCont();
+	}	
+}
+
+///////////////////////////////////////////////////////////
 //  InfoPanelView.as
 ///////////////////////////////////////////////////////////
 
@@ -4123,23 +4904,31 @@ class InfoPanelView //static
 	static #add_tool_bar_item(tool_bar_item, size, handled_events=InfoPanelView.#TO_HANDLE_CLICK, alignment=0, 
 		gravity=0, normal_image=null, pressed_image=null) //: ToolBarItem
 	{
-		if (!tool_bar_item) {
-			if ((handled_events & InfoPanelView.#TO_HANDLE_TOGGLE) != 0) {
+		if (!tool_bar_item) 
+		{
+			if ((handled_events & InfoPanelView.#TO_HANDLE_TOGGLE) != 0) 
+			{
 				var tbtb = null;
-<<<<<<<<<<<<<<<<======== Current place - level 5 ========
 				tbtb = new ToolBarToggleButton(size.clone(), alignment, gravity, normal_image, pressed_image);
-				tbtb.OnToggle.addEventListener(ToolBarEventDispatcher.ON_TOGGLE, InfoPanelView.#tool_bar_toggle_button_on_toggle);
+				//TODO: event
+				//tbtb.on_toggle.addEventListener(ToolBarEventDispatcher.ON_TOGGLE, InfoPanelView.#tool_bar_toggle_button_on_toggle);
 				tool_bar_item = tbtb;
 			}
-			else {
+			else 
+			{
 				tool_bar_item = new ToolBarItem(size.clone(), alignment, gravity, normal_image, pressed_image);
 			}
 			
-			if ((handled_events & InfoPanelView.#TO_HANDLE_CLICK) != 0)
-				tool_bar_item.on_click.addEventListener(ToolBarEventDispatcher.ON_CLICK, InfoPanelView.#tool_bar_item_on_click);					
+			if ((handled_events & InfoPanelView.#TO_HANDLE_CLICK) != 0) 
+			{
+				//TODO: event
+				//tool_bar_item.on_click.addEventListener(ToolBarEventDispatcher.ON_CLICK, InfoPanelView.#tool_bar_item_on_click);					
+			}
 
-			if ((handled_events & InfoPanelView.#TO_HANDLE_PAINT) != 0)
-				tool_bar_item.on_paint.addEventListener(ToolBarEventDispatcher.ON_PAINT, toolBarItem_OnPaint);													
+			if ((handled_events & InfoPanelView.#TO_HANDLE_PAINT) != 0) {
+				//TODO: event
+				//tool_bar_item.on_paint.addEventListener(ToolBarEventDispatcher.ON_PAINT, InfoPanelView.#tool_bar_item_on_paint);
+			}
 		}
 		InfoPanelView.#tool_bar.add_item(tool_bar_item);
 		return tool_bar_item;
@@ -4147,14 +4936,14 @@ class InfoPanelView //static
 	
 	static #control_buttons_state()
 	{
-		if (ControlDispatcher.CurrentDisplayMode != DisplayMode.Play) return;
+		if (ControlDispatcher.current_display_mode != DisplayMode.PLAY) return;
 
-		InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT].pressed = HintPanelView.IsShown;
+		InfoPanelView.#ITEMS[InfoPanelView.#BUTTON_INDEX_HINT].pressed = HintPanelView.is_shown;
 	}
 
 	static #create_tool_bar()
 	{	
-		var rect_info_panel: Rect = FrameBuilder.InfoPanelRect;
+		let rect_info_panel = FrameBuilder.info_panel_rect;
 		var pnt_margins: Point = new Point(rect_info_panel.extent.width*InfoPanelView.#TOOLBAR_HORIZONTAL_MARGIN, 
 			rect_info_panel.extent.height*InfoPanelView.#TOOLBAR_VERTICAL_MARGIN);
 		var sz_tool_bar = new Size(rect_info_panel.extent.width - pnt_margins.x*2,
@@ -4166,40 +4955,43 @@ class InfoPanelView //static
 		);
 	}		
 
-	static #display_level_number(ADisplayRect: Rect)
+	static #display_level_number(display_rect)
 	{
-		ADisplayRect.location.Y = ADisplayRect.location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_LEVEL_NUMBER);
-		ADisplayRect.extent = new Size(-1, -1);
-		ScreenManager.displayText("Level " + GameProgress.Level.toString(), ADisplayRect,
-			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL), Colors.Brown);
+		display_rect.location.y = display_rect.location.y + FrameBuilder.adapt_to_frame(InfoPanelView.#Y_TITLE_LEVEL_NUMBER);
+		display_rect.extent = new Size(-1, -1);
+		ScreenManager.display_text("Level " + GameProgress.level.to_string(), display_rect,
+			FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_SMALL), Colors.BROWN);
 	}	
 
-	static #display_points(ADisplayRect: Rect)
+	static #display_points(display_rect)
 	{
-		ADisplayRect.location.Y = ADisplayRect.location.Y + FrameBuilder.adaptToFrame(InfoPanelView.#Y_TITLE_POINTS_NUMBER);
-		ADisplayRect.extent = new Size(-1, -1);
-		ScreenManager.displayText("Points: " + GameProgress.Points.toString(), ADisplayRect,
-			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL), Colors.Brown);	
+		display_rect.location.y = display_rect.location.y + FrameBuilder.adapt_to_frame(InfoPanelView.#Y_TITLE_POINTS_NUMBER);
+		display_rect.extent = new Size(-1, -1);
+		ScreenManager.display_text("Points: " + GameProgress.points.to_string(), display_rect,
+			FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_SMALL), Colors.BROWN);	
 	}
 
-	static #display_progress_widget(ADisplayRect: Rect)
+	static #display_progress_widget(display_rect)
 	{
 		//звездочки
-		var sp_progress: Sprite = new ProgressImage();
-//		var cy_padding: Number = FrameBuilder.adaptToFrame(InfoPanelView.#CY_OP_PADDING);
-		ADisplayRect.location.Y = ADisplayRect.location.Y /*+ cy_padding*/ + ADisplayRect.extent.height / 2;
-//		ADisplayRect.extent.height = ADisplayRect.extent.height - cy_padding*2;
-		var dbl_zoom: Number = ADisplayRect.extent.height / sp_progress.height;
-		ADisplayRect.extent.width = sp_progress.width * dbl_zoom;
+		//TODO: sprite creation
+		//var sp_progress = new ProgressImage();
+//		var cy_padding = FrameBuilder.adapt_to_frame(InfoPanelView.#CY_OP_PADDING);
+		display_rect.location.y = display_rect.location.y /*+ cy_padding*/ + display_rect.extent.height / 2;
+//		display_rect.extent.height = display_rect.extent.height - cy_padding*2;
+		let dbl_zoom = display_rect.extent.height / sp_progress.height;
+		display_rect.extent.width = sp_progress.width * dbl_zoom;
 
 		//заполнитель
-		var rect_filler: Rect = ADisplayRect.clone();
-		var sp_filler: Sprite = new ProgressFillerImage();
+		var rect_filler = display_rect.clone();
+		//TODO: sprite creation
+		// var sp_filler = new ProgressFillerImage();
+<<<<<<<<<<<<<<<<======== Current place - level 5 ========
 		var gc: GameController = GameController.getInstance();
-		rect_filler.extent.width = sp_filler.width * dbl_zoom * gc.LandingsDone / gc.LandingsToDo;
+		rect_filler.extent.width = sp_filler.width * dbl_zoom * gc.landings_done / gc.landings_to_do;
 
 		ScreenManager.displayImage(sp_filler, rect_filler);
-		ScreenManager.displayImage(sp_progress, ADisplayRect);
+		ScreenManager.displayImage(sp_progress, display_rect);
 	}
 
 	static #display_tool_bar()
@@ -4221,35 +5013,35 @@ class InfoPanelView //static
 		InfoPanelView.#tool_bar.display();
 	}	
 
-	static #display_wind_indicator_widget(ADisplayRect: Rect)
+	static #display_wind_indicator_widget(display_rect: Rect)
 	{
 		var sp_frame: Sprite = new WindIndicatorFrameImage();
 		var sp_arrow: Sprite = new WindIndicatorArrowImage();
 		var sp_filler: Sprite = new WindIndicatorFillerImage();
 
-		ADisplayRect.location.x = ADisplayRect.location.x + ADisplayRect.extent.width/2;
-		ADisplayRect.location.Y = ADisplayRect.location.Y + ADisplayRect.extent.height/2;
+		display_rect.location.x = display_rect.location.x + display_rect.extent.width/2;
+		display_rect.location.y = display_rect.location.y + display_rect.extent.height/2;
 		//displaying frame
 		//var dbl_wind_indi_size: Number = FrameBuilder.adaptToFrame(InfoPanelView.#WIND_INDICATOR_LENGTH);
-		var dbl_zoom: Number = ADisplayRect.extent.height / InfoPanelView.#WIND_INDICATOR_LENGTH;
+		var dbl_zoom: Number = display_rect.extent.height / InfoPanelView.#WIND_INDICATOR_LENGTH;
 		
-		ScreenManager.displayImage(sp_frame, ADisplayRect);
+		ScreenManager.displayImage(sp_frame, display_rect);
 
 		//dispalying wind arrow
 		var cy_arrow = DBL_WIND_ARROW_HEIGHT * dbl_zoom;
 
-		ADisplayRect.extent.height = cy_arrow; //* ratio
-		ADisplayRect.extent.width = InfoPanelView.#WIND_ARROW_WIDTH * dbl_zoom; //* ratio
-		ADisplayRect.location.x -= cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.sin();
-		ADisplayRect.location.Y += cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.cos();
-		ScreenManager.displayImage(sp_arrow, ADisplayRect, InfoPanelView.#airport.CurrentWind.Direction);
+		display_rect.extent.height = cy_arrow; //* ratio
+		display_rect.extent.width = InfoPanelView.#WIND_ARROW_WIDTH * dbl_zoom; //* ratio
+		display_rect.location.x -= cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.sin();
+		display_rect.location.y += cy_arrow / 2 * InfoPanelView.#airport.CurrentWind.Direction.cos();
+		ScreenManager.displayImage(sp_arrow, display_rect, InfoPanelView.#airport.CurrentWind.Direction);
 
 		//displaying undispaled sector :)
 		var ratio: Number =  (InfoPanelView.#airport.CurrentWind.DBL_MAX_WIND_SPEED - InfoPanelView.#airport.CurrentWind.Speed)
 			/InfoPanelView.#airport.CurrentWind.DBL_MAX_WIND_SPEED;
-		ADisplayRect.extent.height = (cy_arrow - 1) * ratio;
-		ADisplayRect.extent.width = (InfoPanelView.#WIND_ARROW_WIDTH - FrameBuilder.adaptToFrame(2))*dbl_zoom;
-		ScreenManager.displayImage(sp_filler, ADisplayRect, InfoPanelView.#airport.CurrentWind.Direction);
+		display_rect.extent.height = (cy_arrow - 1) * ratio;
+		display_rect.extent.width = (InfoPanelView.#WIND_ARROW_WIDTH - FrameBuilder.adaptToFrame(2))*dbl_zoom;
+		ScreenManager.displayImage(sp_filler, display_rect, InfoPanelView.#airport.CurrentWind.Direction);
 	}
 
 //event handlers
@@ -4551,7 +5343,7 @@ class ControlDispatcher //static
 					case DisplayMode.PLAY:
 					case DisplayMode.CRASH_PAUSE:
 						nTitlePause = 0;
-						GameProgress.acceptLevelResult(GameController.getInstance().ShiftProgress);
+						GameProgress.acceptLevelResult(GameController.get_instance().shift_progress);
 						ControlDispatcher.current_display_mode = DisplayMode.LEVEL_FAILED_BANNER;
 				}
 				break;
@@ -4584,7 +5376,7 @@ class ControlDispatcher //static
 			case IncomingDispatcherEventTypes.INFO_PANEL_RESTART_CLICK:	
 				if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
 				{
-					GameProgress.acceptLevelResult(GameController.getInstance().ShiftProgress);
+					GameProgress.acceptLevelResult(GameController.getInstance().shift_progress);
 					return FActiveController.processDispatcherEvent(N_START_LEVEL);				
 				}
 				break;
@@ -4624,7 +5416,7 @@ class ControlDispatcher //static
 					break;
 
 				case DisplayMode.CRASH_PAUSE:
-					GameProgress.acceptLevelResult(GameController.getInstance().ShiftProgress);
+					GameProgress.acceptLevelResult(GameController.getInstance().shift_progress);
 					ControlDispatcher.current_display_mode = DisplayMode.LEVEL_FAILED_BANNER;
 					FActiveController = GameController.getInstance();
 					break;					
@@ -4648,7 +5440,7 @@ class ControlDispatcher //static
 					FActiveController = GameController.getInstance();
 					break;										
 				case DisplayMode.PLAY:
-					if (GameController.getInstance().ShiftProgress >= 100)
+					if (GameController.getInstance().shift_progress >= 100)
 					{
 						GameProgress.acceptLevelResult(100);					
 						ControlDispatcher.current_display_mode = DisplayMode.MISSION_COMPLETE_PAUSE;
@@ -4818,7 +5610,7 @@ class FrameBuilder //static
 	
 	static convert_to_model_point(APoint: Point): Point
 	{
-		return new Point((APoint.x - FOrigin.x) * FZoom, (APoint.Y - FOrigin.Y - FrameBuilder.#info_panel_rect.extent.height) * FZoom);
+		return new Point((APoint.x - FOrigin.x) * FZoom, (APoint.y - FOrigin.y - FrameBuilder.#info_panel_rect.extent.height) * FZoom);
 	}
 	
 	static convert_to_model_rect(ARect: Rect): Rect
@@ -4838,7 +5630,7 @@ class FrameBuilder //static
 	
 	static convert_to_screen_point(APoint: Point): Point
 	{
-		return new Point(APoint.x / FZoom + FOrigin.x, APoint.Y / FZoom + FOrigin.Y + FrameBuilder.#info_panel_rect.extent.height);
+		return new Point(APoint.x / FZoom + FOrigin.x, APoint.y / FZoom + FOrigin.y + FrameBuilder.#info_panel_rect.extent.height);
 	}
 	
 	static convert_to_screen_rect(ARect: Rect): Rect 
