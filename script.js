@@ -1949,6 +1949,788 @@ class AircraftType //enum
     }	
 }
 
+
+///////////////////////////////////////////////////////////
+//  AircraftState.as
+///////////////////////////////////////////////////////////
+
+class AircraftState extends Enum 
+{
+	static ARRIVING = new AircraftState("Arriving", 0);							//подлетающие к аэродрому самолеты, но еще не вошедшие в его зону
+	static UNDIRECTED = new AircraftState("Undirected", 1);						//самолеты, маршрут для которых не задан
+	static DIRECTED = new AircraftState("Directed", 2);							//самолеты, летящие по маршруту
+	static APPROACHING = new AircraftState("Approaching", 3); 					//самолеты, производящие заход
+    static LANDING = new AircraftState("Landing", 4);							//производящие посадку
+    static TAXIING_TO_GATE = new AircraftState("TaxiingToGate", 5);				//рулящие к гейту
+	static PREPARING_TO_TAKEOFF = new AircraftState("PreparingToTakeoff", 6);	//готовищиеся к взлету
+    static READY_TO_TAKEOFF = new AircraftState("ReadyToTakeoff", 7);			//готовые к взлету
+    static TAXIING_TO_AIRFIELD = new AircraftState("TaxiingToAirfield", 8);		//рулящие к ВВП
+	static TAKING_OFF = new AircraftState("TakingOff", 9);						//взлетающие и взлетевшие, покидающие аэродром
+	
+	static values() {
+	  return [AircraftState.ARRIVING,  AircraftState.UNDIRECTED,  AircraftState.DIRECTED,  AircraftState.APPROACHING,  
+	  	AircraftState.LANDING,  AircraftState.TAXIING_TO_GATE, AircraftState.PREPARING_TO_TAKEOFF,  
+	  	AircraftState.READY_TO_TAKEOFF,  AircraftState.TAXIING_TO_AIRFIELD,  AircraftState.TAKING_OFF];
+	} //enum
+
+	public function get is_coming()
+	{
+		return this == AircraftState.ARRIVING || this == AircraftState.DIRECTED || this == AircraftState.UNDIRECTED
+			|| this == AircraftState.APPROACHING || this == AircraftState.LANDING;
+	}	
+
+	//public methods			
+    public function to_string(indent=0) 
+    {
+		let str_indent = Instruments.string_of_char("\t", indent);
+		let str_indent_plus = Instruments.string_of_char("\t", indent + 1);
+		return str_indent + "[AircraftState]\n"
+			+ str_indent + "{\n"
+			+ str_indent_plus + "name=" + this.name + "\n"
+			+ str_indent + "}\n";
+    }	
+}
+
+
+///////////////////////////////////////////////////////////
+//  Aircraft.as
+///////////////////////////////////////////////////////////
+
+class Aircraft extends SelectableObject
+{
+//public consts
+	static get ARRIVAL_PERIOD() {return 8;} //sec
+	static get ARRIVAL_PERIOD() {return 600;} //m	
+	
+	//go around reasons
+	static get GA_REASON_NONE() {return 0;}
+	static get GA_REASON_CLOUDS() {return 2;}
+	static get GA_REASON_UNKNOWN() {return 3;}
+	static get GA_REASON_WIND() {return 1;}
+	
+
+//protected consts
+	_ANG_COURSE = Math.PI / 12; //ширина курса, deg
+	_BRAKING = -8; //m/s
+
+//protected fields
+	_altitude = 0;
+	_collided = false;
+	_is_occuping_airfield = false; 		
+    _is_takeoff_pending = false; 
+	_occupied_gate = null;		
+    _path = null;
+	_state = null;
+    _target_airfield = null;
+	_time_to_arrive = 0;
+	_type = null;
+	_acceleration = 0;
+	_fuel = this.#MAX_FUEL;
+	_speed = 0;	
+	_velocity = 0;	
+    _turn = 0;
+	_waypoint_miss_ticks = 0;
+	_airport_rect = null;
+	_xy_waypoint_distance = Number.MAX_VALUE;
+
+//private consts
+	#TURN_ADMIS_ERROR = new Angle(10, Angle.DEGREE); //deg
+	#AIRCRAFT_SIZE = 750; //m
+	#BOUNCE_BOUND = 1000; //m
+	#COLLISION_HOR_DISTANCE = 300;
+	#COLLISION_VERT_DISTANCE = 50;
+	#CRITICAL_DOWNWIND = 20; //if more -> wind is considered is GA cause
+	#FLARE_ALTITUDE = 30; //m	
+	#FUEL_CONSUMPTION = 1; //secs of flight per second
+	#FUELING_RATE = 5; //secs of flight per second
+	#LANDING_DESCENT = -25; //m/s
+	#LANDING_DETERIORATION_IN_CLOUD = 0.2;
+	#MAX_FUEL = 768; //secs of flight
+	#TAKEOFF_CLIMB = 50; //m/s
+	#WAYPOINT_REACH_DISTANCE = 500; //m
+	#COURSE_CHECK_POINTS = 3; //количество точек, по которым контролируется попадание маршрута в подход
+	#CRITICAL_CLOUD_DENSITY = 80; //if more -> clouds are considered is GA cause
+	#GA_FRAMES = 100; //frames after ga, when ga reason is set
+	#MAX_WAYPOINT_MISS_TICKS = 32; //макс. кол-во тиков, при которых самолет летит мимо точки
+	#WAYPOINT_REACH_DEPTH = 5;
+
+//property fields
+	#go_around_reason = Aircraft.GA_REASON_NONE;
+
+//other fields
+	#max_downwind_speed = 0; 
+	#is_first_contact = true;
+	#is_first_loss_of_contact = true;
+	#cloud_density_counter = 0; 
+	#go_around_frame_counter = 0;
+
+//properties
+	get altitude() //: Number
+    {
+    	return this._altitude;
+    }
+
+	get collided() //: Boolean
+    {
+    	return this._collided;
+    }
+	
+	get fuel() //: Number
+    {
+    	return this._fuel / this.#MAX_FUEL;
+    }
+
+	get go_around_reason() //: int
+    {
+    	return this.#go_around_reason;
+    }
+	
+	get is_occuping_airfield() //: Boolean
+    {
+    	return this._is_occuping_airfield;
+    }
+
+	get is_takeoff_pending() //: Boolean
+    {
+    	return this._is_takeoff_pending;
+    }
+
+	get occupied_gate() //: Gate
+    {
+    	return this._occupied_gate;
+    }
+			
+    get path() //: Points
+    {
+    	return this._path;
+    }
+	
+    get state() //: AircraftState
+    {
+    	return this._state;
+    }
+
+	get target_airfield() //: IAirfield
+	{
+		return this._target_airfield;
+	}
+
+	set target_airfield(airfield)
+	{
+		this.#reset_waypoint_miss_counter();
+		
+		if (!this._state.is_coming)
+		{
+			this.depart();
+		}
+
+		if (this._target_airfield && (this._target_airfield != airfield))
+		{
+			this.#freeAirfield();
+		}
+		this._target_airfield = airfield;			
+		
+		if (this._state == AircraftState.DIRECTED && !this._target_airfield && this._path.Length == 0)
+			this._state = AircraftState.UNDIRECTED;
+		else
+			if (this._state == AircraftState.UNDIRECTED)
+				this._state == AircraftState.DIRECTED;
+	}
+
+	get time_to_arrive() //: Number
+	{
+		return this._time_to_arrive;
+	}
+
+    get type() //: AircraftType
+    {
+    	return this._type;
+    }
+	
+//constructor
+	constructor(aircraft_type, location, course, airport_rect, state, fuel_residue, gate=null)
+    {
+		this._type = aircraft_type;
+		this._path = new Points();
+		this._path.on_add.add_event_listener(PointsEventDispatcher.ON_ADD, this.#points_on_add);
+		this._path.on_remove.add_event_listener(PointsEventDispatcher.ON_REMOVE, this.#points_on_remove);
+
+		super(location, new Size(this.#AIRCRAFT_SIZE, this.#AIRCRAFT_SIZE), course);
+
+		this._state = state;
+		this._fuel = fuel_residue * this.#MAX_FUEL;
+		this._airport_rect = airport_rect;
+		this._altitude = (this._state == AircraftState.PREPARING_TO_TAKEOFF) ? 0 : Aircraft.ARRIVAL_PERIOD;
+		this._time_to_arrive = (this._state == AircraftState.ARRIVING) ? Aircraft.ARRIVAL_PERIOD : 0;
+		this._speed = (this._state == AircraftState.UNDIRECTED) ? this._type.cruise_speed : 0;
+		
+		if (gate != null)
+			gate.occupy();
+		this._occupied_gate = gate;
+
+    	this.on_landed = new CustomDispatcher();
+    }
+
+//public methods
+<<<<<<<<<<<<<<<<======== Current place - level 7 ========
+
+	checkCollision(AnOtherAircraft: Aircraft, APrimaryCheck: Boolean = true): Boolean
+	{
+		if (Math.abs(this.Location.X - AnOtherAircraft.Location.X) <= this.#COLLISION_HOR_DISTANCE
+			&& Math.abs(this.Location.Y - AnOtherAircraft.Location.Y) <= this.#COLLISION_HOR_DISTANCE
+			&& Math.abs(this.altitude - AnOtherAircraft.altitude) <= this.#COLLISION_VERT_DISTANCE
+			&& Instruments.xor(this.altitude == 0, AnOtherAircraft.altitude != 0)
+			)
+		{
+			this._collided= true;
+			if (APrimaryCheck)
+			{
+				AnOtherAircraft.checkCollision(this, false);
+			}
+		}
+		
+		return this._collided;
+	}
+
+	depart(): void
+	{
+		if (this._state == AircraftState.ReadyToTakeoff)
+			this._is_takeoff_pending = true;
+		//дальнейшие действия по старту см. stayReadyToTakeoff()
+	}
+
+	public override function inArea(APoint:Point)
+    {
+		var point: Point = APoint.sub(Location);
+		return point.Radius < this.#AIRCRAFT_SIZE / 2;
+	}
+
+	move(AWind: Wind, ACloudDensity: int): void
+	{
+		if (this.#go_around_frame_counter > 0) 
+			--this.#go_around_frame_counter;
+		else
+			this.#go_around_reason = Aircraft.GA_REASON_NONE;
+			
+		control(AWind, ACloudDensity);
+		calcSpeeds();
+		calcLocation(AWind);
+	}
+
+	public override function toString(AnIndent: int = 0): String
+	{
+		var str_indent = Instruments.stringOfChar("\t", AnIndent);
+		var str_indent_plus = Instruments.stringOfChar("\t", AnIndent + 1);
+		return str_indent + "[Aircraft]\n" 
+			+ super.toString(AnIndent + 1) + "\n"
+			+ str_indent_plus + "altitude=" + this._altitude + "\n"
+			+ str_indent_plus + "collided=" + this._collided + "\n"
+			+ str_indent_plus + "is_occuping_airfield=" + this._is_occuping_airfield + "\n"
+			+ str_indent_plus + "is_takeoff_pending=" + this._is_takeoff_pending + "\n"
+			+ str_indent_plus + "occupied_gate=\n" 
+			+ (this._occupied_gate ? this._occupied_gate.toString(AnIndent + 2) : "")
+			+ str_indent_plus + "state=" + this._state.toString(AnIndent + 2) + "\n"
+			+ str_indent_plus + "target_airfield=\n" 
+			+ (this._target_airfield ? this._target_airfield.toString(AnIndent + 2): "")
+		+ str_indent + "}\n";	
+	}
+
+	//protected methods
+
+	protected function approach(AWind: Wind, ACloudDensity: int)
+	{
+		//ускорение и набор затем могут быть переопределены в land(), который использует данный метод
+		this._acceleration = (this._speed > this._type.TouchdownSpeed) ? this._type.Deceleration: 0;
+		this._velocity = (this._altitude > this.#FLARE_ALTITUDE) ? 
+			(this.#LANDING_DESCENT * (1 - this.#LANDING_DETERIORATION_IN_CLOUD * ACloudDensity)) 
+			: 0;
+			
+		this.#max_downwind_speed = Math.max(AWind.Direction.sub(Course).cos() * AWind.Speed, this.#max_downwind_speed);
+		this.#cloud_density_counter += ACloudDensity;
+		
+		var is_in_landing_zone: Boolean = this._target_airfield.inLandingZone(this.Location);
+		
+		var to_continue_approach: Boolean = navigateToAirfield(is_in_landing_zone, AWind);
+				
+		if (to_continue_approach)
+		{
+			captureAirfield();
+		}
+		
+		return to_continue_approach && is_in_landing_zone;
+	}
+
+	protected function brake(AWind: Wind): void
+	{
+		//сели, теперь нужно затормозить
+		this._acceleration = (this._speed > this._type.TaxiingSpeed) ? this._BRAKING: 0;
+		this._velocity = (this._altitude > 0) ? this.#LANDING_DESCENT : 0;
+	}
+
+	protected function control(AWind: Wind, ACloudDensity: int): Boolean
+	{
+		switch (this._state)
+		{
+			case AircraftState.Arriving:
+				arrive();
+				break;
+
+			case AircraftState.Undirected:
+				flyUndirected();
+				break;
+				
+			case AircraftState.Directed:
+				flyDirected(AWind);
+				break;
+
+			case AircraftState.Approaching:
+				approach(AWind, ACloudDensity);
+				break;
+				
+			case AircraftState.Landing:
+				land(AWind, ACloudDensity);	
+				break;
+							
+			case AircraftState.PreparingToTakeoff:
+				prepareToTakeoff()
+				break;
+				
+			case AircraftState.ReadyToTakeoff:
+				stayReadyToTakeoff();
+				break;
+				
+			case AircraftState.TakingOff:
+				takeoff(AWind);
+				break;
+				
+			default: 
+				this._turn = 0;
+				return false;
+		}
+		
+		return true;
+	}
+
+	protected function convertToGroundSpeed(ASpeed: Number, AWind: Wind)
+	{
+		return this._speed + Course.sub(AWind.Direction).cos() * AWind.Speed;	
+	}
+
+	protected function convertToInstrumentalSpeed(ASpeed: Number, AWind: Wind)
+	{
+		return this._speed - Course.sub(AWind.Direction).cos() * AWind.Speed;		
+	}
+
+	protected function declareLanded()
+	{
+		this._target_airfield.free(this);
+		this._target_airfield = null;
+		this._state = AircraftState.PreparingToTakeoff;
+		OnLanded.fireOnLanded(this);				
+	}
+
+	protected function examineGoAroundReason()
+    {
+		if (this._state != AircraftState.Landing) return;
+		
+		if (this.#max_downwind_speed > this.#CRITICAL_DOWNWIND)
+			this.#go_around_reason = Aircraft.GA_REASON_WIND;
+		else if (this.#cloud_density_counter > this.#CRITICAL_CLOUD_DENSITY)
+			this.#go_around_reason = Aircraft.GA_REASON_CLOUDS;
+		else
+			this.#go_around_reason = Aircraft.GA_REASON_UNKNOWN;
+		trace("==============================");
+		trace("this._fuel = " + this._fuel);
+		trace("GA_CAUSE = " + this.#go_around_reason);
+		trace("this._state = " + this._state.StateName);
+		trace("this.#max_downwind_speed = " + this.#max_downwind_speed);
+		trace("this.#cloud_density_counter = " + this.#cloud_density_counter);
+		this.#go_around_frame_counter = this.#GA_FRAMES;
+    }	
+
+	protected function getTargetCourse(): Angle
+	{
+		return this._target_airfield.Course;
+	}
+
+	protected function goAround(AWind: Wind): void
+	{
+		lossOfContact(AWind);
+		freeAirfield();
+
+		examineGoAroundReason();
+
+		this._state = AircraftState.Undirected;
+	}
+
+	protected function land(AWind: Wind, ACloudDensity: int): Boolean
+	{
+		//заход
+		var is_over_airfield: Boolean = approach(AWind, ACloudDensity);
+		
+		//если мы уже над полосой
+		if (is_over_airfield && this._occupied_gate != null)
+		{
+			this._turn = Course.getRotation(this._target_airfield.ActiveCourse);
+			
+			if (this._altitude <= 0)
+			{
+				if (this.#is_first_contact) 
+				{
+					touchdown(AWind);
+				}
+				return true;
+			}
+			else
+			{
+				//садимся							
+				this._acceleration = (this._speed > this._type.TouchdownSpeed) ? this._type.Deceleration: 0;
+				this._velocity = (this._altitude > 0) ? this.#LANDING_DESCENT : 0;
+			}
+		}
+		return false;
+	}
+
+	protected function lossOfContact(AWind: Wind)
+	{
+		this.#is_first_contact = true;
+		this.#is_first_loss_of_contact = false;
+	}
+	
+	protected function navigateToAirfield(IsInLandingZone: Boolean, AWind: Wind): Boolean
+	{
+		return true;
+	}
+
+	protected function stayReadyToTakeoff(): Boolean
+	{
+		this._turn = 0;
+		this._acceleration = 0;
+		if (this._is_takeoff_pending)
+		{
+			//если полоса для старта не опеределена берем свободную в текущий момент
+			var airfield: IAirfield = this._target_airfield ? this._target_airfield : this._occupied_gate.HostingAirfield;
+			this._is_occuping_airfield = airfield.occupyToTakeoff(this);
+			if (this._is_occuping_airfield)
+			{
+				this._target_airfield = airfield;
+				this._state = AircraftState.TaxiingToAirfield;
+				this._occupied_gate.free(this);
+				this._occupied_gate = null;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected function stop()
+	{
+		this._speed = 0;
+		this._acceleration = 0;
+		this._turn = 0;
+	}
+
+	protected function takeoff(AWind: Wind): void
+	{
+		if (this.#is_first_loss_of_contact)
+		{
+			lossOfContact(AWind) //hook
+		}
+		
+		this._velocity = this.#TAKEOFF_CLIMB;
+		if (this._target_airfield != null)
+		{
+			this._target_airfield.free(this);
+			this._is_occuping_airfield = false;				
+			this._target_airfield.Selected = false;
+			this._target_airfield = null;
+			this.Selected = false;
+		}
+	}	
+	
+	protected function touchdown(AWind: Wind) 
+	{
+		this._altitude = 0;
+		this._velocity = 0;
+		this.#is_first_contact = false;
+		this.#is_first_loss_of_contact = true;
+	}
+	
+	//private methods
+
+	private function arrive(): void
+	{
+		this._time_to_arrive -= 1 / Core.N_FRAME_RATE;
+		if (this._time_to_arrive <= 0)
+		{
+			this._state = AircraftState.Undirected;
+			this._speed = this._type.CruiseSpeed;
+		}
+	}
+
+	private function calcLocation(AWind: Wind): void
+	{
+		//calc altitude
+		this._altitude += this._velocity / Core.N_FRAME_RATE;
+		if (this._altitude < 0)
+		{
+			this._altitude = 0; 
+			if (this._state.is_coming && (!this._target_airfield || !this._target_airfield.inArea(Location)))
+			{
+					this._collided = true;
+			}
+		}
+
+		//calc course
+		Course.Radian += this._type.TurnAngle.Radian * this._turn / Core.N_FRAME_RATE * ((this.altitude == 0) ? 3 : 1);
+		
+		//calc position
+		var x: Number = Course.sin() * this._speed / Core.N_FRAME_RATE;
+		var y: Number = -Course.cos() * this._speed / Core.N_FRAME_RATE;
+		
+		if (this._altitude > 0)
+		{
+			x += AWind.Direction.sin() * AWind.Speed / Core.N_FRAME_RATE;
+			y += -AWind.Direction.cos() * AWind.Speed / Core.N_FRAME_RATE;
+		}
+		
+		Location.X += x;
+		Location.Y += y;		
+	}
+
+	private function calcSpeeds(): void
+	{
+		this._speed += this._acceleration / Core.N_FRAME_RATE;
+
+		if (this._state.is_coming && this._velocity >= 0 && this._acceleration >= 0) 
+		{
+			this._fuel -= this.#FUEL_CONSUMPTION / Core.N_FRAME_RATE;
+			if (this._fuel < 0)
+			{
+				this._fuel = 0;
+			}
+		}
+		if (this._speed < 0) this._speed = 0;
+		if (this._fuel == 0) this._velocity = this.#LANDING_DESCENT;
+	}
+
+	private function captureAirfield(): void
+	{
+		if (this._target_airfield != null && !this._is_occuping_airfield)
+		{
+			this._occupied_gate = this._target_airfield.occupyToLand(this);
+			if (this._occupied_gate != null)
+			{
+				this._is_occuping_airfield = true;
+				this._path.removeAll();
+				this._state = AircraftState.Landing;
+			}
+			else
+				this._is_occuping_airfield = false;	
+		}
+	}
+
+	private function checkNextWaypointAccessibility()
+	{
+		var pnt_dist: Point = this.Location.sub(this._path.get(0));
+		var xy_dist: Number = Math.abs(pnt_dist.X) + Math.abs(pnt_dist.Y);
+		if (xy_dist <= this._xy_waypoint_distance) 
+		{
+			this._xy_waypoint_distance = xy_dist;
+			this._waypoint_miss_ticks = 0;
+			return false;
+		}
+		else
+			return ++this._waypoint_miss_ticks > this.#MAX_WAYPOINT_MISS_TICKS;
+	}
+
+	private function flyDirected(AWind: Wind): void
+	{
+		this._acceleration = (this._speed < this._type.CruiseSpeed) ? this._type.Acceleration: 0;
+		this._velocity = (this._altitude < Aircraft.ARRIVAL_PERIOD) ? this.#TAKEOFF_CLIMB : 0;	
+		if (this._path.Length > 0) //Выясняем, достижима ли текущая маршрутная точка
+		{
+			if (checkNextWaypointAccessibility())
+			{
+				this._path.shift();
+				resetWaypointMissCounter();
+			}
+			
+			manageReachedWaypoints();
+		}
+		if (isReadyToApproach()) //Проверяем возможность захода
+		{
+			this._state = AircraftState.Approaching;
+			this.#max_downwind_speed = 0; 
+			this.#cloud_density_counter = 0; 
+			this._path.removeAll();
+			return;
+		}
+		else 
+			if (this._target_airfield && this._path.Length == 0)
+				goAround(AWind);
+				
+		if (this._path.Length == 0) //Если точек нет и нет ВПП, то переходим в ненаправленный режим
+		{
+			if (!this._target_airfield)
+			{
+				this._state = AircraftState.Undirected;
+				return;
+			}
+		}
+		else
+		{
+			var ang_target: Angle = Angle.direction(this.Location, Point(this._path.get(0)), {});			
+			var ang_diff: Angle = ang_target.sub(Course);
+			//turn to waypoint
+			this._turn = (Math.abs(ang_diff.Radian) < this.#TURN_ADMIS_ERROR.Radian) ? 0 : Instruments.sign(ang_diff.Radian);
+		}
+	}
+
+	private function flyUndirected(): void
+	{
+		if (Location.X - this._airport_rect.Location.X < this.#BOUNCE_BOUND)
+		{
+			if (Course.Radian >= -Math.PI/2 && Course.Radian < Math.PI/2)
+				this._turn = 1;
+			else if (Course.Radian < -Math.PI/2 || Course.Radian > Math.PI/2)
+					this._turn = -1;
+		}
+		else if (this._airport_rect.Location.X + this._airport_rect.Extent.Width - Location.X < this.#BOUNCE_BOUND)
+		{
+			if (Course.Radian < Math.PI/2 && Course.Radian > -Math.PI/2)
+				this._turn = -1;
+			else if (Course.Radian > Math.PI/2 || Course.Radian < -Math.PI/2)
+				this._turn = 1;
+		}						
+		else if (Location.Y - this._airport_rect.Location.Y < this.#BOUNCE_BOUND)
+		{
+			if (Course.Radian < 0)
+				this._turn = -1;
+			else if (Course.Radian > 0)
+				this._turn = 1;
+		}				
+		else if (this._airport_rect.Location.Y + this._airport_rect.Extent.Height - Location.Y < this.#BOUNCE_BOUND)
+		{
+			if (Course.Radian < 0)
+				this._turn = 1;
+			else if (Course.Radian > 0)
+				this._turn = -1;
+		}						
+		else 
+			this._turn = 0;
+			
+		this._acceleration = (this._speed < this._type.CruiseSpeed) ? this._type.Acceleration : 0;
+		this._velocity = (this._altitude < Aircraft.ARRIVAL_PERIOD) ? this.#TAKEOFF_CLIMB : 0;
+	}
+
+	#freeAirfield()
+	{
+		if (this._is_occuping_airfield) 
+		{
+			this._target_airfield.free(this);
+			if (this._occupied_gate != null)
+			{
+				this._occupied_gate.free(this);
+				this._occupied_gate = null;
+			}
+			this._is_occuping_airfield = false;
+		}
+		if (this._target_airfield != null)
+		{
+			this._target_airfield.Selected = false;
+			this._target_airfield = null;
+		}
+	}
+			
+	private function isOnCourse(AWaypoint: Point, ATargetCourse: Angle):Boolean
+	{
+		var o_dist: Object = {Distance: 0.0};
+		var ang_target: Angle = Angle.direction(AWaypoint, this._target_airfield.Location, o_dist);
+		var ang_diff: Angle = ang_target.sub(ATargetCourse);
+
+		return ang_diff.abs().Radian < this._ANG_COURSE/2 || ang_diff.abs().sub(Angle.PI).abs().Radian < this._ANG_COURSE/2;
+	}
+
+	private function isReadyToApproach()
+	{
+		//Если не задана ВПП - заход делать некуда
+		if (!this._target_airfield || this._path.Length == 0) return false;
+		
+		//проверяем, не можем ли мы сделать заход
+		var n_step: int = Math.floor(this._path.Length / this.#COURSE_CHECK_POINTS);
+		var is_on_course: Boolean = true;
+		var ang_course: Angle = getTargetCourse();
+  		for (var i: int = 0; is_on_course && i < this.#COURSE_CHECK_POINTS; i++)
+		{
+			is_on_course &&= isOnCourse(Point(this._path.get(i * n_step)), ang_course);
+		}
+		
+		return is_on_course; 
+	}
+
+	private function manageReachedWaypoints()
+	{
+		for (var i = Math.min(this._path.Length - 1, this.#WAYPOINT_REACH_DEPTH); i >= 0; i--)
+		{
+			if (waypointReached(this._path.get(i)))
+			{
+				this._path.removeAt(0, i + 1);
+				resetWaypointMissCounter();
+				break;
+			}
+		}
+	}
+
+	private function prepareToTakeoff(): void
+	{
+		if (this._fuel < this.#MAX_FUEL)
+			this._fuel += this.#FUELING_RATE / Core.N_FRAME_RATE;
+		else
+		{
+			this._fuel = this.#MAX_FUEL;
+			this._is_takeoff_pending = false;
+			this._state = AircraftState.ReadyToTakeoff;
+		}
+	}
+
+	#reset_waypoint_miss_counter()
+	{
+		this._waypoint_miss_ticks = 0;
+		this._xy_waypoint_distance = Number.MAX_VALUE;					
+	}
+		
+	private function waypointReached(waypoint: Point)
+	{
+		return (Math.abs(waypoint.X - this.Location.X) < this.#WAYPOINT_REACH_DISTANCE 
+			&& Math.abs(waypoint.Y - this.Location.Y) < this.#WAYPOINT_REACH_DISTANCE);
+
+	}
+
+	//event handlers
+	#points_on_add(AnEvent: Event):void 
+	{
+		//trace("    On add waypoint:");
+		if (this._target_airfield || this._path.Length > 0)
+		{
+			resetWaypointMissCounter();
+			this._state = AircraftState.Directed;
+			//trace("        Aircraft state => Directed");
+		}
+	}
+
+	#points_on_remove(AnEvent: Event):void 
+	{
+		//trace("    On remove waypoint:");
+		if (this._state == AircraftState.Directed && !this._target_airfield && this._path.Length == 0)
+		{
+			this._state = AircraftState.Undirected;
+			//trace("        Aircraft state => Undirected");			
+		}
+	}
+}
+
+
 ///////////////////////////////////////////////////////////
 //  IAirfield.as
 ///////////////////////////////////////////////////////////
@@ -4517,12 +5299,11 @@ class GameController implements IController //Singleton
 		return false;
 	}
 	
-<<<<<<<<<<<<<<<<======== Current place - level 6 ========
 	#continue_path(position) //: Boolean
     {
 		if (this.#is_creating_path)
 		{
-			var dt_current_time: Date = new Date();
+			let dt_current_time = new Date();
 
 			if (dt_current_time.valueOf() - this.#waypoint_created.valueOf() > GameController.#WAYPOINT_CREATION_TIMEOUT)
 			{
@@ -4537,7 +5318,6 @@ class GameController implements IController //Singleton
 	#control_aircraft_quantity(aircraft_quantity)
 	{
 		this.#emit_frames_interval += 1;
-			
 		if (this.#landings_done + aircraft_quantity < this.#landings_to_do)
 		{
 			if (aircraft_quantity < GameController.#MIN_ACTIVE_AIRCRAFT_COUNT)
@@ -4555,18 +5335,18 @@ class GameController implements IController //Singleton
 
 	#control_clouds()
 	{
-		if (this.airport.CurrentWind.Speed > GameController.#MIN_CLOUD_SPEED && Math.random() < this.airport.CloudProbability)
+		if (this.airport.current_wind.speed > GameController.#MIN_CLOUD_SPEED && Math.random() < this.airport.cloud_probability)
 		{
 			this.#emit_cloud();
 		}
 		
-		for (var i: int; i < this.airport.Clouds.length; i++)
+		for (let i; i < this.airport.clouds.length; i++)
 		{
-			var cloud: Cloud = this.airport.Clouds[i];
-			cloud.move(this.airport.CurrentWind);
+			var cloud = this.airport.Clouds[i];
+			cloud.move(this.airport.current_wind);
 			if (this.#is_cloud_left(cloud))
 			{
-				this.airport.Clouds.splice(i, 1);
+				this.airport.clouds.splice(i, 1);
 			}
 		}
 	}		
@@ -4574,6 +5354,7 @@ class GameController implements IController //Singleton
 	#create_aircraft(aircraft_type, location, course, airport_rect, aircraft_state, fuel_residue, gate=null) //: Aircraft
 	{
 		if (aircraft_type == AircraftType.copter)
+<<<<<<<<<<<<<<<<======== Current place - level 6 ========
 			return new Copter(aircraft_type, location, course, airport_rect, aircraft_state, fuel_residue, gate);
 		else
 			return new Plane(aircraft_type, location, course, airport_rect, aircraft_state, fuel_residue, gate);
@@ -4798,7 +5579,7 @@ class GameController implements IController //Singleton
 			//проверяем попадание в облако
 			aircraft.move(this.airport.CurrentWind, this.#get_cloud_density(aircraft));
 			
-			if (aircraft.State == AircraftState.TakingOff
+			if (aircraft.state == AircraftState.TakingOff
 				&& (
 					aircraft.Location.X - this.airport.Location.X < GameController.#LEAVE_BOUND 
 					|| this.airport.Location.X + this.airport.Extent.Width - aircraft.Location.X < GameController.#LEAVE_BOUND 
@@ -4810,7 +5591,7 @@ class GameController implements IController //Singleton
 				this.airport.Aircrafts.splice(i, 1);
 			}
 			else
-				if (aircraft.State.IsComing || aircraft.State == AircraftState.TaxiingToGate || aircraft.State == AircraftState.Arriving)
+				if (aircraft.state.is_coming || aircraft.state == AircraftState.TaxiingToGate || aircraft.state == AircraftState.Arriving)
 					n_aircrafts_count++;
 		}
 		return n_aircrafts_count;
@@ -4876,9 +5657,9 @@ class GameController implements IController //Singleton
     {
 		for each(var aircraft: Aircraft in this.airport.Aircrafts)
 		{
-			if (!aircraft.inArea(point) || aircraft.State == AircraftState.TakingOff) continue;
+			if (!aircraft.inArea(point) || aircraft.state == AircraftState.TakingOff) continue;
 
-			if (!is_double_clicked && aircraft.State.IsComing)
+			if (!is_double_clicked && aircraft.state.is_coming)
 			{
 				this.#is_new_path = true;
 				this.#is_creating_path = true;
@@ -4911,21 +5692,21 @@ class GameController implements IController //Singleton
 		aircraft.Selected = true;					
 		this.#selected_aircraft = aircraft;
 		
-		if (this.#selected_aircraft.TargetAirfield != null && aircraft.State == AircraftState.Directed || aircraft.State == AircraftState.Landing)
-			this.#select_airfield(this.#selected_aircraft.TargetAirfield);
+		if (this.#selected_aircraft.target_airfield != null && aircraft.state == AircraftState.Directed || aircraft.state == AircraftState.Landing)
+			this.#select_airfield(this.#selected_aircraft.target_airfield);
 	}
 
 	#select_airfield(airfield)
 	{
 		//Если самолет на земле, то не направляем его на ВВП если: самолет уже покинул гейт или гейт не относится к этой полосе		 
-		if (!this.#selected_aircraft.State.IsComing && (!this.#selected_aircraft.OccupiedGate || !this.#selected_aircraft.OccupiedGate.isHostedBy(airfield))) return;
+		if (!this.#selected_aircraft.state.is_coming && (!this.#selected_aircraft.occupied_gate || !this.#selected_aircraft.occupied_gate.isHostedBy(airfield))) return;
 
 		this.#deselect(false, true);		
 							
 		airfield.Selected = true;					
 		this.#selected_airfield = airfield;
 		
-		this.#selected_aircraft.TargetAirfield = airfield;		
+		this.#selected_aircraft.target_airfield = airfield;		
 	}
 
 	#start_level()
@@ -4993,7 +5774,7 @@ class GameController implements IController //Singleton
 	{
 		this.#landings_done += 1;
 		var aircraft: Aircraft  = (Aircraft)(event.SourceObject); 
-		GameProgress.addPoints(int(aircraft.Fuel*GameController.#FULL_TANK_POINTS));
+		GameProgress.addPoints(int(aircraft.fuel*GameController.#FULL_TANK_POINTS));
 		StarView.addStar(FrameBuilder.convertToScreenPoint(aircraft.Location));
 	}
 
