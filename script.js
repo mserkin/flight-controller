@@ -1738,6 +1738,164 @@ class SelectableObject extends Region
 
 
 ///////////////////////////////////////////////////////////
+//  PeriodicState.as
+///////////////////////////////////////////////////////////
+
+class PeriodicState
+{
+//property fields
+	#counter = 0;
+	#is_used = false;
+	#key_object = null;
+	#period = 0;
+
+//properties
+	get is_used() //: Boolean
+	{
+		return this.#is_used;
+	}
+
+	get key_object() //: Object
+	{
+		return this.#key_object;
+	}
+
+	get period() //: int
+	{
+		return this.#period;
+	}
+
+	set period(period)
+	{
+		this.#period = period;
+	}
+		
+//methods
+	//constructor
+	constructor (key_object, period)
+	{
+		this.#key_object = key_object;
+		this.#period = period;
+		this.#counter = -period;
+		this.#is_used = true;
+	}
+
+	//public methods	
+	getState(period=0)
+	{
+		this.#is_used = true;
+		if (period != -1) {
+			this.#period = period;
+		}
+		if (this.#counter > this.#period || this.#counter < -this.#period) {
+			this.#counter = -this.#period;
+		}
+			
+		return this.#counter > 0;
+	}	
+	
+	tick() //: Boolean
+	{
+		if (++this.#counter > this.#period)
+		{
+			if (!this.#is_used) 
+				return false;
+			else
+				this.#counter = -this.#period;
+		}
+		this.#is_used = false;
+		return true;
+	}
+}
+
+
+///////////////////////////////////////////////////////////
+//  PeriodicStateList.as
+///////////////////////////////////////////////////////////
+
+class PeriodicStateList
+{
+//public consts
+	static STATE_OFF = false; 
+	static STATE_ON = true;
+
+	#states = null;
+
+	//constructor
+	constructor ()
+	{
+		this.#states = [];
+	}
+
+	//public methods
+
+	getState(key_object, period=0) //: Boolean
+	{
+		for (let ps of this.#states)
+		{
+			if (ps.key_object == key_object)
+			{
+				return ps.get_state(period);
+			}
+		}
+		this.#states.push(new PeriodicState(key_object, period));
+		return STATE_OFF;
+	}
+	
+	tick()
+	{
+		for (let i = apsStates.length - 1; i >= 0; i--) 
+		{
+			if (!this.#states[i].tick())
+			{
+				this.#states.splice(i, 1);
+			}
+		}
+	}
+}
+
+
+///////////////////////////////////////////////////////////
+//  Keys.as
+///////////////////////////////////////////////////////////
+class Keys
+{
+//public fields & consts		
+
+	//public consts
+	//Letter buttons in alphabetic order
+	static A = 65;
+	static B = 66;
+	static C = 67;
+	static D = 68;
+	static E = 69;
+	static F = 70;
+	static G = 71;
+	static I = 73;
+	static O = 79;
+	static P = 80;
+	static S = 83;
+	static W = 87;
+	static X = 88;
+	static Y = 89;
+	static Z = 90;
+	
+	//other buttons
+	static ARROW_DOWN = 40; 
+	static ARROW_LEFT = 37; 
+	static ARROW_RIGHT = 39;
+	static ARROW_UP = 38;
+	static BROCKET_LEFT = 188;
+	static BROCKET_RIGHT = 190;
+	static DELETE = 46;
+	static EQUALS = 187;
+	static INSERT = 45;
+	static KEY0 = 48;
+	static TAB = 9;
+}
+
+
+///////////////////////////////////////////////////////////
 //  Cloud.as
 ///////////////////////////////////////////////////////////
 
@@ -4734,6 +4892,600 @@ class MenuController implements IController //singleton
 
 
 ///////////////////////////////////////////////////////////
+//  AircraftView.as
+///////////////////////////////////////////////////////////
+
+class AircraftView //static
+{
+<<<<<<<<<<<<<<<<======== Current place - level 5 ========
+	//private consts
+	static private const DBL_AIRCRAFT_ALT_SCALE: Number = 0.25;
+	static private const DBL_AIRCRAFT_SHADOW_BASE_SHIFT: Number = 1;
+	static private const DBL_AIRCRAFT_SHADOW_SHIFT: Number = 8;
+	static private const DBL_APPROAICHING_MARK_HEIGHT: Number = 40;
+	static private const DBL_APPROAICHING_MARK_WIDTH: Number = 30;
+	static private const DBL_BALLOON_HEIGHT: Number = 30; 
+	static private const DBL_BALLOON_WIDTH: Number = 35; 
+	static private const DBL_CRITICAL_FUEL_LEVEL: Number = 0.2;
+	static private const DBL_GAMEZONE_MARGIN: Number = 5;
+	static private const DBL_GAUGE_HEIGHT: Number = 3.125;
+	static private const DBL_GAUGE_WIDTH: Number = 15.0;
+	static private const DBL_LIGHT_IMG_HEIGHT: Number = 46.5;
+	static private const DBL_NORMAL_LEAVING: Number = 50;
+	static private const N_BLINK_MIN_PERIOD: Number = 1;
+	static private const N_BLINK_MAX_PERIOD: Number = 12;
+	
+//other fields
+	/* static private var nFrameCounter: int = 0; */
+	static private var pslArrivalMarks: PeriodicStateList = new PeriodicStateList();
+	static private var pslGaugeStates: PeriodicStateList = new PeriodicStateList();
+
+//public methods
+	static public function display(AnAircraftsVector: Vector.<Aircraft>) 
+	{	
+		pslGaugeStates.tick();
+		pslArrivalMarks.tick();
+		Profiler.checkin("aircrafts");
+		var aircrafts_vector: Vector.<Aircraft> = AnAircraftsVector.sort(compareAltitude);
+		for each(var aircraft: Aircraft in aircrafts_vector) 
+		{
+			var pnt_scr: Point = FrameBuilder.convertToScreenPoint(aircraft.Location);	
+			switch(aircraft.State)
+			{
+				case AircraftState.Arriving:
+					displayArrivalMark(aircraft, pnt_scr);
+					break;
+					
+				case AircraftState.Directed:
+				case AircraftState.Approaching:
+				case AircraftState.Landing:					
+					displayPath(aircraft);
+					break;
+			}
+		}
+		for each(var craft: Aircraft in aircrafts_vector)
+		{
+			if (craft.State == AircraftState.Arriving) continue;
+			var rect_aircraft: Rect = FrameBuilder.convertToScreenRect(craft);
+			if (FrameBuilder.FrameRect.isInside(rect_aircraft.Location) || aircraft.State == AircraftState.TakingOff)
+			{
+				//отображение самолета
+				displayAircraft(craft, rect_aircraft);
+			}
+			else 
+			{
+				//отображение стрелки
+				displayArrivalMark(craft, rect_aircraft.Location);
+			}	
+		}
+		Profiler.checkout("aircrafts");
+	}
+
+
+//private methods
+	static private function calcBlinkPeriod(AnAircraft: Aircraft, AScreenPosition: Point, AnArrowPosition: Point): int
+	{
+		var dbl_rate: Number;
+		if (AnAircraft.State == AircraftState.Arriving) {
+			dbl_rate = AnAircraft.TimeToArrive/(Aircraft.DBL_ARRIVAL_PERIOD/2); 
+		}
+		else {
+			dbl_rate = Math.max(Math.abs(AScreenPosition.X - AnArrowPosition.X), 
+				Math.abs(AScreenPosition.Y - AnArrowPosition.Y))/DBL_NORMAL_LEAVING;
+		}
+		return int(Math.ceil(N_BLINK_MIN_PERIOD + dbl_rate*(N_BLINK_MAX_PERIOD - N_BLINK_MIN_PERIOD)));		
+	}
+	
+	static private function compareAltitude(AnAircraft1: Aircraft, AnAircraft2: Aircraft): Number
+	{
+		return Instruments.sign(AnAircraft1.Altitude - AnAircraft2.Altitude);
+	}
+	
+	static private function createAircraftFrameImage(AnAircraft: Aircraft): Sprite
+	{
+		if (AnAircraft.Collided) 
+		{
+			switch(AnAircraft.Type)
+			{
+				case AircraftType.Copter:
+					return new CopterCollidedImage();
+				case AircraftType.Propeller:
+					return new PropellerCollidedImage();
+				case AircraftType.Liner:
+					return new LinerCollidedImage();
+				case AircraftType.Supersonic:
+					return new SupersonicCollidedImage();
+			}
+		} 
+		else if (AnAircraft.Selected) 
+		{
+			switch(AnAircraft.Type)
+			{
+				case AircraftType.Copter:
+					return new CopterSelectedImage();
+				case AircraftType.Propeller:
+					return new PropellerSelectedImage();
+				case AircraftType.Liner:
+					return new LinerSelectedImage();
+				case AircraftType.Supersonic:
+					return new SupersonicSelectedImage();
+			}
+		}
+		return null;
+	}
+	
+	static private function createAircraftImage(AnAircraft: Aircraft): Sprite
+	{
+		switch (AnAircraft.State) {
+			case AircraftState.Undirected :
+				switch(AnAircraft.Type)
+				{
+					case AircraftType.Copter:
+						return new CopterUndirectedImage();					
+					case AircraftType.Propeller:
+						return new PropellerUndirectedImage();
+					case AircraftType.Liner:
+						return new LinerUndirectedImage();
+					case AircraftType.Supersonic:
+						return new SupersonicUndirectedImage();
+				}
+			case AircraftState.TaxiingToAirfield :
+			case AircraftState.ReadyToTakeoff :
+			case AircraftState.TakingOff :
+				switch(AnAircraft.Type)		
+				{
+					case AircraftType.Copter:
+						return new CopterDepartingImage();
+					case AircraftType.Propeller:
+						return new PropellerDepartingImage();
+					case AircraftType.Liner:
+						return new LinerDepartingImage();
+					case AircraftType.Supersonic:
+						return new SupersonicDepartingImage();
+				}
+			case AircraftState.PreparingToTakeoff :
+				if (AnAircraft.Type == AircraftType.Copter) 
+					return new CopterParkedImage();
+				//no break!
+			default :
+				switch(AnAircraft.Type)		
+				{
+					case AircraftType.Copter:
+						return new CopterDirectedImage();
+					case AircraftType.Propeller:
+						return new PropellerDirectedImage();
+					case AircraftType.Liner:
+						return new LinerDirectedImage();
+					case AircraftType.Supersonic:
+						return new SupersonicDirectedImage();
+				}
+		}
+		return null;
+	}
+	
+	static private function createAircraftShadowImage(AnAircraft: Aircraft): Sprite
+	{
+		switch(AnAircraft.Type)
+		{
+			case AircraftType.Copter:
+				return new CopterShadowImage();
+			case AircraftType.Propeller:
+				return new PropellerShadowImage();
+			case AircraftType.Liner:
+				return new LinerShadowImage();
+			case AircraftType.Supersonic:
+				return new SupersonicShadowImage();
+		}
+		return null;
+	}
+
+	static private function displayAircraft(AnAircraft: Aircraft, AnAircraftScreenRect: Rect) 
+	{
+		//отображения тени
+		Profiler.checkin("shadows");
+		displayAircraftShadow(AnAircraft, AnAircraftScreenRect);
+		Profiler.checkout("shadows");
+		//отображение света фар
+		Profiler.checkin("headlights");
+		displayHeadlight(AnAircraft, AnAircraftScreenRect);
+		Profiler.checkout("headlights");
+		//отображение самого самолета
+		Profiler.checkin("bodies");
+		displayAircraftBody(AnAircraft, AnAircraftScreenRect);
+		Profiler.checkout("bodies");
+		//отображение градусника
+		Profiler.checkin("gauges");	
+		displayGauge(AnAircraft, AnAircraftScreenRect);
+		Profiler.checkout("gauges");	
+		//отображение балуна
+		Profiler.checkin("balloons");	
+		displayBalloon(AnAircraft, AnAircraftScreenRect);
+		Profiler.checkout("balloons");	
+	}
+	
+	static private function displayAircraftBody(AnAircraft: Aircraft, AnAircraftScreenRect: Rect) 
+	{
+		//отображение самолета
+		var sp_aircraft: Sprite = createAircraftImage(AnAircraft);
+	
+		var dbl_koef: Number = (1 + (AnAircraft.Altitude - Aircraft.DBL_NORMAL_ALTITUDE) / Aircraft.DBL_NORMAL_ALTITUDE * DBL_AIRCRAFT_ALT_SCALE);
+		AnAircraftScreenRect.Extent = new Size(AnAircraft.Extent.Width / FrameBuilder.Zoom * dbl_koef, AnAircraft.Extent.Height / FrameBuilder.Zoom * dbl_koef);
+		ScreenManager.displayImage(sp_aircraft, AnAircraftScreenRect, AnAircraft.Course);
+	
+		//отображение окантовки самолета
+		var sp_fr_aircraft: Sprite = createAircraftFrameImage(AnAircraft);
+	
+		if (sp_fr_aircraft!=null) {
+			ScreenManager.displayImage(sp_fr_aircraft, AnAircraftScreenRect, AnAircraft.Course);
+		}
+	}
+	
+	static private function displayAircraftShadow(AnAircraft: Aircraft, AnAircraftScreenRect: Rect) 
+	{
+		if (AnAircraft.Altitude===0) {
+			return;
+		}
+	
+		var sp_shadow: Sprite = createAircraftShadowImage(AnAircraft);
+		
+		var dbl_shift: Number = FrameBuilder.adaptToFrame(DBL_AIRCRAFT_SHADOW_BASE_SHIFT + 
+			DBL_AIRCRAFT_SHADOW_SHIFT * (1 + (AnAircraft.Altitude - Aircraft.DBL_NORMAL_ALTITUDE)/Aircraft.DBL_NORMAL_ALTITUDE));
+		var dbl_src_aircraft_size = AnAircraft.Extent.Width/FrameBuilder.Zoom;		
+		var dbl_koef: Number = (1 + (AnAircraft.Altitude - Aircraft.DBL_NORMAL_ALTITUDE) / Aircraft.DBL_NORMAL_ALTITUDE * DBL_AIRCRAFT_ALT_SCALE);
+		var rect_shadow: Rect = new Rect(
+			new Point(AnAircraftScreenRect.Location.X + dbl_shift, AnAircraftScreenRect.Location.Y + dbl_shift),
+			new Size(dbl_src_aircraft_size * dbl_koef, dbl_src_aircraft_size * dbl_koef)
+		);
+	
+		ScreenManager.displayImage(sp_shadow, rect_shadow, AnAircraft.Course);
+	}
+	
+	static private function displayArrivalMark(AnAircraft: Aircraft, AScreenPosition: Point) 
+	{
+		var angle: Angle = Angle.direction(new Point(0.0), AnAircraft.Location);
+		var rect_game_zone: Rect = FrameBuilder.GameZoneRect.clone();
+		rect_game_zone.Location.X += DBL_GAMEZONE_MARGIN;
+		rect_game_zone.Location.Y += DBL_GAMEZONE_MARGIN;
+		rect_game_zone.Extent.Width -= 2*DBL_GAMEZONE_MARGIN;
+		rect_game_zone.Extent.Height -= 2*DBL_GAMEZONE_MARGIN;
+		
+		var pnt_arrow_pos: Point = rect_game_zone.moveToRect(AScreenPosition);
+		
+		if (AnAircraft.TimeToArrive < Aircraft.DBL_ARRIVAL_PERIOD/2)
+		{
+			var n_blink_period = calcBlinkPeriod(AnAircraft, AScreenPosition, pnt_arrow_pos);
+			if (!pslArrivalMarks.getState(AnAircraft, n_blink_period)) return;
+		}
+		
+		ScreenManager.displayImage(
+			new ApproachingMarkImage(), 
+			new Rect(
+				pnt_arrow_pos,
+				new Size(
+					FrameBuilder.adaptToFrame(DBL_APPROAICHING_MARK_WIDTH), 
+					FrameBuilder.adaptToFrame(DBL_APPROAICHING_MARK_HEIGHT)
+				)
+			), 
+			angle
+		);
+	}
+	
+	static private function displayBalloon(AnAircraft: Aircraft, AnAircraftScreenRect: Rect) 
+	{
+		var do_balloon: DisplayObject;
+		switch (AnAircraft.GoAroundCause)
+		{	
+			case Aircraft.DBL_GA_CAUSE_NONE: 
+				return;
+			case Aircraft.DBL_GA_CAUSE_WIND:
+				do_balloon = new StrongWindBalloonImage();
+				break;
+			case Aircraft.DBL_GA_CAUSE_CLOUDS:
+				do_balloon = new CloudBalloonImage();
+				break;			
+			default:
+				do_balloon = new ShortRunwayBalloonImage();
+				break;			
+		}
+		
+		var rect_balloon: Rect = new Rect(
+			new Point(AnAircraftScreenRect.Location.X, AnAircraftScreenRect.Location.Y),
+			new Size(
+				FrameBuilder.adaptToFrame(DBL_BALLOON_WIDTH), 
+				FrameBuilder.adaptToFrame(DBL_BALLOON_HEIGHT)
+			)
+		);
+		ScreenManager.displayImage(do_balloon, rect_balloon, new Angle());
+	}
+
+	static private function displayGauge(AnAircraft: Aircraft, AnAircraftScreenRect: Rect) 
+	{
+		if (AnAircraft.State==AircraftState.ReadyToTakeoff&&! AnAircraft.IsTakeoffPending) return;
+		
+		if (AnAircraft.Fuel < DBL_CRITICAL_FUEL_LEVEL && AnAircraft.State.IsComing)
+		{
+			var n_blink_period: int = new int(AnAircraft.Fuel * Core.N_FRAME_RATE / DBL_CRITICAL_FUEL_LEVEL);
+			if (!pslGaugeStates.getState(AnAircraft, n_blink_period)) return;
+		}
+		//отображение градусника 
+		var ang_0: Angle = new Angle();
+	
+		//отображаем красный фон
+		var sp_red: Sprite = new FuelGaugeRedSegmentImage();
+		var dbl_koef: Number = 1 + (AnAircraft.Altitude - Aircraft.DBL_NORMAL_ALTITUDE) / Aircraft.DBL_NORMAL_ALTITUDE * DBL_AIRCRAFT_ALT_SCALE;
+		var rect_gauge: Rect = new Rect(
+			new Point(AnAircraftScreenRect.Location.X + AnAircraftScreenRect.Extent.Width, AnAircraftScreenRect.Location.Y - AnAircraftScreenRect.Extent.Height / 1.5),
+			new Size(
+				FrameBuilder.adaptToFrame(DBL_GAUGE_WIDTH) * dbl_koef, 
+				FrameBuilder.adaptToFrame(DBL_GAUGE_HEIGHT) * dbl_koef
+			)
+		);
+		ScreenManager.displayImage(sp_red, rect_gauge, ang_0);
+	
+		//отображам зеленый сегмент
+		var sp_green: Sprite = new FuelGaugeGreenSegmentImage();
+		var rect_gauge_green: Rect = rect_gauge.clone();
+		rect_gauge_green.Extent.Width *= AnAircraft.Fuel;
+	
+		ScreenManager.displayImage(sp_green, rect_gauge_green, ang_0);
+	
+		//отображам рамку градусника
+		//var mc_frame: MovieClip = new FuelGaugeFrameImage();
+		//ScreenManager.displayImage(mc_frame, rect_gauge, ang_0);
+	}
+		
+	static private function displayHeadlight(AnAircraft: Aircraft, AnAircraftScreenRect: Rect) 
+	{
+		if (AnAircraft.IsOccupingAirfield && (AnAircraft.State == AircraftState.Landing || AnAircraft.State == AircraftState.TakingOff)) {
+			//отображение света фары
+			var sp_light: Sprite = new AircraftHeadlightImage();
+			var dbl_koef: Number = (1 + (AnAircraft.Altitude - Aircraft.DBL_NORMAL_ALTITUDE) / Aircraft.DBL_NORMAL_ALTITUDE * DBL_AIRCRAFT_ALT_SCALE);
+			AnAircraftScreenRect.Extent = new Size(
+				AnAircraft.Extent.Width / FrameBuilder.Zoom * dbl_koef, 
+				FrameBuilder.adaptToFrame(DBL_LIGHT_IMG_HEIGHT) * dbl_koef
+			);
+			ScreenManager.displayImage(sp_light, AnAircraftScreenRect, AnAircraft.Course);
+		}
+	}
+	
+	static public function displayPath(AnAircraft: Aircraft)
+	{
+		Profiler.checkin("paths");
+		var vpntPath: Vector.<Point> = new Vector.<Point>();
+		vpntPath.push(FrameBuilder.convertToScreenPoint(AnAircraft.Location));
+		
+		for (var i: int = 0; i < AnAircraft.Path.Length; i++)
+		{
+			vpntPath.push(FrameBuilder.convertToScreenPoint(AnAircraft.Path.get(i)));
+		}
+		
+		if (AnAircraft.TargetAirfield)
+		{
+			vpntPath.push(FrameBuilder.convertToScreenPoint(AnAircraft.TargetAirfield.Location));
+		}
+
+		ScreenManager.drawLine(vpntPath, AnAircraft.Selected ? Colors.Selection : Colors.Gray, (AnAircraft.Path.Length > 0) ? 1 : 0.5); 
+		Profiler.checkout("paths");
+	}	
+}
+
+
+///////////////////////////////////////////////////////////
+//  AirfieldView.as
+///////////////////////////////////////////////////////////
+
+class AirfieldView //static
+{
+<<<<<<<<<<<<<<<<======== Current place - level 6 ========
+	//private consts
+	//*airfield graphic types
+	static private const DBL_RUNWAY_APPROACH_LIGHTS_HEIGHT: Number = 45.0; //abs?
+	static private const DBL_RUNWAY_APPROACH_LIGHTS_WIDTH: Number=21.0; //abs?
+	static private const DBL_RUNWAY_WIND_LIGHTS_HEIGHT: Number = 4; //abs?
+	static private const DBL_RUNWAY_WIND_LIGHTS_WIDTH: Number=10; //abs?
+	static private const DBL_WIND_LIGHTS_REL_POS: Number = 0.9; //90% от длины ВПП
+	
+	//id графики in order of displaying
+	static private const RW_GRAPHIC_FRAME: int = 0;
+	static private const RW_GRAPHIC_SURFACE: int = 1;
+	static private const RW_GRAPHIC_LIGHTS: int = 2;
+	static private const RW_GRAPHIC_TYPE_COUNT: int = 3;
+
+//public methods
+	static public function display(AnAirfieldsVector: Vector.<IAirfield>) 
+	{
+		Profiler.checkin("airfields");
+		for (var i: int = 0; i < RW_GRAPHIC_TYPE_COUNT; i++)
+		{
+			displayAirfieldGraphic(i, AnAirfieldsVector);
+		}
+		Profiler.checkout("airfields");
+	}
+
+//private methods
+	static private function displayAirfieldGraphic(AGraphicType: int, AnAirfieldsVector: Vector.<IAirfield>)
+	{
+		for each (var airfield: IAirfield in AnAirfieldsVector) 
+		{
+			var rect_scr: Rect = FrameBuilder.convertToScreenRect(airfield.getRegion());
+			var sp: Sprite;
+			var ang_rotation: Angle = airfield.ActiveCourse;
+			
+			switch(AGraphicType)
+			{
+				case RW_GRAPHIC_FRAME:
+					sp = getFrameImage(airfield);
+					break;
+				case RW_GRAPHIC_LIGHTS:
+					if (airfield.IsRunway) {
+						var dbl_hor_proj: Number = airfield.ActiveCourse.sin();
+						var dbl_ver_proj: Number = airfield.ActiveCourse.cos();
+						var rw: Runway = Runway(airfield);		
+						if (airfield.Occupied) 
+							//рисуем огни привода
+							displayApproachLights(rw, rect_scr, dbl_hor_proj, dbl_ver_proj);
+						if (rw.HasFreeGate)
+						{
+							displayWindLights(rw, +1, rect_scr, dbl_hor_proj, dbl_ver_proj);
+							displayWindLights(rw, -1, rect_scr, dbl_hor_proj, dbl_ver_proj);    
+						}
+						sp = new RunwayMarkingImage();
+					}
+					else
+					{
+						sp = new HelipadMarkingImage();
+					}
+					break;
+				case RW_GRAPHIC_SURFACE:
+					sp = airfield.IsRunway ? new RunwaySurfaceImage() : new HelipadSurfaceImage();
+					break;
+			}
+			ScreenManager.displayImage(sp, rect_scr, ang_rotation);
+		}
+	}
+
+	static private function displayApproachLights(ARunway: Runway, ARunwayScreenRect: Rect, AHorProj: Number, AVertProj: Number)
+	{
+		var dbl_lights_dist: Number = ARunwayScreenRect.Extent.Height/2 
+			+ ((ARunway.ActiveCourse.Radian == ARunway.Course.Radian) 
+			? FrameBuilder.convertToScreenLength(ARunway.CourseLightsDistance) : FrameBuilder.convertToScreenLength(ARunway.BackCourseLightsDistance));
+	
+		ScreenManager.displayImage(
+			new RunwayFrontLightsImage(), 
+			new Rect(
+				new Point(ARunwayScreenRect.Location.X - AHorProj*dbl_lights_dist, ARunwayScreenRect.Location.Y + AVertProj*dbl_lights_dist), 
+				new Size(
+					FrameBuilder.adaptToFrame(DBL_RUNWAY_APPROACH_LIGHTS_WIDTH), 
+					FrameBuilder.adaptToFrame(DBL_RUNWAY_APPROACH_LIGHTS_HEIGHT))
+			),
+		   ARunway.ActiveCourse
+		);
+	}		
+	
+	static private function displayWindLights(ARunway: Runway, ASide: int, ARunwayScreenRect: Rect, AHorProj: Number, AVertProj: Number)
+	{
+		ScreenManager.displayImage(
+			new RunwayWindLightsImage(),
+			new Rect(
+				new Point(
+					ARunwayScreenRect.Location.X + AHorProj * ARunwayScreenRect.Extent.Height/2 * ASide * DBL_WIND_LIGHTS_REL_POS, 
+					ARunwayScreenRect.Location.Y - AVertProj * ARunwayScreenRect.Extent.Height/2 * ASide * DBL_WIND_LIGHTS_REL_POS
+				), 
+				new Size(
+					FrameBuilder.adaptToFrame(DBL_RUNWAY_WIND_LIGHTS_WIDTH), 
+					FrameBuilder.adaptToFrame(DBL_RUNWAY_WIND_LIGHTS_HEIGHT)
+				)
+			),
+			(ControlDispatcher.ActiveController.getControllerType() == 0) ? ARunway.UpwindCourse : ARunway.Course
+		);
+	}
+
+	static private function getFrameImage(AnAirfield: IAirfield): Sprite
+	{
+		return	AnAirfield.Selected 
+			? ((AnAirfield.IsRunway) ? new RunwayFrameSelectedImage() : new HelipadFrameSelectedImage()) 
+			: ((AnAirfield.IsRunway) ? new RunwayFrameImage() : new HelipadFrameImage());
+	}
+}
+
+
+///////////////////////////////////////////////////////////
+//  StarView.as
+///////////////////////////////////////////////////////////
+
+class Star
+{
+<<<<<<<<<<<<<<<<======== Current place - level 7 ========
+	private const N_MOVE_STEPS: int = 16;
+	private const N_ROTATION_STEPS: int = 16;
+	private const DBL_ROTATION_MIN: Number = 0.2;
+	private var FLocation: ap.basic.Point;
+	private var FRotationPhase: Number = DBL_ROTATION_MIN;
+	private var dblMoveStep: Number;
+	private var dblRotationStep: Number = 1/N_ROTATION_STEPS*2;
+
+	public function get Location(): ap.basic.Point 
+	{
+		return FLocation;
+	}
+
+	public function get RotationPhase(): Number
+	{
+		return FRotationPhase;
+	}
+	
+	public function get IsFlownAway(): Boolean
+	{
+		return (FLocation.Y < 0);
+	}
+	
+	public function Star(ALocation: ap.basic.Point) {
+		FLocation = ALocation;
+		dblMoveStep = ALocation.Y / N_MOVE_STEPS;
+	}
+	
+	public function move(): void 
+	{
+		FLocation.Y -= dblMoveStep;
+		var dbl_rot = FRotationPhase + dblRotationStep;
+		if (dbl_rot < DBL_ROTATION_MIN || dbl_rot > 1) {
+			dblRotationStep = -dblRotationStep;
+			dbl_rot = FRotationPhase + dblRotationStep;
+		}
+		else {
+			FRotationPhase = dbl_rot;
+		}
+	}
+}
+
+
+
+class StarView //static
+{
+<<<<<<<<<<<<<<<<======== Current place - level 8 ========
+//private consts
+	static private var STAR_SIZE: Number = 24;
+
+//private fields
+	static private var asStars: Vector.<Star>;
+	
+//public methods
+	public static function addStar(ALocation: Point)
+	{
+		asStars.push(new Star(ALocation));
+		var transform: SoundTransform = new SoundTransform(1, 0);
+		var zvon: Zvon = new Zvon();
+		var ch: SoundChannel = zvon.play();
+		ch.soundTransform = transform;
+	}	
+	
+	public static function clear()
+	{
+		asStars = new Vector.<Star>(0, false);
+	}	
+	
+	public static function display()
+	{
+		for (var i: int = asStars.length - 1; i >= 0; i--)
+		{
+			var star: Star = asStars[i];
+			displayStar(star);		
+			star.move();
+			//delete if flown away
+			if (star.IsFlownAway) {
+				asStars.splice(i, 1);
+			}			
+		}
+	}
+//private methods
+	private static function displayStar(star: Star)
+	{
+		ScreenManager.displayImage(new StarImage(), new Rect(star.Location, new Size(STAR_SIZE*star.RotationPhase, STAR_SIZE)));		
+	}
+}
+
+
+///////////////////////////////////////////////////////////
 //  MenuView.as
 ///////////////////////////////////////////////////////////
 
@@ -6397,6 +7149,340 @@ class GameController implements IController //Singleton
 
 
 ///////////////////////////////////////////////////////////
+//  EditController.as
+///////////////////////////////////////////////////////////
+
+class EditController implements IController //Singleton
+{
+<<<<<<<<<<<<<<<<======== Current place - level 9 ========
+	//private consts
+	private const DBL_AIRPORT_ZOOM_EXPANSION: Number = 200;
+	private const DBL_INITIAL_APRON_HEIGHT: Number = 1200;
+	private const DBL_INITIAL_APRON_WIDTH: Number = 3000;
+	private const DBL_OBJECT_EXPANSION: Number = 100;	
+	private const DBL_OBJECT_MOVE_DISTANCE: Number = 100;
+	private const DBL_ROTATE_DEGREE: Number = 10;
+
+	//property fields
+	private var FLevelConfig: XML = null;
+
+	//other fields
+	private var apAirport: Airport;
+	static private var controllerInstance: EditController;
+	private var moSelectedObject: SelectableObject = null;
+	private var nNewObjectType: int = 0; //0 - ВВП, 1 - апрон, 2 - гейт
+	private var isSelectedNew: Boolean = false;
+
+//properties
+
+	public function get LevelConfig(): XML
+    {
+    	return FLevelConfig; 
+    }
+		
+//methods
+	//constructor
+	//private constructors not supported by actionscript
+	//use getInstance instead!	
+   	constructor(AnAirport: Airport){
+		apAirport = AnAirport;
+	}
+
+//public methods
+	public function getControllerType(): int 
+	{
+		return ControlDispatcher.N_EDIT_CONTROLLER;
+	}
+	
+	static public function getInstance(AnAirport: Airport = null): EditController
+	{
+		if (!controllerInstance)
+		{
+			controllerInstance = new EditController(AnAirport);
+		}
+		return controllerInstance;
+	}
+
+	public function processDispatcherEvent(AType: int, AParamObj: Object = null): Boolean
+	{
+		switch (AType)
+		{
+			case ControlDispatcher.N_KEY_PRESSED:
+				return processKeyPress(AParamObj.KeyCode);
+		
+			case ControlDispatcher.N_LEVEL_CONFIG_VISIBILITY: 
+				if (!FLevelConfig)
+				{
+					FLevelConfig = generateLevelXML();
+				}
+				else
+				{
+					ControlDispatcher.ActiveController = GameController.getInstance();
+					FLevelConfig = null;
+				}
+				return true;
+				
+			case ControlDispatcher.N_OBJECT_ACTIVATE:
+				return select(AParamObj.Position, true);			
+		
+			case ControlDispatcher.N_OBJECT_INFO:
+				return traceObjectInfo();										
+
+			case ControlDispatcher.N_OBJECT_SELECT:
+				return select(AParamObj.Position, false);			
+		}
+		return false;
+	}
+	
+	public function run(): void {} 
+	
+	public function resizeAirport(IsExpanding: Boolean)
+	{
+		apAirport.resize(
+			new Point(
+				apAirport.Location.X + (IsExpanding ? -1 : +1) * DBL_AIRPORT_ZOOM_EXPANSION / 2, 
+				apAirport.Location.Y + (IsExpanding ? -1 : +1) * DBL_AIRPORT_ZOOM_EXPANSION / 2
+			), 
+			new Size(
+				apAirport.Extent.Width + (IsExpanding ? +1 : -1) * DBL_AIRPORT_ZOOM_EXPANSION, 
+				apAirport.Extent.Height + (IsExpanding ? +1 : -1) * DBL_AIRPORT_ZOOM_EXPANSION
+			)
+		);
+	}
+
+//private methods
+	private function deleteObject()
+	{
+		if (!moSelectedObject) return;
+
+		if (moSelectedObject is Runway)
+		{
+				apAirport.Airfields.splice(apAirport.Airfields.indexOf(moSelectedObject), 1);
+		}
+		else if (moSelectedObject is Gate)
+		{
+			for each (var airfield: IAirfield in apAirport.Airfields)
+			{
+				airfield.Gates.splice(airfield.Gates.indexOf(moSelectedObject), 1);
+			}
+			apAirport.Gates.splice(apAirport.Gates.indexOf(moSelectedObject), 1);
+		}
+		else
+		{
+			apAirport.Aprons.splice(apAirport.Aprons.indexOf(moSelectedObject), 1);
+		}
+		moSelectedObject = null;
+		isSelectedNew = false;
+	}
+
+	private function detectClickedAirfield(APoint:Point)
+	{
+		for each (var airfield: IAirfield in apAirport.Airfields)
+		{
+			if (!airfield.inArea(APoint)) continue;
+			
+			return airfield;
+		}		
+		return null;
+	}
+	
+	private function detectClickedApron(APoint:Point)
+	{
+		for each (var apron: SelectableObject in apAirport.Aprons)
+		{
+			if (!apron.inArea(APoint)) continue;
+			
+			return apron;
+		}
+		return null;
+	}
+	
+	private function detectClickedGate(APoint:Point)
+	{
+		for each (var gate: Gate in apAirport.Gates)
+		{
+			if (!gate.inArea(APoint)) continue;
+
+			return gate;
+		}
+		return null;
+	}
+
+	private function generateLevelXML(): XML
+	{
+		return apAirport.makeLevelXML();
+	}
+	
+	private function moveObject(ACX: Number, ACY: Number)
+	{
+		if (!moSelectedObject) return;
+		
+		moSelectedObject.Location.X += ACX*DBL_OBJECT_MOVE_DISTANCE;
+		moSelectedObject.Location.Y += ACY*DBL_OBJECT_MOVE_DISTANCE;
+	}
+
+	private function newApron()
+	{
+		moSelectedObject = new SelectableObject(new Point(0, 0), new Size(DBL_INITIAL_APRON_WIDTH, DBL_INITIAL_APRON_HEIGHT), new Angle());  
+		apAirport.Aprons.push(moSelectedObject);
+	}
+
+	private function newGate()
+	{
+		moSelectedObject = new Gate(Instruments.intRandom(), new Point(0, 0), true);
+		apAirport.Gates.push(moSelectedObject);
+		for each (var airfield: IAirfield in apAirport.Airfields)
+		{
+			airfield.Gates.push(moSelectedObject);
+		}				
+	}
+
+	private function newObject()
+	{
+		if (isSelectedNew)
+		{
+			var obj_sel = moSelectedObject;
+			
+			deleteObject();
+			
+			if (obj_sel is Runway)
+				newGate();
+			else if (obj_sel is Gate)
+				newApron();
+			else 
+				newRunway();
+		}
+		if (!obj_sel)
+			newRunway();
+		
+		moSelectedObject.Selected = true;
+		isSelectedNew = true;
+	}
+
+	private function newRunway()
+	{
+		var runway: Runway = new Runway(null, apAirport);
+		for each (var gate: Gate in apAirport.Gates)
+		{
+			gate.associate(runway);
+			runway.Gates.push(gate);
+		}
+		apAirport.Airfields.push(runway);			
+		moSelectedObject = runway;		
+	}	
+
+	private function processKeyPress(AKey: uint): Boolean
+	{
+		switch (AKey)
+		{
+			case Keys.INSERT:
+				newObject();	
+				break;
+			case Keys.DELETE:
+				deleteObject();	
+				break;			
+			case Keys.ARROW_DOWN:
+				moveObject(0, +1);			
+				break;
+			case Keys.ARROW_LEFT:
+				moveObject(-1, 0);			
+				break;		
+			case Keys.ARROW_RIGHT:
+				moveObject(+1, 0);			
+				break;		
+			case Keys.ARROW_UP:
+				moveObject(0, -1);			
+				break;
+			case Keys.TAB:
+				toggleObject();		
+				break;		
+			case Keys.A:
+				resizeObject(-1, 0);
+				break;
+			case Keys.D:
+				resizeObject(+1, 0);
+				break;
+			case Keys.S:
+				resizeObject(0, -1);		
+				break;					
+			case Keys.W:
+				resizeObject(0, +1);
+				break;			
+			case Keys.X:
+				resizeAirport(true);
+				break;		
+			case Keys.Z:
+				resizeAirport(false);
+				break;				
+			case Keys.BROCKET_LEFT:
+				rotateObject(false);					
+				break;		
+			case Keys.BROCKET_RIGHT:
+				rotateObject(true);					
+				break;
+			default:
+				return false;
+		}
+		return true;
+	}	
+	
+	private function resizeObject(ACX: Number, ACY: Number)
+	{
+		if (!moSelectedObject) return;
+		
+		if (!(moSelectedObject is Gate) && !(moSelectedObject is Runway))
+			moSelectedObject.Extent.Width += ACX*DBL_OBJECT_EXPANSION;
+		if (!(moSelectedObject is Gate))
+			moSelectedObject.Extent.Height += ACY*DBL_OBJECT_EXPANSION;
+	}
+	
+	private function rotateObject(IsClockwise: Boolean)
+	{
+		moSelectedObject.Course.Degree += IsClockwise ? DBL_ROTATE_DEGREE : -DBL_ROTATE_DEGREE;
+	}
+	
+    private function select(APoint:Point, IsDoubleClicked: Boolean): void
+    {
+		if (moSelectedObject)
+		{
+			moSelectedObject.Selected = false;
+			moSelectedObject = null;
+			isSelectedNew = false;			
+		}
+
+		moSelectedObject = detectClickedAirfield(APoint);
+		if (!moSelectedObject) moSelectedObject = detectClickedGate(APoint);
+		if (!moSelectedObject) moSelectedObject = detectClickedApron(APoint);
+		
+		if (moSelectedObject)
+			moSelectedObject.Selected = true;
+    }
+    
+    private function toggleObject()
+	{
+		if (!moSelectedObject || !(moSelectedObject is Gate)) return;
+
+		var gate: Gate = Gate(moSelectedObject);
+		if (gate.Free)
+			gate.occupy();
+		else
+			gate.free(null);
+	}
+	
+	private function traceObjectInfo()
+	{
+		if (moSelectedObject)
+		{
+			trace(moSelectedObject);
+			return true;
+		}
+		
+		return false;
+	}
+}
+
+
+///////////////////////////////////////////////////////////
 //  InfoPanelView.as
 ///////////////////////////////////////////////////////////
 
@@ -7171,7 +8257,7 @@ class BannerView //static!
 	//event hanglers
 	static #tool_bar_item_on_paint(event)
 	{
-		let tbi_source = ToolBarItem(AnEvent.SourceObject);
+		let tbi_source = ToolBarItem(event.SourceObject);
 		let rect_tbi  = tbi_source.clone();
 		rect_tbi.location = rect_tbi.location.add(BannerView.#tool_bar.location);
 		
@@ -7197,230 +8283,238 @@ class BannerView //static!
 
 class AirportView //static
 {
-<<<<<<<<<<<<<<<<======== Current place - level 5 ========
 //private consts
-	static private const DBL_EDIT_GATE_SIZE = 24; //abs?
-	static private const DBL_GAME_GATE_SIZE = 9.6; //abs?
+	static #EDIT_GATE_SIZE = 24; //abs?
+	static #GAME_GATE_SIZE = 9.6; //abs?
 	
 //private fields
-	static private apAirport  = null;
-	static private isGateIdsShown  = false;
+	static #airport = null;
+	static #is_gate_ids_shown = false;
 
 //public methods
-	static display(AnAirport , ToShowAircrafts)
+	static display(airport, to_show_aircrafts)
 	{
 		Profiler.checkin("airport");
-		apAirport = AnAirport;
+		AirportView.#airport = airport;
 		
-		displayAprons(AnAirport.Aprons);
+		AirportView.#display_aprons(airport.aprons);
 		
-		AirfieldView.display(AnAirport.Airfields);
+		AirfieldView.display(airport.airfields);
 		
-		displayGates(AnAirport.Gates);
+		AirportView.#display_gates(airport.gates);
 		
-		if (ToShowAircrafts)
+		if (to_show_aircrafts)
 		{
-			AircraftView.display(AnAirport.Aircrafts);
+			AircraftView.display(airport.aircrafts);
 		}
 		
-		displayClouds(AnAirport.Clouds);
+		AirportView.#display_clouds(airport.clouds);
 		Profiler.checkout("airport");
 	}	
 
-	static processEvent(AnEvent): Boolean
+	static AirportView.processEvent(event) //: Boolean
 	{
-		if (AnEvent is MouseEvent)
-		{
-			let mouse_event: MouseEvent = MouseEvent(AnEvent);
-			let point = new Point(mouse_event.stageX, mouse_event.stageY);
-			let pnt_airport_pos = FrameBuilder.convertToModelPoint(point);
-			processMouseEvent(mouse_event, pnt_airport_pos);
+		//TODO: event type by class type!
+		// if (event is MouseEvent)
+		// {
+		// 	let point = new Point(event.stage_x, event.stage_y);
+		// 	let pnt_airport_pos = FrameBuilder.convert_to_model_point(point);
+		// 	AirportView.#process_mouse_event(event, pnt_airport_pos);
 
-		}
-		else if (AnEvent is KeyboardEvent)
-		{
-			processKeyboardEvent(KeyboardEvent(AnEvent));
-		}
+		// }
+		// else if (event is KeyboardEvent)
+		// {
+		// 	AirportView.#process_keyboard_event(event);
+		// }
 
 		return false;
 	}	
 
 //private methods
-	static #displayAprons(AnApronsVector: Vector.<SelectableObject>) 
+	static #display_aprons(aprons_vector) 
 	{
 		Profiler.checkin("aprons");
 		//отображение апронов
-		for each (let apron: SelectableObject in AnApronsVector)
+		for (let apron of aprons_vector)
 		{
-			ScreenManager.displayImage(apron.Selected ? new ApronSelectedImage() : new ApronImage(), FrameBuilder.convertToScreenRect(apron), apron.Course);
+			//TODO: displaying image
+			// ScreenManager.display_image(apron.selected ? new ApronSelectedImage() : new ApronImage(), FrameBuilder.convert_to_screen_rect(apron), apron.course);
 		}
 		Profiler.checkout("aprons");
 	}	
 
-	static #displayClouds(ACloudsVector: Vector.<Cloud>)
+	static #display_clouds(clouds_vector)
 	{
 		Profiler.checkin("clouds");
-		for each (let cloud: Cloud in ACloudsVector)
+		for (let cloud of clouds_vector)
 		{		
-			let rect_cloud = FrameBuilder.convertToScreenRect(cloud);
-			let do_cloud: DisplayObject;
-			switch(cloud.Density)
-			{
-				case 1: do_cloud = new CloudImage1(); break;
-				case 2: do_cloud = new CloudImage2(); break;
-				case 3: do_cloud = new CloudImage3(); break;
-				case 4: do_cloud = new CloudImage4(); break;
-			}
-			ScreenManager.displayImage(do_cloud, rect_cloud, cloud.Course);		
+			let rect_cloud = FrameBuilder.convert_to_screen_rect(cloud);
+			let do_cloud = null;
+			//TODO: image creation
+			// switch(cloud.density)
+			// {
+			// 	case 1: do_cloud = new CloudImage1(); break;
+			// 	case 2: do_cloud = new CloudImage2(); break;
+			// 	case 3: do_cloud = new CloudImage3(); break;
+			// 	case 4: do_cloud = new CloudImage4(); break;
+			// }
+
+			//TODO: displaying image
+			//ScreenManager.display_image(do_cloud, rect_cloud, cloud.course);		
 			
 			/*
-			if (cloud.Density == Cloud.N_SNOW_CLOUD_DENSITY)
+			if (cloud.density == Cloud.SNOW_CLOUD_DENSITY)
 			{
 				dblSnowShift += DBL_SNOW_SPEED;
 				if (dblSnowShift > N_MAX_SNOW_SHIFT) dblSnowShift = 0;
 				rect_cloud.location.x += DBL_SNOW_SPEED * Instruments.randomSign();
 				rect_cloud.location.y += dblSnowShift;
-				ScreenManager.displayImage(new SnowImage(), rect_cloud, cloud.Course);		
+				ScreenManager.displayImage(new SnowImage(), rect_cloud, cloud.course);		
 			}
 			*/
 		}	
 		Profiler.checkout("clouds");		
 	}
 	
-	static #displayGates(AGatesVector: Vector.<Gate>)
+	static #display_gates(gates)
 	{
 		Profiler.checkin("gates");
-		for each (let gate: Gate in AGatesVector)
+		for (let gate of gates)
 		{
-			let obj_gate_size: Object = {};
-			let do_gate_image: DisplayObject = getGateImage(gate, obj_gate_size);
+			let obj_gate_size = {};
+			let do_gate_image = AirportView.#get_gate_image(gate, obj_gate_size);
 			let dbl_gate_img_size = obj_gate_size.ImageSize;
 					
-			let rect_gate = FrameBuilder.convertToScreenRect(gate);
+			let rect_gate = FrameBuilder.convert_to_screen_rect(gate);
 			rect_gate.extent = new Size(dbl_gate_img_size, dbl_gate_img_size);
-			ScreenManager.displayImage(do_gate_image, rect_gate, new Angle());		
+			//TODO: displaying image
+			//ScreenManager.display_image(do_gate_image, rect_gate, new Angle());		
 
-			if (isGateIdsShown)
+			if (AirportView.#is_gate_ids_shown)
 			{
 				//отображение id гейта
-				ScreenManager.displayText(gate.Id, new Rect(rect_gate.location, new Size(-1, -1)), 
-					FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_TINY), Colors.Blue);		
+				//TODO: displaying text
+				// ScreenManager.displayText(gate.id, new Rect(rect_gate.location, new Size(-1, -1)), 
+				// 	FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_TINY), Colors.BLUE);		
 			}
 
 		}
 		Profiler.checkout("gates");		
 	}
 	
-	static #getGateImage(AGate: Gate, AnImageSizeObject: Object): DisplayObject
+	static #get_gate_image(gate, image_size_object) //: DisplayObject
 	{
-		if (ControlDispatcher.ActiveController.getControllerType() == 1)
+		if (ControlDispatcher.active_controller.get_controller_type() == 1)
 		{
-			AnImageSizeObject.ImageSize = FrameBuilder.adaptToFrame(DBL_EDIT_GATE_SIZE);
-			if (AGate.Selected) 
-			{
-				if (AGate.Free) 
-				{
-					return new GateFreeSelectedEditImage();
-				} 
-				else 
-				{
-					return new GateOccupiedSelectedEditImage();
-				}
-			} 
-			else 
-			{
-				if (AGate.Free) 
-				{
-					return new GateFreeEditImage();
-				} 
-				else 
-				{
-					return new GateOccupiedEditImage();
-				}
-			}
+			image_size_object.ImageSize = FrameBuilder.adapt_to_frame(AirportView.#EDIT_GATE_SIZE);
+			//TODO: image creation
+			// if (gate.selected) 
+			// {
+			// 	if (gate.free) 
+			// 	{
+			// 		return new GateFreeSelectedEditImage();
+			// 	} 
+			// 	else 
+			// 	{
+			// 		return new GateOccupiedSelectedEditImage();
+			// 	}
+			// } 
+			// else 
+			// {
+			// 	if (gate.free) 
+			// 	{
+			// 		return new GateFreeEditImage();
+			// 	} 
+			// 	else 
+			// 	{
+			// 		return new GateOccupiedEditImage();
+			// 	}
+			// }
 		}
 		else
 		{
-			AnImageSizeObject.ImageSize = FrameBuilder.adaptToFrame(DBL_GAME_GATE_SIZE);
-			if (AGate.Free) 
-			{
-				return new GateFreeImage();
-			} 
-			else 
-			{
-				return new GateOccupiedImage();
-			}
+			image_size_object.ImageSize = FrameBuilder.adapt_to_frame(AirportView.#GAME_GATE_SIZE);
+			// TODO: image creation
+			// if (gate.free) 
+			// {
+			// 	return new GateFreeImage();
+			// } 
+			// else 
+			// {
+			// 	return new GateOccupiedImage();
+			// }
 		}
 	}	
 
-	static #processKeyboardEvent(AnEvent: KeyboardEvent)
+	static #process_keyboard_event(event)
 	{
-		switch(AnEvent.type)
+		switch(event.type)
 		{
 			case KeyboardEvent.KEY_DOWN:
-				if (AnEvent.keyCode == Keys.O)
+				if (event.key_code == Keys.O)
 				{
-					FrameBuilder.PerformanceMetricsShown = true;
+					FrameBuilder.performance_metrics_shown = true;
 					return true;
 				}
 				break;
 				
 			case KeyboardEvent.KEY_UP:
-				switch (AnEvent.keyCode)
+				switch (event.key_code)
 				{
 					case Keys.G:
-						toggleGateIds();
+						AirportView.#toggle_gate_ids();
 						return true;
 						
 					case Keys.O:
-						FrameBuilder.PerformanceMetricsShown = false;
+						FrameBuilder.performance_metrics_shown = false;
 						return true;
 						
 					default:
-						return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_AIRPORT_KEY_PRESSED, 
-							{KeyCode: AnEvent.keyCode});
+						return ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.AIRPORT_KEY_PRESSED, 
+							{KeyCode: event.key_code});
 				}					
 				break;
 		}
 	}
 	
-	static #processMouseEvent(AnEvent: MouseEvent, APosition)
+	static #process_mouse_event(event, position)
 	{
-		switch(AnEvent.type)
+		switch(event.type)
 		{
-			case MouseEvent.CLICK:
-				if (AnEvent.stageX > FrameBuilder.GameZoneRect.extent.width - 10 
-					&& AnEvent.stageY > FrameBuilder.GameZoneRect.extent.height - 10)
-				{
-					return ControlDispatcher.dispatchViewEvent(
-						ControlDispatcher.N_EDITOR_CORNER_CLICK);					
-				}	
-				break;
-			case MouseEvent.DOUBLE_CLICK:
-				return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_AIRPORT_DOUBLE_CLICK, 
-					{Position: APosition});
+			// TODO: events
+			// case MouseEvent.CLICK:
+			// 	if (event.stage_x > FrameBuilder.game_zone_rect.extent.width - 10 
+			// 		&& event.stage_y > FrameBuilder.game_zone_rect.extent.height - 10)
+			// 	{
+			// 		return ControlDispatcher.dispatch_view_event(
+			// 			IncomingDispatcherEventTypes.EDITOR_CORNER_CLICK);					
+			// 	}	
+			// 	break;
+			// case MouseEvent.DOUBLE_CLICK:
+			// 	return ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.AIRPORT_DOUBLE_CLICK, 
+			// 		{Position: position});
 				
-			case MouseEvent.MOUSE_DOWN:
-				return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_AIRPORT_MOUSE_DOWN, 
-					{Position: APosition});
+			// case MouseEvent.MOUSE_DOWN:
+			// 	return ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.AIRPORT_MOUSE_DOWN, 
+			// 		{Position: position});
 
-			case MouseEvent.MOUSE_MOVE:
-				if (apAirport) 
-				{
-					let pnt_in_airport = apAirport.moveToRect(APosition);
-					return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_AIRPORT_MOUSE_MOVE, 
-						{Position: pnt_in_airport});
-				}
-				break;
-			case MouseEvent.MOUSE_UP:
-				return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_AIRPORT_MOUSE_UP, 
-					{Position: APosition});						
+			// case MouseEvent.MOUSE_MOVE:
+			// 	if (AirportView.#airport) 
+			// 	{
+			// 		let pnt_in_airport = AirportView.#airport.move_to_rect(position);
+			// 		return ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.AIRPORT_MOUSE_MOVE, 
+			// 			{Position: pnt_in_airport});
+			// 	}
+			// 	break;
+			// case MouseEvent.MOUSE_UP:
+			// 	return ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.AIRPORT_MOUSE_UP, 
+			// 		{Position: position});						
 		}
 	}
 	
-	static #toggleGateIds()
+	static #toggle_gate_ids()
 	{
-		isGateIdsShown = !isGateIdsShown;
+		AirportView.#is_gate_ids_shown = !AirportView.#is_gate_ids_shown;
 	}
 }
 
@@ -7443,10 +8537,10 @@ class Core //static
 		if (!MenuView.process_event(event))
 			if (!HintPanelView.process_event(event))
 				if (!InfoPanelView.process_event(event))
-<<<<<<<<<<<<<<<<======== Current place - level 4 ========
 					if (!BannerView.process_event(event))
 						AirportView.process_event(event);
 								
+<<<<<<<<<<<<<<<<======== Current place - level 4 ========
 		postprocess();
 	}
 
@@ -7821,7 +8915,7 @@ class FrameBuilder //static
 	//Всегда равен FrameRect за вычетом панели
 	//Используется в:
 	//	AircraftView.displayArrivalMark
-	//	AirportView.processMouseEvent
+	//	AirportView.AirportView.#process_mouse_event
 	//  MenuView.get_menu_parameters
 	static get game_zone_rect() //: Rect
 	{
@@ -8082,7 +9176,6 @@ class FrameBuilder //static
 		scaleScene();
 	}
 }
-
 
 
 function start()
