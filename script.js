@@ -2,8 +2,8 @@
 //import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 //const loader = new SVGLoader();
 
-var canvasWidth = window.innerWidth;
-var canvasHeight = window.innerHeight;
+let canvasWidth = window.innerWidth;
+let canvasHeight = window.innerHeight;
 
 const xAxis = new THREE.Vector3(1, 0, 0);
 const yAxis = new THREE.Vector3(0, 1, 0);
@@ -5596,7 +5596,7 @@ class ToolBarToggleButton extends ToolBarItem
 
 	//public methods
 
-	processEvent(event_type, location)
+	BannerView.process_event(event_type, location)
 	{
 		super.process_event(event_type, location);
 	}
@@ -6805,12 +6805,12 @@ class BannerView //static!
 	static #TOOLBAR_VERTICAL_MARGIN = 1 / 12; //of banner height
 	static #TOOLBAR_HEIGHT = 1 / 3; //of banner height
 
-	static #AUTHOR_NAME: String = "Programmed by Mikhail Serkin and Den Spirin";
-	static #AUTHOR_EMAIL: String = "Email: Mikhail.Serkin@gmail.com";
-	static #GAME_NAME: String = "Mad Skies";
-	static #LANDED: String = "Planes landed: ";
-	static #POINTS: String = "Points: ";
-	static #THE_END: String = "The End!";
+	static #AUTHOR_NAME = "Programmed by Mikhail Serkin and Den Spirin";
+	static #AUTHOR_EMAIL = "Email: Mikhail.Serkin@gmail.com";
+	static #GAME_NAME = "Mad Skies";
+	static #LANDED = "Planes landed: ";
+	static #POINTS = "Points: ";
+	static #THE_END = "The End!";
 	static #BUTTON_SIZE = new Size(50, 50);
 	static #Y_AUTHOR_EMAIL = 0.5; //of banner height
 	static #Y_AUTHOR_NAME = 0.4; //of banner height
@@ -6832,129 +6832,137 @@ class BannerView //static!
 	static #tool_bar = null;
 
 //public methods
-<<<<<<<<<<<<<<<<======== Current place - level 6 ========
 	static display() 
 	{
-		if (ControlDispatcher.ActiveController.getControllerType() == 1 || ControlDispatcher.CurrentDisplayMode.AirportShown) return;
+		if (ControlDispatcher.active_controller.get_controller_type() == 1 || ControlDispatcher.current_display_mode.airport_shown) return;
 		Profiler.checkin("banner");
 	
-		BannerView.#banner_rect = displayBannerBackground();
+		BannerView.#banner_rect = BannerView.#display_banner_background();
 		
-		if (!ControlDispatcher.CurrentDisplayMode.IsSplashScreen) {
-			var str_title: String = ControlDispatcher.CurrentDisplayMode.Title;
-			if (ControlDispatcher.CurrentDisplayMode == DisplayMode.LevelStartBanner) {
-				str_title += GameProgress.Level;
+		if (!ControlDispatcher.current_display_mode.is_splash_screen) {
+			let str_title = ControlDispatcher.current_display_mode.title;
+			if (ControlDispatcher.current_display_mode == DisplayMode.LEVEL_START_BANNER) {
+				str_title += GameProgress.level;
 			}
-			printTitle(str_title, ControlDispatcher.CurrentDisplayMode.Color);
+			BannerView.#print_title(str_title, ControlDispatcher.current_display_mode.color);
 			
-			displayToolBar();
+			BannerView.#display_tool_bar();
 			
-			switch (ControlDispatcher.CurrentDisplayMode)
+			switch (ControlDispatcher.current_display_mode)
 			{
-				case DisplayMode.LevelFailedBanner:
-				case DisplayMode.LevelCompleteBanner:
-					displayLevelStats();
+				case DisplayMode.LEVEL_FAILED_BANNER:
+				case DisplayMode.LEVEL_COMPLETE_BANNER:
+					BannerView.#display_level_stats();
 					break;
-				case DisplayMode.AboutBanner:				
-					displayGameInfo();
+				case DisplayMode.ABOUT_BANNER:				
+					BannerView.#display_game_info();
 					break;
 			}
 			
-			displayProgress();
+			BannerView.#display_progress();
 		}
 		Profiler.checkout("banner");
 	}
 
-	static processEvent(AnEvent: Event): Boolean
+	static process_event(event) //: Boolean
 	{
-		switch (ControlDispatcher.CurrentDisplayMode)
+		switch (ControlDispatcher.current_display_mode)
 		{
-			case DisplayMode.AboutBanner:
-			case DisplayMode.LevelStartBanner:
-			case DisplayMode.LevelFailedBanner:
-			case DisplayMode.LevelCompleteBanner:
-				if (BannerView.#tool_bar) return BannerView.#tool_bar.processEvent(AnEvent);
+			case DisplayMode.ABOUT_BANNER:
+			case DisplayMode.LEVEL_START_BANNER:
+			case DisplayMode.LEVEL_FAILED_BANNER:
+			case DisplayMode.LEVEL_COMPLETE_BANNER:
+				if (BannerView.#tool_bar) return BannerView.#tool_bar.process_event(event);
 
 			default: return false;
 		}
 	}	
 
 //private methods
-	static #addBackToMenuButton(IsSoleButton )
+	static #add_back_to_menu_button(is_sole_button)
 	{
 		if (!BannerView.#back_to_menu_item)
 		{
-			BannerView.#back_to_menu_item = new ToolBarItem(BannerView.#BUTTON_SIZE.clone(), 0, int.MIN_VALUE, 
-				new BannerBackToMenuNormalImage(), new BannerBackToMenuPressedImage());
-			BannerView.#back_to_menu_item.OnClick.addEventListener(ToolBarEventDispatcher.ON_CLICK, toolBarItem_OnClick);					
+			//TODO: image creation
+			//BannerView.#back_to_menu_item = new ToolBarItem(BannerView.#BUTTON_SIZE.clone(), 0, Number.MIN_SAFE_INTEGER, 
+			//	new BannerBackToMenuNormalImage(), new BannerBackToMenuPressedImage());
+			
+			//TODO: Event processing
+			//BannerView.#back_to_menu_item.on_click.add_event_listener(ToolBarEventDispatcher.ON_CLICK, BannerView.#tool_bar_item_on_click);					
 		}
-		BannerView.#back_to_menu_item.Alignment = IsSoleButton ? ToolBar.ALIGNMENT_CENTER : ToolBar.ALIGNMENT_LEFT;
-		BannerView.#tool_bar.addItem(BannerView.#back_to_menu_item);
+		BannerView.#back_to_menu_item.alignment = is_sole_button ? ToolBar.ALIGNMENT_CENTER : ToolBar.ALIGNMENT_LEFT;
+		BannerView.#tool_bar.add_item(BannerView.#back_to_menu_item);
 	}
 	
-	static #addBoxButton()
+	static #add_box_button()
 	{
 		if (!BannerView.#openned_box_item)
 		{
 			BannerView.#openned_box_item = new ToolBarItem(BannerView.#BUTTON_SIZE.clone(), ToolBar.ALIGNMENT_CENTER);
-			BannerView.#openned_box_item.OnClick.addEventListener(ToolBarEventDispatcher.ON_CLICK, toolBarItem_OnClick);					
-			BannerView.#openned_box_item.OnPaint.addEventListener(ToolBarEventDispatcher.ON_PAINT, toolBarItem_OnPaint);
+			//TODO: events
+			// BannerView.#openned_box_item.on_click.add_event_listener(ToolBarEventDispatcher.ON_CLICK, BannerView.#tool_bar_item_on_click);					
+			// BannerView.#openned_box_item.on_paint.add_event_listener(ToolBarEventDispatcher.ON_PAINT, BannerView.#tool_bar_item_on_paint);
 		}
-		BannerView.#tool_bar.addItem(BannerView.#openned_box_item);
+		BannerView.#tool_bar.add_item(BannerView.#openned_box_item);
 	}
 	
-	static #addButtons(ShowStartButton , ShowRestartButton , ShowNewlyOpenedBox  = true)
+	static #add_buttons(show_start_button, show_restart_button, show_newly_opened_box=true)
 	{
-		addBackToMenuButton(!(ShowStartButton || ShowRestartButton || ShowNewlyOpenedBox));
-		if (ShowRestartButton) addRestartButton();
+		BannerView.#add_back_to_menu_button(!(show_start_button || show_restart_button || show_newly_opened_box));
+		if (show_restart_button) BannerView.#add_restart_button();
 		
-		if (GameProgress.NewlyOpenedBox >= 0 && ShowNewlyOpenedBox >= 0 && ControlDispatcher.CurrentDisplayMode != DisplayMode.AboutBanner
-				&& (ControlDispatcher.CurrentDisplayMode != DisplayMode.LevelStartBanner 
-				|| ControlDispatcher.CurrentDisplayMode == DisplayMode.LevelStartBanner && GameProgress.Box != GameProgress.NewlyOpenedBox)) {
-				addBoxButton();
+		if (GameProgress.newly_opened_box >= 0 && show_newly_opened_box >= 0 && ControlDispatcher.current_display_mode != DisplayMode.ABOUT_BANNER
+				&& (ControlDispatcher.current_display_mode != DisplayMode.LEVEL_START_BANNER 
+				|| ControlDispatcher.current_display_mode == DisplayMode.LEVEL_START_BANNER && GameProgress.box != GameProgress.newly_opened_box)) {
+				BannerView.#add_box_button();
 		}
 		
-		if (ShowStartButton) {
-			var n_current_level_box: int = GameProgress.getBoxForLevel(GameProgress.Level);
-			var n_next_level_box: int = GameProgress.getBoxForLevel(GameProgress.Level + 1);
-			if (ControlDispatcher.CurrentDisplayMode != DisplayMode.AboutBanner 
-				&& (ControlDispatcher.CurrentDisplayMode != DisplayMode.LevelCompleteBanner
-					&& ControlDispatcher.CurrentDisplayMode != DisplayMode.LevelFailedBanner
+		if (show_start_button) {
+			let n_current_level_box = GameProgress.get_box_for_level(GameProgress.level);
+			let n_next_level_box = GameProgress.get_box_for_level(GameProgress.level + 1);
+			if (ControlDispatcher.current_display_mode != DisplayMode.ABOUT_BANNER 
+				&& (ControlDispatcher.current_display_mode != DisplayMode.LEVEL_COMPLETE_BANNER
+					&& ControlDispatcher.current_display_mode != DisplayMode.LEVEL_FAILED_BANNER
 					|| n_next_level_box == n_current_level_box 
-					|| GameProgress.getBoxProgress(n_current_level_box) >= 1))
+					|| GameProgress.get_box_progress(n_current_level_box) >= 1))
 			{
-				addStartLevelButton();
+				BannerView.#add_start_level_button();
 			}
 		}
 	}
 	
-	static #addRestartButton()
+	static #add_restart_button()
 	{
 		if (!BannerView.#restart_item)
 		{
-			BannerView.#restart_item = new ToolBarItem(BannerView.#BUTTON_SIZE.clone(), ToolBar.ALIGNMENT_CENTER, 10,
-				new BannerRestartNormalImage(), new BannerRestartPressedImage());
-			BannerView.#restart_item.OnClick.addEventListener(ToolBarEventDispatcher.ON_CLICK, toolBarItem_OnClick);					
+			//TODO: Image creation
+			//BannerView.#restart_item = new ToolBarItem(BannerView.#BUTTON_SIZE.clone(), ToolBar.ALIGNMENT_CENTER, 10,
+			//	new BannerRestartNormalImage(), new BannerRestartPressedImage());
+			BannerView.#restart_item.on_click.add_event_listener(ToolBarEventDispatcher.ON_CLICK, BannerView.#tool_bar_item_on_click);					
 		}
-		BannerView.#tool_bar.addItem(BannerView.#restart_item);
+		BannerView.#tool_bar.add_item(BannerView.#restart_item);
 	}
+
 	
-	static #addStartLevelButton()
+	static #add_start_level_button()
 	{
 		if (!BannerView.#start_item)
 		{
-			BannerView.#start_item = new ToolBarItem(BannerView.#BUTTON_SIZE.clone(), ToolBar.ALIGNMENT_RIGHT, int.MAX_VALUE,
-				new BannerStartNormalImage(), new BannerStartPressedImage());
-			BannerView.#start_item.OnClick.addEventListener(ToolBarEventDispatcher.ON_CLICK, toolBarItem_OnClick);					
+			//TODO: Image creation
+			//BannerView.#start_item = new ToolBarItem(BannerView.#BUTTON_SIZE.clone(), ToolBar.ALIGNMENT_RIGHT, Number.MAX_SAFE_INTEGER,
+			//	new BannerStartNormalImage(), new BannerStartPressedImage());
+
+			//TODO: events
+			//BannerView.#start_item.on_click.add_event_listener(ToolBarEventDispatcher.ON_CLICK, BannerView.#tool_bar_item_on_click);					
 		}
-		BannerView.#tool_bar.addItem(BannerView.#start_item);
+		BannerView.#tool_bar.add_item(BannerView.#start_item);
 	}
 		
-	static #createToolBar()
+	static #create_tool_bar()
 	{	
-		var sz_margins = new Size(BannerView.#banner_rect.extent.width*BannerView.#TOOLBAR_HORIZONTAL_MARGIN, 
+		let sz_margins = new Size(BannerView.#banner_rect.extent.width*BannerView.#TOOLBAR_HORIZONTAL_MARGIN, 
 			BannerView.#banner_rect.extent.height*BannerView.#TOOLBAR_VERTICAL_MARGIN);
-		var sz_tool_bar = new Size(BannerView.#banner_rect.extent.width - sz_margins.width*2,
+		let sz_tool_bar = new Size(BannerView.#banner_rect.extent.width - sz_margins.width*2,
 			BannerView.#banner_rect.extent.height*BannerView.#TOOLBAR_HEIGHT);
 		
 		BannerView.#tool_bar = new ToolBar(
@@ -6965,148 +6973,159 @@ class BannerView //static!
 		);
 	}	
 		
-	static #displayBox(ABoxNumber, ARect)
+	static #display_box(box_number, rect)
 	{
-		MenuView.displayBoxIcon(true, ABoxNumber, ARect);
+		MenuView.display_box_icon(true, box_number, rect);
 	}
 		
-	static #displayBannerBackground(): Rect
+	static #display_banner_background() //: Rect
 	{
-		var sp_background: Sprite;
-		var rect_bg  = new Rect(new Point(), FrameBuilder.adaptSizeToFrame(new Size(BannerView.#BANNER_WIDTH, BannerView.#BANNER_HEIGHT)));		
-		switch (ControlDispatcher.CurrentDisplayMode)
-		{
-			case DisplayMode.AboutBanner:
-				sp_background = new AboutBannerImage();
-				break;
-			case DisplayMode.LevelStartBanner:
-				sp_background = new MissionStartBannerImage();
-				break;
-			case DisplayMode.LevelFailedBanner:
-				sp_background = new MissionFailedBannerImage();
-				break;				
-			case DisplayMode.LevelCompleteBanner:
-				sp_background = new MissionCompletedBannerImage();
-				break;
-			case DisplayMode.SplashScreen:
-				sp_background = new SplashScreenBannerImage();
-				rect_bg = FrameBuilder.fitToFrame(new Rect(new Point(), new Size(sp_background.width, sp_background.height)));
-				break;				
-			default: sp_background = new BannerBackToMenuNormalImage();
-		}	
+		let sp_background = null;
+		let rect_bg  = new Rect(new Point(), FrameBuilder.adapt_size_to_frame(new Size(BannerView.#BANNER_WIDTH, BannerView.#BANNER_HEIGHT)));		
+		//TODO: Image creation
+		// switch (ControlDispatcher.current_display_mode)
+		// {
+		// 	case DisplayMode.ABOUT_BANNER:
+		// 		sp_background = new AboutBannerImage();
+		// 		break;
+		// 	case DisplayMode.LEVEL_START_BANNER:
+		// 		sp_background = new MissionStartBannerImage();
+		// 		break;
+		// 	case DisplayMode.LEVEL_FAILED_BANNER:
+		// 		sp_background = new MissionFailedBannerImage();
+		// 		break;				
+		// 	case DisplayMode.LEVEL_COMPLETE_BANNER:
+		// 		sp_background = new MissionCompletedBannerImage();
+		// 		break;
+		// 	case DisplayMode.SPLASH_SCREEN:
+		// 		sp_background = new SplashScreenBannerImage();
+		// 		rect_bg = FrameBuilder.fit_to_frame(new Rect(new Point(), new Size(sp_background.width, sp_background.height)));
+		// 		break;				
+		// 	default: sp_background = new BannerBackToMenuNormalImage();
+		// }	
 		
-		var rect_result  = FrameBuilder.centerInFrame(rect_bg);
-		ScreenManager.displayImage(sp_background, rect_result);
+		//TODO: displaying image
+		// let rect_result  = FrameBuilder.center_in_frame(rect_bg);
+		// ScreenManager.display_image(sp_background, rect_result);
 		return rect_result;
 	}
 
-	static #displayGameInfo() {
-		var gc: GameController = GameController.getInstance();
-		var pnt: Point = BannerView.#banner_rect.Center;
-		var rgn: Region = new Region(pnt, new Size(-1, -1));
+	static #display_game_info() {
+		let gc = GameController.get_instance();
+		let pnt = BannerView.#banner_rect.center;
+		let rgn = new Region(pnt, new Size(-1, -1));
 		
 		rgn.location.y = BannerView.#banner_rect.location.y + BannerView.#banner_rect.extent.height*BannerView.#Y_THE_END;
 		
-		if (GameProgress.IsLastBox && GameProgress.BoxPassed) {
-			ScreenManager.displayText(BannerView.#THE_END, rgn, FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_LARGE), Colors.Brown);
+		if (GameProgress.is_last_box && GameProgress.box_passed) {
+			//TODO: Displaying text
+			//ScreenManager.display_text(BannerView.#THE_END, rgn, FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_LARGE), Colors.BROWN);
 		}
 		rgn.location.y = BannerView.#banner_rect.location.y + BannerView.#banner_rect.extent.height*BannerView.#Y_GAME_NAME;
-		ScreenManager.displayText(BannerView.#GAME_NAME, rgn, FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_LARGE), 0x00AAFF);		
+		//TODO: Displaying text
+		//ScreenManager.display_text(BannerView.#GAME_NAME, rgn, FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_LARGE), 0x00AAFF);		
 
 		rgn.location.y = BannerView.#banner_rect.location.y + BannerView.#banner_rect.extent.height*BannerView.#Y_AUTHOR_NAME;
-		ScreenManager.displayText(BannerView.#AUTHOR_NAME, rgn, FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL));		
+		//TODO: Displaying text
+		//ScreenManager.display_text(BannerView.#AUTHOR_NAME, rgn, FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_SMALL));		
 
 		rgn.location.y = BannerView.#banner_rect.location.y + BannerView.#banner_rect.extent.height*BannerView.#Y_AUTHOR_EMAIL;
-		ScreenManager.displayText(BannerView.#AUTHOR_EMAIL, rgn, FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL));					
+		//TODO: Displaying text
+		//ScreenManager.display_text(BannerView.#AUTHOR_EMAIL, rgn, FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_SMALL));					
 	}
 	
-	static #displayLevelStats()
+	static #display_level_stats()
 	{
-		var gc: GameController = GameController.getInstance();
-		var pnt: Point = BannerView.#banner_rect.Center;
+		let gc = GameController.getInstance();
+		let pnt = BannerView.#banner_rect.center;
 		pnt.y = BannerView.#banner_rect.location.y + BannerView.#banner_rect.extent.height*BannerView.#Y_LANDED;
 		
-		ScreenManager.displayText(
-			BannerView.#LANDED + gc.LandingsDone + " / " + gc.LandingsToDo, 
-			new Region(pnt, new Size(-1, -1)), 
-			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_MEDIUM),
-			Colors.Yellow
-		);
+		//TODO: Displaying text
+		// ScreenManager.display_text(
+		// 	BannerView.#LANDED + gc.landings_done + " / " + gc.landings_to_do, 
+		// 	new Region(pnt, new Size(-1, -1)), 
+		// 	FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_MEDIUM),
+		// 	Colors.YELLOW
+		// );
 
 		pnt.y = BannerView.#banner_rect.location.y + BannerView.#banner_rect.extent.height*BannerView.#Y_POINTS;
-		ScreenManager.displayText(
-			BannerView.#POINTS + GameProgress.Points, 
-			new Region(pnt, new Size(-1, -1)), 
-			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_SMALL)
-		);	
+		//TODO: Displaying text
+		// ScreenManager.displayText(
+		// 	BannerView.#POINTS + GameProgress.points, 
+		// 	new Region(pnt, new Size(-1, -1)), 
+		// 	FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_SMALL)
+		// );	
 	}
 
-	static #displayProgress()
+	static #display_progress()
 	{
-		var sp_progress: Sprite;
-		switch (ControlDispatcher.CurrentDisplayMode)
+		let sp_progress;
+		switch (ControlDispatcher.current_display_mode)
 		{
-			case DisplayMode.LevelCompleteBanner:
-				sp_progress = new BannerProgressCompletedImage();
+			case DisplayMode.LEVEL_COMPLETE_BANNER:
+				// TODO: Image creation
+				// sp_progress = new BannerProgressCompletedImage();
 				break;
-			case DisplayMode.LevelFailedBanner:
-				sp_progress = new BannerProgressFailedImage();
+			case DisplayMode.LEVEL_FAILED_BANNER:
+				// TODO: Image creation
+				// sp_progress = new BannerProgressFailedImage();
 				break;
 			default: return;
 		}
 		
-		var cy_size = BannerView.#banner_rect.extent.height * BannerView.#PROGRESS_HEIGHT;
-		var dbl_zoom = cy_size / sp_progress.height;
-		var cx_size_progress = sp_progress.width * dbl_zoom;
-		var x_progress = BannerView.#banner_rect.location.x + BannerView.#banner_rect.extent.width/2 - cx_size_progress/2;
-		var y_progress = BannerView.#banner_rect.location.y + BannerView.#banner_rect.extent.height*Y_PROGRESS;
+		let cy_size = BannerView.#banner_rect.extent.height * BannerView.#PROGRESS_HEIGHT;
+		let dbl_zoom = cy_size / sp_progress.height;
+		let cx_size_progress = sp_progress.width * dbl_zoom;
+		let x_progress = BannerView.#banner_rect.location.x + BannerView.#banner_rect.extent.width/2 - cx_size_progress/2;
+		let y_progress = BannerView.#banner_rect.location.y + BannerView.#banner_rect.extent.height*Y_PROGRESS;
 		
-		var rect_progress  = new Rect(new Point(x_progress, y_progress), new Size(cx_size_progress, cy_size));
+		let rect_progress  = new Rect(new Point(x_progress, y_progress), new Size(cx_size_progress, cy_size));
 		
-		var sp_filler: Sprite = new BannerProgressFillerImage();
-		var cx_size_filler = sp_filler.width * dbl_zoom;
-		var gc: GameController = GameController.getInstance();
+		//TODO: image creation
+		// let sp_filler = new BannerProgressFillerImage();
+		// let cx_size_filler = sp_filler.width * dbl_zoom;
+		let gc = GameController.get_instance();
 			
-		var rect_filler  = new Rect(
+		let rect_filler  = new Rect(
 			new Point(x_progress, y_progress), 
-			new Size(gc.LandingsDone / gc.LandingsToDo * cx_size_filler, cy_size)
+			new Size(gc.landings_done / gc.landings_to_do * cx_size_filler, cy_size)
 		);
-		ScreenManager.displayImage(sp_filler, rect_filler, new Angle());
-		ScreenManager.displayImage(sp_progress, rect_progress, new Angle());
+		ScreenManager.display_image(sp_filler, rect_filler, new Angle());
+		ScreenManager.display_image(sp_progress, rect_progress, new Angle());
 	}	
 	
-	static #displayToolBar()
+	static #display_tool_bar()
 	{
-		var dm_current_mode  = ControlDispatcher.CurrentDisplayMode;
+		let dm_current_mode  = ControlDispatcher.current_display_mode;
 		if (dm_current_mode != BannerView.#last_display_mode) {
 			BannerView.#last_display_mode = dm_current_mode;
-			if (!BannerView.#tool_bar) createToolBar();
-			BannerView.#tool_bar.removeAllItems();
+			if (!BannerView.#tool_bar) BannerView.#create_tool_bar();
+			BannerView.#tool_bar.remove_all_items();
 			switch (dm_current_mode)
 			{
-				case DisplayMode.LevelFailedBanner:
-					addButtons(true, true);
+				case DisplayMode.LEVEL_FAILED_BANNER:
+					BannerView.#add_buttons(true, true);
 					break;
-				case DisplayMode.LevelCompleteBanner:
-					addButtons(true, true);
+				case DisplayMode.LEVEL_COMPLETE_BANNER:
+					BannerView.#add_buttons(true, true);
 					break;
-				case DisplayMode.LevelStartBanner:
-					addButtons(true, false);
+				case DisplayMode.LEVEL_START_BANNER:
+					BannerView.#add_buttons(true, false);
 					break;
-				case DisplayMode.AboutBanner:
-					addButtons(false, false, false);
+				case DisplayMode.ABOUT_BANNER:
+					BannerView.#add_buttons(false, false, false);
 					break;
 			}
 		}
 		BannerView.#tool_bar.display();
 	}
 	
-	static #printTitle(AText: String, AColor: int)
+	static #print_title(text, color)
 	{
-		if (!AText) return;
+		if (!text) return;
 		
-		ScreenManager.displayText(
-			AText, 
+		ScreenManager.display_text(
+			text, 
 			new Region(
 				new Point(
 					BannerView.#banner_rect.location.x + BannerView.#banner_rect.extent.width/2,
@@ -7114,59 +7133,60 @@ class BannerView //static!
 				), 
 				new Size(-1, -1)
 			), 
-			FrameBuilder.adaptToFrame(ScreenManager.FONT_SIZE_LARGE), 
-			AColor
+			FrameBuilder.adapt_to_frame(ScreenManager.FONT_SIZE_LARGE), 
+			color
 		);
 	}
 
 	//event handlers
 
-	static #toolBarItem_OnClick(AnEvent:  ObjectEvent): void
+	static #tool_bar_item_on_click(event)
 	{
-		switch(AnEvent.SourceObject) {
+		switch(event.SourceObject) {
 			case BannerView.#back_to_menu_item:
-				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_BANNER_BACK_CLICK);	
+				ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.BANNER_BACK_CLICK);	
 				break;
 			case BannerView.#restart_item:
-				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_BANNER_RESTART_CLICK);
+				ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.BANNER_RESTART_CLICK);
 				break;
 				
 			case BannerView.#start_item:
-				if (ControlDispatcher.CurrentDisplayMode == DisplayMode.LevelStartBanner)
+				if (ControlDispatcher.current_display_mode == DisplayMode.LEVEL_START_BANNER)
 				{
-					ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_BANNER_START_CLICK);
+					ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.BANNER_START_CLICK);
 				}
 				else
 				{
-					ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_BANNER_SKIP_LEVEL_CLICK);
+					ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.BANNER_SKIP_LEVEL_CLICK);
 				}				
 				break;
 				
 			case BannerView.#openned_box_item:
-				GameProgress.selectSpecifiedLevel(GameProgress.getFirstLevelForBox(GameProgress.NewlyOpenedBox));
-				ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_BANNER_BACK_CLICK);	
+				GameProgress.select_specified_level(GameProgress.get_first_level_for_box(GameProgress.newly_opened_box));
+				ControlDispatcher.dispatch_view_event(IncomingDispatcherEventTypes.BANNER_BACK_CLICK);	
 			break;	
 		}
 	}
 	
 	//event hanglers
-	static #toolBarItem_OnPaint(AnEvent: ObjectEvent): void
+	static #tool_bar_item_on_paint(event)
 	{
-		var tbi_source = ToolBarItem(AnEvent.SourceObject);
-		var rect_tbi  = tbi_source.clone();
+		let tbi_source = ToolBarItem(AnEvent.SourceObject);
+		let rect_tbi  = tbi_source.clone();
 		rect_tbi.location = rect_tbi.location.add(BannerView.#tool_bar.location);
 		
-		ScreenManager.displayImage(new BannerButtonFrameImage(), rect_tbi);
+		//TODO: displaying image
+		// ScreenManager.display_image(new BannerButtonFrameImage(), rect_tbi);
 	
-		var dbl_spacing_hor = rect_tbi.extent.width * BannerView.#BOX_SPACING;
-		var dbl_spacing_ver = rect_tbi.extent.height * BannerView.#BOX_SPACING;
+		let dbl_spacing_hor = rect_tbi.extent.width * BannerView.#BOX_SPACING;
+		let dbl_spacing_ver = rect_tbi.extent.height * BannerView.#BOX_SPACING;
 		
 		rect_tbi.extent.width -= dbl_spacing_hor*2;
 		rect_tbi.extent.height -= dbl_spacing_ver*2;
 		rect_tbi.location.x += dbl_spacing_hor;
 		rect_tbi.location.y += dbl_spacing_ver;
 		
-		displayBox(GameProgress.NewlyOpenedBox, rect_tbi);
+		BannerView.#display_box(GameProgress.newly_opened_box, rect_tbi);
 	}
 }
 
@@ -7183,8 +7203,8 @@ class AirportView //static
 	static private const DBL_GAME_GATE_SIZE = 9.6; //abs?
 	
 //private fields
-	static private var apAirport  = null;
-	static private var isGateIdsShown  = false;
+	static private apAirport  = null;
+	static private isGateIdsShown  = false;
 
 //public methods
 	static display(AnAirport , ToShowAircrafts)
@@ -7207,13 +7227,13 @@ class AirportView //static
 		Profiler.checkout("airport");
 	}	
 
-	static processEvent(AnEvent: Event): Boolean
+	static processEvent(AnEvent): Boolean
 	{
 		if (AnEvent is MouseEvent)
 		{
-			var mouse_event: MouseEvent = MouseEvent(AnEvent);
-			var point: Point = new Point(mouse_event.stageX, mouse_event.stageY);
-			var pnt_airport_pos: Point = FrameBuilder.convertToModelPoint(point);
+			let mouse_event: MouseEvent = MouseEvent(AnEvent);
+			let point = new Point(mouse_event.stageX, mouse_event.stageY);
+			let pnt_airport_pos = FrameBuilder.convertToModelPoint(point);
 			processMouseEvent(mouse_event, pnt_airport_pos);
 
 		}
@@ -7230,7 +7250,7 @@ class AirportView //static
 	{
 		Profiler.checkin("aprons");
 		//отображение апронов
-		for each (var apron: SelectableObject in AnApronsVector)
+		for each (let apron: SelectableObject in AnApronsVector)
 		{
 			ScreenManager.displayImage(apron.Selected ? new ApronSelectedImage() : new ApronImage(), FrameBuilder.convertToScreenRect(apron), apron.Course);
 		}
@@ -7240,10 +7260,10 @@ class AirportView //static
 	static #displayClouds(ACloudsVector: Vector.<Cloud>)
 	{
 		Profiler.checkin("clouds");
-		for each (var cloud: Cloud in ACloudsVector)
+		for each (let cloud: Cloud in ACloudsVector)
 		{		
-			var rect_cloud = FrameBuilder.convertToScreenRect(cloud);
-			var do_cloud: DisplayObject;
+			let rect_cloud = FrameBuilder.convertToScreenRect(cloud);
+			let do_cloud: DisplayObject;
 			switch(cloud.Density)
 			{
 				case 1: do_cloud = new CloudImage1(); break;
@@ -7270,13 +7290,13 @@ class AirportView //static
 	static #displayGates(AGatesVector: Vector.<Gate>)
 	{
 		Profiler.checkin("gates");
-		for each (var gate: Gate in AGatesVector)
+		for each (let gate: Gate in AGatesVector)
 		{
-			var obj_gate_size: Object = {};
-			var do_gate_image: DisplayObject = getGateImage(gate, obj_gate_size);
-			var dbl_gate_img_size = obj_gate_size.ImageSize;
+			let obj_gate_size: Object = {};
+			let do_gate_image: DisplayObject = getGateImage(gate, obj_gate_size);
+			let dbl_gate_img_size = obj_gate_size.ImageSize;
 					
-			var rect_gate = FrameBuilder.convertToScreenRect(gate);
+			let rect_gate = FrameBuilder.convertToScreenRect(gate);
 			rect_gate.extent = new Size(dbl_gate_img_size, dbl_gate_img_size);
 			ScreenManager.displayImage(do_gate_image, rect_gate, new Angle());		
 
@@ -7364,7 +7384,7 @@ class AirportView //static
 		}
 	}
 	
-	static #processMouseEvent(AnEvent: MouseEvent, APosition: Point)
+	static #processMouseEvent(AnEvent: MouseEvent, APosition)
 	{
 		switch(AnEvent.type)
 		{
@@ -7387,7 +7407,7 @@ class AirportView //static
 			case MouseEvent.MOUSE_MOVE:
 				if (apAirport) 
 				{
-					var pnt_in_airport: Point = apAirport.moveToRect(APosition);
+					let pnt_in_airport = apAirport.moveToRect(APosition);
 					return ControlDispatcher.dispatchViewEvent(ControlDispatcher.N_AIRPORT_MOUSE_MOVE, 
 						{Position: pnt_in_airport});
 				}
@@ -7899,7 +7919,7 @@ class FrameBuilder //static
 		return length * FZoom;
 	}
 	
-	static convert_to_model_point(point: Point): Point
+	static convert_to_model_point(point)
 	{
 		return new Point((point.x - FOrigin.x) * FZoom, (point.y - FOrigin.y - FrameBuilder.#info_panel_rect.extent.height) * FZoom);
 	}
@@ -7919,7 +7939,7 @@ class FrameBuilder //static
 		return length / FZoom;
 	}
 	
-	static convert_to_screen_point(point: Point): Point
+	static convert_to_screen_point(point): Point
 	{
 		return new Point(point.x / FZoom + FOrigin.x, point.y / FZoom + FOrigin.y + FrameBuilder.#info_panel_rect.extent.height);
 	}
@@ -7944,10 +7964,10 @@ class FrameBuilder //static
 
 	static fit_to_frame(ARect): Rect
 	{
-		var rect_result = ARect.clone();
-		var dbl_hor_scale = FFrameRect.extent.width / ARect.extent.width;    //10x50 / 500x100 //50
-		var dbl_ver_scale = FFrameRect.extent.height / ARect.extent.height;//2
-		var dbl_scale = Math.min(dbl_hor_scale, dbl_ver_scale);
+		let rect_result = ARect.clone();
+		let dbl_hor_scale = FFrameRect.extent.width / ARect.extent.width;    //10x50 / 500x100 //50
+		let dbl_ver_scale = FFrameRect.extent.height / ARect.extent.height;//2
+		let dbl_scale = Math.min(dbl_hor_scale, dbl_ver_scale);
 		rect_result.extent.width *= dbl_scale; 
 		rect_result.extent.height *= dbl_scale;			
 		
@@ -7958,8 +7978,8 @@ class FrameBuilder //static
 	static #display_frame_margins()
 	{
 		Profiler.checkin("margins");
-		for (var x = -1; x <= 1; x++)
-			for (var y = (x ? 0: -1); y <= (x ? 0 : 1); y+=2)
+		for (let x = -1; x <= 1; x++)
+			for (let y = (x ? 0: -1); y <= (x ? 0 : 1); y+=2)
 				displayMargin(x, y);
 		
 		//рамка	
@@ -7982,11 +8002,11 @@ class FrameBuilder //static
 
 	static #display_margin(x, y)
 	{
-		var dbl_margin_width = FrameBuilder.adapt_to_frame(N_MARGIN_WIDTH);
-		var x = x ? ((x < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.width): 0;
-		var y = y ? ((y < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.height): 0;
-		var cx = x ? dbl_margin_width : FrameBuilder.FrameRect.extent.width;
-		var cy = y ? dbl_margin_width : FrameBuilder.FrameRect.extent.height;		
+		let dbl_margin_width = FrameBuilder.adapt_to_frame(N_MARGIN_WIDTH);
+		let x = x ? ((x < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.width): 0;
+		let y = y ? ((y < 0) ? -dbl_margin_width : FrameBuilder.FrameRect.extent.height): 0;
+		let cx = x ? dbl_margin_width : FrameBuilder.FrameRect.extent.width;
+		let cy = y ? dbl_margin_width : FrameBuilder.FrameRect.extent.height;		
 	
 		ScreenManager.display_image(new MarginImage(), new Rect(new Point(x, y), new Size(cx, cy)));
 	}
@@ -7994,7 +8014,7 @@ class FrameBuilder //static
 	static #display_performance_metrics() 
 	{
 		nFrameCount++;
-		var dt = new Date();
+		let dt = new Date();
 		if (dt.getTime() - dtFrameCount.getTime() > 1000)
 		{	
 			nFramesPerSecond = nFrameCount;
@@ -8002,7 +8022,7 @@ class FrameBuilder //static
 			dtFrameCount = dt;
 		}	
 		
-		var str_text: String = "FPS: " + nFramesPerSecond.to_string() 
+		let str_text = "FPS: " + nFramesPerSecond.to_string() 
 		+ "\nDisplaying:"
 		+ "\n\t" + Profiler.getWatch("background")
 		+ "\n\t" + Profiler.getWatch("margins")
@@ -8051,7 +8071,7 @@ class FrameBuilder //static
 
 		FrameBuilder.#info_panel_rect = new Rect(new Point(), new Size(FFrameRect.extent.width, FrameBuilder.adapt_to_frame(CY_INFO_PANEL_HEIGHT)));		
 		
-		var sz_game_zone = ScreenManager.StageSize.clone();
+		let sz_game_zone = ScreenManager.StageSize.clone();
 		sz_game_zone.height -= FInfoPanelRect.extent.height;
 		this.#game_zone_rect = new Rect(new Point(0, FInfoPanelRect.extent.height), sz_game_zone);		
 	}
