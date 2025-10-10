@@ -5395,45 +5395,44 @@ class AirfieldView //static
 
 class Star
 {
-<<<<<<<<<<<<<<<<======== Current place - level 7 ========
-	private const N_MOVE_STEPS = 16;
-	private const N_ROTATION_STEPS = 16;
-	private const DBL_ROTATION_MIN = 0.2;
-	private var FLocation: ap.basic.Point;
-	private var FRotationPhase = DBL_ROTATION_MIN;
-	private var dblMoveStep;
-	private var dblRotationStep = 1/N_ROTATION_STEPS*2;
+	#MOVE_STEPS = 16;
+	#ROTATION_STEPS = 16;
+	#ROTATION_MIN = 0.2;
+	#location = null;
+	#rotation_phase = this.#ROTATION_MIN;
+	#move_step = 0;
+	#rotation_step = 1/this.#ROTATION_STEPS*2;
 
-	public function get location(): ap.basic.Point 
-	{
-		return FLocation;
+	constructor (location) {
+		this.#location = location;
+		this.#move_step = location.y / this.#MOVE_STEPS;
 	}
 
-	public function get RotationPhase(): Number
+	get location() //:Point 
 	{
-		return FRotationPhase;
+		return this.#location;
+	}
+
+	get rotation_phase() //: Number
+	{
+		return this.#rotation_phase;
 	}
 	
-	public function get IsFlownAway(): Boolean
+	get is_flown_away() //: Boolean
 	{
-		return (FLocation.y < 0);
+		return (this.#location.y < 0);
 	}
-	
-	public function Star(ALocation: ap.basic.Point) {
-		FLocation = ALocation;
-		dblMoveStep = ALocation.y / N_MOVE_STEPS;
-	}
-	
-	public function move(): void 
+		
+	public function move()
 	{
-		FLocation.y -= dblMoveStep;
-		var dbl_rot = FRotationPhase + dblRotationStep;
-		if (dbl_rot < DBL_ROTATION_MIN || dbl_rot > 1) {
-			dblRotationStep = -dblRotationStep;
-			dbl_rot = FRotationPhase + dblRotationStep;
+		this.#location.y -= this.#move_step;
+		let dbl_rot = this.#rotation_phase + this.#rotation_step;
+		if (dbl_rot < this.#ROTATION_MIN || dbl_rot > 1) {
+			this.#rotation_step = -this.#rotation_step;
+			dbl_rot = this.#rotation_phase + this.#rotation_step;
 		}
 		else {
-			FRotationPhase = dbl_rot;
+			this.#rotation_phase = dbl_rot;
 		}
 	}
 }
@@ -5442,45 +5441,46 @@ class Star
 
 class StarView //static
 {
-<<<<<<<<<<<<<<<<======== Current place - level 8 ========
 //private consts
-	static private var STAR_SIZE = 24;
+	static #STAR_SIZE = 24;
 
 //private fields
-	static private var asStars: Vector.<Star>;
+	static #stars = [];
 	
 //public methods
-	public static function addStar(ALocation)
+	static add_star(location)
 	{
-		asStars.push(new Star(ALocation));
-		var transform: SoundTransform = new SoundTransform(1, 0);
-		var zvon: Zvon = new Zvon();
-		var ch: SoundChannel = zvon.play();
-		ch.soundTransform = transform;
+		StarView.#stars.push(new Star(location));
+		// TODO: playing sound
+		// var transform: SoundTransform = new SoundTransform(1, 0);
+		// var zvon: Zvon = new Zvon();
+		// var ch: SoundChannel = zvon.play();
+		// ch.soundTransform = transform;
 	}	
 	
-	public static function clear()
+	static clear()
 	{
-		asStars = new Vector.<Star>(0, false);
+		StarView.#stars = [];
 	}	
 	
-	public static function display()
+	static display()
 	{
-		for (var i = asStars.length - 1; i >= 0; i--)
+		for (var i = StarView.#stars.length - 1; i >= 0; i--)
 		{
-			var star: Star = asStars[i];
-			displayStar(star);		
+			var star: Star = StarView.#stars[i];
+			StarView.#display_star(star);		
 			star.move();
 			//delete if flown away
-			if (star.IsFlownAway) {
-				asStars.splice(i, 1);
+			if (star.is_flown_away) {
+				StarView.#stars.splice(i, 1);
 			}			
 		}
 	}
 //private methods
-	private static function displayStar(star: Star)
+	static display_star(star)
 	{
-		ScreenManager.displayImage(new StarImage(), new Rect(star.location, new Size(STAR_SIZE*star.RotationPhase, STAR_SIZE)));		
+		// TODO: displaying image
+		// ScreenManager.display_image(new StarImage(), new Rect(star.location, new Size(StarView.#STAR_SIZE*star.rotation_phase, StarView.#STAR_SIZE)));		
 	}
 }
 
@@ -7128,7 +7128,7 @@ class GameController implements IController //Singleton
 		this.#landings_done += 1;
 		let aircraft = event.SourceObject; 
 		GameProgress.add_points(int(aircraft.fuel*GameController.#FULL_TANK_POINTS));
-		StarView.addStar(FrameBuilder.convert_to_screen_point(aircraft.location));
+		StarView.StarView.add_star(FrameBuilder.convert_to_screen_point(aircraft.location));
 	}
 
 	#hint_panel_view_on_hiding(event)
