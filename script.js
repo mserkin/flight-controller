@@ -921,6 +921,8 @@ render();
 
 class Enum 
 {
+	#name = null;
+	#value = null;
 	// приватный конструктор, чтобы никто не создавал экземпляры
 	constructor(name, value) {
 	  this.#name = name;
@@ -932,7 +934,7 @@ class Enum
 	  return this.#name;
 	}
   
-	valueOf() {
+	value_of() {
 	  return this.#value;
 	}
 }
@@ -1350,7 +1352,7 @@ class Point
 ///////////////////////////////////////////////////////////
 //  PointsEventDispatcher.as
 ///////////////////////////////////////////////////////////
-public class PointsEventDispatcher extends EventDispatcher 
+class PointsEventDispatcher extends EventDispatcher 
 {
 //public consts
 	static ON_ADD() {return "OnAdd"};		
@@ -1391,7 +1393,7 @@ class Points
 //constructor
 	constructor ()
 	{
-		this.#points = new Vector.<Point>();
+		this.#points = [];
 		this.on_add  = new PointsEventDispatcher();
 		this.on_remove = new PointsEventDispatcher();
 	}		
@@ -1583,10 +1585,11 @@ class Rect
 	
 	to_xml(xml_node)
 	{
-		xml_node.@x = this.#location.x;
-		xml_node.@y = this.#location.y;
-		xml_node.@width = this.#extent.width;
-		xml_node.@height = this.#extent.height;
+		// TODO: xml
+		// xml_node.@x = this.#location.x;
+		// xml_node.@y = this.#location.y;
+		// xml_node.@width = this.#extent.width;
+		// xml_node.@height = this.#extent.height;
 	}	
 }
 
@@ -1623,8 +1626,8 @@ class Region extends Rect
 		{
 			for (let i_width = -1; i_width <= 1; i_width+=2)	
 			{
-				let pnt_corner = new Point(this.#extent.width/2*i_width, this.#extent.height/2*i_height); 
-				//let ang_fix = new Angle(pnt_corner.Theta.radian - Math.PI / 2 * i_width); 
+				let pnt_corner = new Point(this.extent.width/2*i_width, this.extent.height/2*i_height); 
+				/* ang_fix = new Angle(pnt_corner.Theta.radian - Math.PI / 2 * i_width); */
 				pnt_corner.theta = pnt_corner.theta.add(rotation);
 				pnt_corner.x += this.location.x;
 				pnt_corner.y += this.location.y;
@@ -1647,9 +1650,9 @@ class Region extends Rect
 	
 	in_area(point)
     {
-		let point = point.sub(this.location);
-		let ang_theta = point.theta;
-		point.theta = ang_theta.sub(rotation);
+		let pnt = point.sub(this.location);
+		let ang_theta = pnt.theta;
+		pnt.theta = ang_theta.sub(this.#rotation);
 		return Math.abs(point.y) < this.extent.height / 2 && Math.abs(point.x) < this.extent.width / 2;
 	}
 
@@ -1683,11 +1686,18 @@ class SelectableObject extends Region
 	
 	static fromXml(xml)
 	{
-		let x = xml.@x;
-		let y = xml.@y;
-		let cx = xml.@width;
-		let cy = xml.@height;
-		let n_course = xml.@course;
+		let x = 0;
+		let y = 0;
+		let cx = 0;
+		let cy = 0;
+		let n_course = 0;
+		
+		// TODO: xml
+		// let x = xml.@x;
+		// let y = xml.@y;
+		// let cx = xml.@width;
+		// let cy = xml.@height;
+		// let n_course = xml.@course;
 
 		return new SelectableObject(new Point(x, y), new Size(cx, cy), new Angle(n_course, AngleUnits.DEGREE));
 	}
@@ -1732,7 +1742,8 @@ class SelectableObject extends Region
 	to_xml(xml_node)
 	{
 		super.to_xml(xml_node);
-		xml_node.@course = this.course.degree;
+		// TODO: xml
+		// xml_node.@course = this.course.degree;
 	}	
 }
 
@@ -1990,7 +2001,7 @@ class Wind
 
 	get maximal_speed() //: Number
 	{
-		return #this.#maximal_speed;
+		return this.#maximal_speed;
 	}
 	
 	get minimal_speed() //: Number
@@ -2012,7 +2023,7 @@ class Wind
 //constructor
 	constructor (min_speed, max_speed, letiability)
 	{
-		#this.#maximal_speed = Math.min(max_speed, MAX_WIND_SPEED);
+		this.#maximal_speed = Math.min(max_speed, MAX_WIND_SPEED);
 		this.#minimal_speed = min_speed;
 		this.#letiability = letiability;
 		this.update();
@@ -2417,7 +2428,7 @@ class Aircraft extends SelectableObject
 
 	get target_airfield() //: IAirfield
 	{
-		return this.#taxi_downwind_airfield;
+		return this._target_airfield;
 	}
 
 	set target_airfield(airfield)
@@ -2429,17 +2440,19 @@ class Aircraft extends SelectableObject
 			this.depart();
 		}
 
-		if (this.#taxi_downwind_airfield && (this.#taxi_downwind_airfield != airfield))
+		if (this._target_airfield && (this._target_airfield != airfield))
 		{
 			this.#free_airfield();
 		}
-		this.#taxi_downwind_airfield = airfield;			
+		this._target_airfield = airfield;			
 		
-		if (this._state == AircraftState.DIRECTED && !this.#taxi_downwind_airfield && this._path.length == 0)
+		if (this._state == AircraftState.DIRECTED && !this._target_airfield && this._path.length == 0) {
 			this._state = AircraftState.UNDIRECTED;
-		else
-			if (this._state == AircraftState.UNDIRECTED)
-				this._state == AircraftState.DIRECTED;
+		}
+		else if (this._state == AircraftState.UNDIRECTED) 
+		{
+			this._state == AircraftState.DIRECTED;
+		}
 	}
 
 	get time_to_arrive() //: Number
@@ -2469,8 +2482,9 @@ class Aircraft extends SelectableObject
 		this._time_to_arrive = (this._state == AircraftState.ARRIVING) ? Aircraft.ARRIVAL_PERIOD : 0;
 		this._speed = (this._state == AircraftState.UNDIRECTED) ? this._type.cruise_speed : 0;
 		
-		if (gate != null)
+		if (gate != null) {
 			gate.occupy();
+		}
 		this._occupied_gate = gate;
 
     	this.on_landed = new CustomDispatcher();
@@ -2483,8 +2497,7 @@ class Aircraft extends SelectableObject
 		if (Math.abs(this.location.x - other_aircraft.location.x) <= this.#COLLISION_HOR_DISTANCE
 			&& Math.abs(this.location.y - other_aircraft.location.y) <= this.#COLLISION_HOR_DISTANCE
 			&& Math.abs(this.altitude - other_aircraft.altitude) <= this.#COLLISION_VERT_DISTANCE
-			&& Instruments.xor(this.altitude == 0, other_aircraft.altitude != 0)
-			)
+			&& Instruments.xor(this.altitude == 0, other_aircraft.altitude != 0))
 		{
 			this._collided= true;
 			if (primary_check)
@@ -2498,8 +2511,10 @@ class Aircraft extends SelectableObject
 
 	depart() //
 	{
-		if (this._state == AircraftState.READY_TO_TAKEOFF)
+		if (this._state == AircraftState.READY_TO_TAKEOFF) 
+		{
 			this._is_takeoff_pending = true;
+		}
 		//дальнейшие действия по старту см. _stay_ready_to_takeoff()
 	}
 
@@ -2512,9 +2527,13 @@ class Aircraft extends SelectableObject
 	move(wind, cloud_density)
 	{
 		if (this.#go_around_frame_counter > 0) 
+		{
 			--this.#go_around_frame_counter;
-		else
+		}
+		else 
+		{
 			this.#go_around_reason = Aircraft.GA_REASON_NONE;
+		}
 			
 		this._control(wind, cloud_density);
 		this._calc_speeds();
@@ -2535,11 +2554,11 @@ class Aircraft extends SelectableObject
 			+ (this._occupied_gate ? this._occupied_gate.to_string(indent + 2) : "")
 			+ str_indent_plus + "state=" + this._state.to_string(indent + 2) + "\n"
 			+ str_indent_plus + "target_airfield=\n" 
-			+ (this.#taxi_downwind_airfield ? this.#taxi_downwind_airfield.to_string(indent + 2): "")
+			+ (this._target_airfield ? this._target_airfield.to_string(indent + 2): "")
 		+ str_indent + "}\n";	
 	}
 
-	//protected methods
+// 	//protected methods
 
 	_approach(wind, cloud_density)
 	{
@@ -2552,7 +2571,7 @@ class Aircraft extends SelectableObject
 		this.#max_downwind_speed = Math.max(wind.direction.sub(this.course).cos() * wind.speed, this.#max_downwind_speed);
 		this.#cloud_density_counter += cloud_density;
 		
-		let is_in_landing_zone = this.#taxi_downwind_airfield.in_landing_zone(this.location);
+		let is_in_landing_zone = this._target_airfield.in_landing_zone(this.location);
 		
 		let to_continue_approach = this._navigate_to_airfield(is_in_landing_zone, wind);
 				
@@ -2627,8 +2646,8 @@ class Aircraft extends SelectableObject
 
 	_declare_landed()
 	{
-		this.#taxi_downwind_airfield.free(this);
-		this.#taxi_downwind_airfield = null;
+		this._target_airfield.free(this);
+		this._target_airfield = null;
 		this._state = AircraftState.PREPARING_TO_TAKEOFF;
 		//TODO: event
 		//this.on_landed.fire_on_landed(this);				
@@ -2636,14 +2655,23 @@ class Aircraft extends SelectableObject
 
 	_examine_go_around_reason()
     {
-		if (this._state != AircraftState.LANDING) return;
-		
-		if (this.#max_downwind_speed > this.#CRITICAL_DOWNWIND)
+		if (this._state != AircraftState.LANDING) 
+		{
+			return;
+		}
+
+		if (this.#max_downwind_speed > this.#CRITICAL_DOWNWIND) 
+		{
 			this.#go_around_reason = Aircraft.GA_REASON_WIND;
-		else if (this.#cloud_density_counter > this.#CRITICAL_CLOUD_DENSITY)
+		}
+		else if (this.#cloud_density_counter > this.#CRITICAL_CLOUD_DENSITY) 
+		{
 			this.#go_around_reason = Aircraft.GA_REASON_CLOUDS;
-		else
+		}
+		else 
+		{
 			this.#go_around_reason = Aircraft.GA_REASON_UNKNOWN;
+		}
 		console.log("==============================");
 		console.log("this._fuel = " + this._fuel);
 		console.log("this.#go_around_reason = " + this.#go_around_reason);
@@ -2655,7 +2683,7 @@ class Aircraft extends SelectableObject
 
 	_get_target_course() //: Angle
 	{
-		return this.#taxi_downwind_airfield.course;
+		return this._target_airfield.course;
 	}
 
 	_go_around(wind)
@@ -2674,7 +2702,7 @@ class Aircraft extends SelectableObject
 		//если мы уже над полосой
 		if (is_over_airfield && this._occupied_gate != null)
 		{
-			this._turn = this.course.get_rotation(this.#taxi_downwind_airfield.active_course);
+			this._turn = this.course.get_rotation(this._target_airfield.active_course);
 			
 			if (this._altitude <= 0)
 			{
@@ -2712,11 +2740,11 @@ class Aircraft extends SelectableObject
 		if (this._is_takeoff_pending)
 		{
 			//если полоса для старта не опеределена берем свободную в текущий момент
-			let airfield: IAirfield = this.#taxi_downwind_airfield ? this.#taxi_downwind_airfield : this._occupied_gate.HostingAirfield;
-			this._is_occuping_airfield = airfield.occupyToTakeoff(this);
+			let airfield = this._target_airfield ? this._target_airfield : this._occupied_gate.hosting_airfield;
+			this._is_occuping_airfield = airfield.occupy_to_takeoff(this);
 			if (this._is_occuping_airfield)
 			{
-				this.#taxi_downwind_airfield = airfield;
+				this._target_airfield = airfield;
 				this._state = AircraftState.TAXIING_TO_AIRFIELD;
 				this._occupied_gate.free(this);
 				this._occupied_gate = null;
@@ -2741,12 +2769,12 @@ class Aircraft extends SelectableObject
 		}
 		
 		this._velocity = this.#TAKEOFF_CLIMB;
-		if (this.#taxi_downwind_airfield != null)
+		if (this._target_airfield != null)
 		{
-			this.#taxi_downwind_airfield.free(this);
+			this._target_airfield.free(this);
 			this._is_occuping_airfield = false;				
-			this.#taxi_downwind_airfield.Selected = false;
-			this.#taxi_downwind_airfield = null;
+			this._target_airfield.Selected = false;
+			this._target_airfield = null;
 			this.selected = false;
 		}
 	}	
@@ -2777,7 +2805,7 @@ class Aircraft extends SelectableObject
 		if (this._altitude < 0)
 		{
 			this._altitude = 0; 
-			if (this._state.is_coming && (!this.#taxi_downwind_airfield || !this.#taxi_downwind_airfield.in_area(this.location)))
+			if (this._state.is_coming && (!this._target_airfield || !this._target_airfield.in_area(this.location)))
 			{
 					this._collided = true;
 			}
@@ -2812,23 +2840,29 @@ class Aircraft extends SelectableObject
 				this._fuel = 0;
 			}
 		}
-		if (this._speed < 0) this._speed = 0;
-		if (this._fuel == 0) this._velocity = this.#LANDING_DESCENT;
+		if (this._speed < 0) {
+			this._speed = 0;
+		}
+		if (this._fuel == 0) {
+			this._velocity = this.#LANDING_DESCENT;
+		}
 	}
 
 	#capture_airfield()
 	{
-		if (this.#taxi_downwind_airfield != null && !this._is_occuping_airfield)
+		if (this._target_airfield != null && !this._is_occuping_airfield)
 		{
-			this._occupied_gate = this.#taxi_downwind_airfield.occupy_to_land(this);
+			this._occupied_gate = this._target_airfield.occupy_to_land(this);
 			if (this._occupied_gate != null)
 			{
 				this._is_occuping_airfield = true;
 				this._path.remove_all();
 				this._state = AircraftState.LANDING;
 			}
-			else
+			else 
+			{
 				this._is_occuping_airfield = false;	
+			}
 		}
 	}
 
@@ -2868,13 +2902,13 @@ class Aircraft extends SelectableObject
 			this._path.remove_all();
 			return;
 		}
-		else 
-			if (this.#taxi_downwind_airfield && this._path.length == 0)
-				this._go_around(wind);
+		else if (this._target_airfield && this._path.length == 0) {
+			this._go_around(wind);
+		}
 				
 		if (this._path.length == 0) //Если точек нет и нет ВПП, то переходим в ненаправленный режим
 		{
-			if (!this.#taxi_downwind_airfield)
+			if (!this._target_airfield)
 			{
 				this._state = AircraftState.UNDIRECTED;
 				return;
@@ -2893,34 +2927,50 @@ class Aircraft extends SelectableObject
 	{
 		if (this.location.x - this._airport_rect.location.x < this.#BOUNCE_BOUND)
 		{
-			if (this.course.radian >= -Math.PI/2 && this.course.radian < Math.PI/2)
+			if (this.course.radian >= -Math.PI/2 && this.course.radian < Math.PI/2) {
 				this._turn = 1;
-			else if (this.course.radian < -Math.PI/2 || this.course.radian > Math.PI/2)
-					this._turn = -1;
+			}
+			else if (this.course.radian < -Math.PI/2 || this.course.radian > Math.PI/2) {
+				this._turn = -1;
+			}
 		}
 		else if (this._airport_rect.location.x + this._airport_rect.extent.width - this.location.x < this.#BOUNCE_BOUND)
 		{
 			if (this.course.radian < Math.PI/2 && this.course.radian > -Math.PI/2)
+			{
 				this._turn = -1;
-			else if (this.course.radian > Math.PI/2 || this.course.radian < -Math.PI/2)
+			}
+			else if (this.course.radian > Math.PI/2 || this.course.radian < -Math.PI/2) 
+			{
 				this._turn = 1;
+			}
 		}						
 		else if (this.location.y - this._airport_rect.location.y < this.#BOUNCE_BOUND)
 		{
 			if (this.course.radian < 0)
+			{
 				this._turn = -1;
+			}
 			else if (this.course.radian > 0)
+			{
 				this._turn = 1;
+			}
 		}				
 		else if (this._airport_rect.location.y + this._airport_rect.extent.height - this.location.y < this.#BOUNCE_BOUND)
 		{
-			if (this.course.radian < 0)
+			if (this.course.radian < 0) 
+			{
 				this._turn = 1;
-			else if (this.course.radian > 0)
+			}
+			else if (this.course.radian > 0) 
+			{
 				this._turn = -1;
+			}
 		}						
 		else 
+		{
 			this._turn = 0;
+		}
 			
 		this._acceleration = (this._speed < this._type.cruise_speed) ? this._type.acceleration : 0;
 		this._velocity = (this._altitude < Aircraft.ARRIVAL_PERIOD) ? this.#TAKEOFF_CLIMB : 0;
@@ -2930,7 +2980,7 @@ class Aircraft extends SelectableObject
 	{
 		if (this._is_occuping_airfield) 
 		{
-			this.#taxi_downwind_airfield.free(this);
+			this._target_airfield.free(this);
 			if (this._occupied_gate != null)
 			{
 				this._occupied_gate.free(this);
@@ -2938,17 +2988,17 @@ class Aircraft extends SelectableObject
 			}
 			this._is_occuping_airfield = false;
 		}
-		if (this.#taxi_downwind_airfield != null)
+		if (this._target_airfield != null)
 		{
-			this.#taxi_downwind_airfield.Selected = false;
-			this.#taxi_downwind_airfield = null;
+			this._target_airfield.selected = false;
+			this._target_airfield = null;
 		}
 	}
 			
 	#is_on_course(waypoint, target_course) //:Boolean
 	{
 		let o_dist = {Distance: 0.0};
-		let ang_targe = Angle.direction(waypoint, this.#taxi_downwind_airfield.location, o_dist);
+		let ang_targe = Angle.direction(waypoint, this._target_airfield.location, o_dist);
 		let ang_diff = ang_target.sub(target_course);
 
 		return ang_diff.abs().radian < this._ANG_COURSE/2 || ang_diff.abs().sub(Angle.PI).abs().radian < this._ANG_COURSE/2;
@@ -2957,7 +3007,10 @@ class Aircraft extends SelectableObject
 	#is_ready_to_approach()
 	{
 		//Если не задана ВПП - заход делать некуда
-		if (!this.#taxi_downwind_airfield || this._path.length == 0) return false;
+		if (!this._target_airfield || this._path.length == 0) 
+		{ 
+			return false;
+		}
 		
 		//проверяем, не можем ли мы сделать заход
 		let n_step = Math.floor(this._path.length / this.#COURSE_CHECK_POINTS);
@@ -2986,8 +3039,10 @@ class Aircraft extends SelectableObject
 
 	#prepare_to_takeoff()
 	{
-		if (this._fuel < this.#MAX_FUEL)
+		if (this._fuel < this.#MAX_FUEL) 
+		{
 			this._fuel += this.#FUELING_RATE / Core.FRAME_RATE;
+		}
 		else
 		{
 			this._fuel = this.#MAX_FUEL;
@@ -3006,14 +3061,13 @@ class Aircraft extends SelectableObject
 	{
 		return (Math.abs(waypoint.x - this.location.x) < this.#WAYPOINT_REACH_DISTANCE 
 			&& Math.abs(waypoint.y - this.location.y) < this.#WAYPOINT_REACH_DISTANCE);
-
 	}
 
 	//event handlers
 	#points_on_add(event)
 	{
 		//console.log("    On add waypoint:");
-		if (this.#taxi_downwind_airfield || this._path.length > 0)
+		if (this._target_airfield || this._path.length > 0)
 		{
 			this.#reset_waypoint_miss_counter();
 			this._state = AircraftState.DIRECTED;
@@ -3024,7 +3078,7 @@ class Aircraft extends SelectableObject
 	#points_on_remove(event)
 	{
 		//console.log("    On remove waypoint:");
-		if (this._state == AircraftState.DIRECTED && !this.#taxi_downwind_airfield && this._path.length == 0)
+		if (this._state == AircraftState.DIRECTED && !this._target_airfield && this._path.length == 0)
 		{
 			this._state = AircraftState.UNDIRECTED;
 			//console.log("        Aircraft state => Undirected");			
@@ -3088,7 +3142,7 @@ class Plane extends Aircraft
 			
 			this.#is_gate_changed = false;
 			this._state = AircraftState.TAXIING_TO_GATE;
-			this.#taxi_downwind_airfield.selected = false;
+			this._target_airfield.selected = false;
 		}
 		else 
 		{
@@ -3148,7 +3202,7 @@ class Plane extends Aircraft
 		//азимутом на центр ВПП. Например: курс ВПП = 90грд. Азимут на центр = 80грд. Разница = 10грд. Следвать 80 - 10*2 = 60грд.
 		//азимут на центр ВПП
 		let obj_dist = {Distance: 0.0};
-		let ang_to_runway = Angle.direction(this.location, this.#taxi_downwind_airfield.location, obj_dist);		
+		let ang_to_runway = Angle.direction(this.location, this._target_airfield.location, obj_dist);		
 		
 		//здесь не работает ILS
 		if (obj_dist.Distance < this.#COURSE_ERROR_DISTANCE)
@@ -3177,7 +3231,7 @@ class Plane extends Aircraft
 	_takeoff(wind)
 	{
 		//ехать с курсом ВПП
-		this._turn = (this.#taxi_downwind_airfield == null) ? 0 : this.course.get_rotation(this.#taxi_downwind_airfield.active_course);
+		this._turn = (this._target_airfield == null) ? 0 : this.course.get_rotation(this._target_airfield.active_course);
 		//набирая скорость до нормальной
 		this._acceleration = (this._speed < this._type.cruise_speed) ? this._type.acceleration : 0;
 		//при скорости отрыва набирать высоту
@@ -3229,7 +3283,7 @@ class Plane extends Aircraft
 			//trace('this.#check_runway_remainder()');
 			//азимут на центр ВПП
 			let obj_dist = {Distance: 0.0};
-			let ang_to_runway = Angle.direction(this.location, this.#taxi_downwind_airfield.location, obj_dist);
+			let ang_to_runway = Angle.direction(this.location, this._target_airfield.location, obj_dist);
 			//trace(' ang_to_runway='+ang_to_runway.Degree);
 			//trace(' obj_dist.Distance='+obj_dist.Distance);			
 			//получаем посадочный курс
@@ -3239,7 +3293,7 @@ class Plane extends Aircraft
 			let ang_diff = ang_to_runway.sub(ang_rw_course);
 			//trace(' ang_diff=' + ang_diff.Degree);
 			//считаем остаток ВПП
-			let dbl_rw_remainder = this.#taxi_downwind_airfield.length / 2 + obj_dist.Distance * ((ang_diff.abs().radian < Math.PI/2) ? +1 : -1);
+			let dbl_rw_remainder = this._target_airfield.length / 2 + obj_dist.Distance * ((ang_diff.abs().radian < Math.PI/2) ? +1 : -1);
 			//trace(' dbl_rw_remainder='+dbl_rw_remainder);
 			//получаем проекцию скорости ветра на курс
 			let dbl_wind_proj = wind.speed * wind.direction.sub(ang_rw_course).cos();
@@ -3268,10 +3322,10 @@ class Plane extends Aircraft
 	{
 		//1. получаем азимут на ВПП
 		//		берем азимут перпендикулярный курсу ВПП
-		let ang_to_centerline = this.#taxi_downwind_airfield.course.add(Angle.HALF_PI);
+		let ang_to_centerline = this._target_airfield.course.add(Angle.HALF_PI);
 		//      получаем курс на центр
 		let obj_dist = {Distance: 0.0};
-		let ang_to_runway = Angle.direction(this.location, this.#taxi_downwind_airfield.location, obj_dist);
+		let ang_to_runway = Angle.direction(this.location, this._target_airfield.location, obj_dist);
 		//		считаем разницу между ними
 		let ang_diff = ang_to_runway.sub(ang_to_centerline);
 		//		если разница больше Пи/2 то берем встречный перпендикуляр
@@ -3288,12 +3342,12 @@ class Plane extends Aircraft
 		if (this._state == AircraftState.LANDING)
 		{
 			//trace('this.#get_landing_course='+FTargetAirfield.ActiveCourse.Degree);
-			return this.#taxi_downwind_airfield.active_course;
+			return this._target_airfield.active_course;
 		}
 		else
 		{
 			let obj_rw_dir = {Course: new Angle(), BackCourse: new Angle(), Distance: 0.0};
-			this.#get_course_and_distance(this.#taxi_downwind_airfield, obj_rw_dir);
+			this.#get_course_and_distance(this._target_airfield, obj_rw_dir);
 			//trace('this.#get_landing_course='+ obj_rw_dir.Course.Degree); 
 			return obj_rw_dir.Course;
 		}
@@ -3302,12 +3356,12 @@ class Plane extends Aircraft
 	#taxi_downwind()
 	{
 		let obj_rw_dir2 = {Course: new Angle(), BackCourse: new Angle(), Distance: 0.0};
-		this.#get_course_and_distance(this.#taxi_downwind_airfield, obj_rw_dir2);
-		let dbl_run_dist = this.#taxi_downwind_airfield.length / 2 
-			+ obj_rw_dir2.Distance * ((obj_rw_dir2.Course.radian == this.#taxi_downwind_airfield.active_course.radian) ? +1 : -1);
+		this.#get_course_and_distance(this._target_airfield, obj_rw_dir2);
+		let dbl_run_dist = this._target_airfield.length / 2 
+			+ obj_rw_dir2.Distance * ((obj_rw_dir2.Course.radian == this._target_airfield.active_course.radian) ? +1 : -1);
 		if (dbl_run_dist < this._type.takeoff_roll_length)
 		{
-			this._turn = this.course.get_rotation(this.#taxi_downwind_airfield.active_course.sub(Angle.PI));						
+			this._turn = this.course.get_rotation(this._target_airfield.active_course.sub(Angle.PI));						
 		}
 		else
 		{
@@ -3318,7 +3372,7 @@ class Plane extends Aircraft
 	
 	#taxi_to_centerline()
 	{
-		if(this.#taxi_downwind_airfield.get_distance_to_centerline(this.location) <= this.#PERMISSIBLE_CENTERLINE_ERROR)
+		if(this._target_airfield.get_distance_to_centerline(this.location) <= this.#PERMISSIBLE_CENTERLINE_ERROR)
 		{
 			this._state = AircraftState.TAKING_OFF;
 			this._turn = 0;
@@ -3333,7 +3387,7 @@ class Plane extends Aircraft
 	{
 		if (!this.#is_gate_changed)
 		{
-			this._occupied_gate = this.#taxi_downwind_airfield.exchange_gate(this._occupied_gate, this.location);
+			this._occupied_gate = this._target_airfield.exchange_gate(this._occupied_gate, this.location);
 			this.#is_gate_changed = true;
 		}
 
@@ -3341,7 +3395,7 @@ class Plane extends Aircraft
 		this._acceleration = (this._speed > this._type.taxiing_speed) ? this._BRAKING : 0;
 		
 		let obj_rw_dir = {Course: new Angle(), BackCourse: new Angle(), Distance: 0.0};
-		this.#get_course_and_distance(this.#taxi_downwind_airfield, obj_rw_dir);
+		this.#get_course_and_distance(this._target_airfield, obj_rw_dir);
 		//получаем азимут на гейт и расстояние до него		
 		let obj_dist = {Distance: 0.0};
 		let ang_to_gate = Angle.direction(this.location, this._occupied_gate.location, obj_dist);
@@ -3359,7 +3413,7 @@ class Plane extends Aircraft
 			}
 		}
 		else 
-			if(this.#taxi_downwind_airfield.get_distance_to_centerline(this.location) > this.#PERMISSIBLE_CENTERLINE_ERROR)
+			if(this._target_airfield.get_distance_to_centerline(this.location) > this.#PERMISSIBLE_CENTERLINE_ERROR)
 				this._turn = this.course.get_rotation(this.#get_course_to_centerline());
 			else
 				//если угол меньше Пи/2 
@@ -3379,7 +3433,7 @@ class Plane extends Aircraft
 
 	#taxi_to_runway()
 	{
-		if (this.#taxi_downwind_airfield.get_distance_to_centerline(this.location) > this.#PERMISSIBLE_CENTERLINE_ERROR)
+		if (this._target_airfield.get_distance_to_centerline(this.location) > this.#PERMISSIBLE_CENTERLINE_ERROR)
 		{
 			this._turn = this.course.get_rotation(this.#get_course_to_centerline());
 		}
@@ -3413,10 +3467,10 @@ class Plane extends Aircraft
 	
 	#taxi_u_turn()
 	{
-		let ang_diff = this.#taxi_downwind_airfield.active_course.sub(this.course);
+		let ang_diff = this._target_airfield.active_course.sub(this.course);
 		if(Math.abs(ang_diff.radian) > this.#PERMISSIBLE_TURN_ERROR)
 		{
-			this._turn = this.course.get_rotation(this.#taxi_downwind_airfield.active_course);
+			this._turn = this.course.get_rotation(this._target_airfield.active_course);
 		}
 		else
 		{
@@ -3430,7 +3484,7 @@ class Plane extends Aircraft
 ///////////////////////////////////////////////////////////
 //  Copter.as
 ///////////////////////////////////////////////////////////
-public class Copter extends Aircraft
+class Copter extends Aircraft
 {
 	//constructor
     constructor(aircraft_type, location, course, airport_rect, state, fuel_residue, gate=null)
@@ -3445,7 +3499,7 @@ public class Copter extends Aircraft
 //protected methods
 	_declare_landed()
 	{
-		this.#state = AircraftState.PREPARING_TO_TAKEOFF;
+		this._state = AircraftState.PREPARING_TO_TAKEOFF;
 		this.on_landed.fire_on_landed(this);				
 	}	
 	
@@ -3456,7 +3510,7 @@ public class Copter extends Aircraft
 
 	_navigate_to_airfield (is_in_landing_zone, wind) //: Boolean
 	{
-		this._turn = this.course.get_rotation(Angle.direction(this.location, this.#taxi_downwind_airfield.location, {}));
+		this._turn = this.course.get_rotation(Angle.direction(this.location, this._target_airfield.location, {}));
 		return true;
 	} 
 
@@ -3548,14 +3602,15 @@ class Runway extends SelectableObject //implements IAirfield
 		
 		if (xml)
 		{
-			x = xml.@x;
-			y = xml.@y;
-			cy_length = xml.@length;
-			ang_course.degree = xml.@course;
-			let dbl_course_lights_dist = xml.@courseLights;
-			let dbl_backcourse_lights_dist = xml.@backcourseLights;
-			if (dbl_course_lights_dist) this.#course_lights_distance = xml.@courseLights;
-			if (dbl_backcourse_lights_dist) this.#back_course_lights_distance = xml.@backcourseLights;
+			// TODO: xml
+			// x = xml.@x;
+			// y = xml.@y;
+			// cy_length = xml.@length;
+			// ang_course.degree = xml.@course;
+			// let dbl_course_lights_dist = xml.@courseLights;
+			// let dbl_backcourse_lights_dist = xml.@backcourseLights;
+			// if (dbl_course_lights_dist) this.#course_lights_distance = xml.@courseLights;
+			// if (dbl_backcourse_lights_dist) this.#back_course_lights_distance = xml.@backcourseLights;
 					
 			this.#load_gates_from_xml(xml.gates[0], airport);
 		}
@@ -3604,7 +3659,7 @@ class Runway extends SelectableObject //implements IAirfield
 	
 	get length() //: Number
 	{
-		return this.#extent.height;
+		return this.extent.height;
 	}
 
 	get occupied() //: Boolean
@@ -3624,7 +3679,7 @@ class Runway extends SelectableObject //implements IAirfield
 	
 	get width() //: Number
 	{
-		return this.#extent.width;
+		return this.extent.width;
 	}
 
 //methods
@@ -3728,24 +3783,25 @@ class Runway extends SelectableObject //implements IAirfield
 
 	to_xml(xml_node)
 	{
-		super.to_xml(xml_node);
+		// TODO: xml
+		// super.to_xml(xml_node);
 		
-		xml_node.@length = this.extent.height;
+		// xml_node.@length = this.extent.height;
 			
-		let xml_gates = new XML('<gates></gates>');
-		xml_node.appendChild(xml_gates);
+		// let xml_gates = new XML('<gates></gates>');
+		// xml_node.appendChild(xml_gates);
 			
-		for (let gate of this.gates)
-		{
-			let xml_gate = new XML('<gate></gate>');
-			xml_gates.appendChild(xml_gate);
-			xml_gate.@ref = gate.id;
-		}
+		// for (let gate of this.gates)
+		// {
+		// 	let xml_gate = new XML('<gate></gate>');
+		// 	xml_gates.appendChild(xml_gate);
+		// 	xml_gate.@ref = gate.id;
+		// }
 	}
 
 	update_wind(wind_direction)
 	{
-		this.#upwind_course = this.#chooseRunwayCourse(wind_direction.sub(Angle.PI));	
+		this.#upwind_course = this.#choose_runway_course(wind_direction.sub(Angle.PI));	
 	}
 
 	//private methods
@@ -3763,15 +3819,16 @@ class Runway extends SelectableObject //implements IAirfield
 	{
 		for (let xml_gate of gates_node.gate)
 		{
-			let str_id = xml_gate.@ref;
+			// TODO: xml
+			// let str_id = xml_gate.@ref;
 
-			let gate = airport.find_gate(str_id);
+			// let gate = airport.find_gate(str_id);
 			
-			if (gate)
-			{
-				gate.associate(this);
-				this.#gates.push(gate);
-			}
+			// if (gate)
+			// {
+			// 	gate.associate(this);
+			// 	this.#gates.push(gate);
+			// }
 		}
 	}
 }
@@ -3782,7 +3839,7 @@ class Runway extends SelectableObject //implements IAirfield
 
 class Gate extends SelectableObject
 {
-	get SELECT_RADIUS {return 400};
+	get SELECT_RADIUS() {return 400};
     #free = true;
     #id = "";
 	#arw_hosting_airfields = [];
@@ -3834,8 +3891,8 @@ class Gate extends SelectableObject
     
     in_area(point)
     {
-		let point = point.sub(this.location);
-		return point.radius < this.SELECT_RADIUS;
+		let pnt = point.sub(this.location);
+		return pnt.radius < this.SELECT_RADIUS;
 	}
 	
 	is_hosted_by(airfield) //: Boolean
@@ -3868,21 +3925,23 @@ class Gate extends SelectableObject
 
 	to_xml(xml_node)
 	{
-		super.to_xml(xml_node);
+		//TODO: xml
+		// super.to_xml(xml_node);
 		
-		xml_node.@free = this.#free;
-		xml_node.@id = this.#id;
+		// xml_node.@free = this.#free;
+		// xml_node.@id = this.#id;
 	}	
 
 //protected methods
 	_get_gate_props_from_xml(xml) //: Object
 	{		
 		let obj_props = {id: "", location: new Point(0, 0), is_free: true};
-		obj_props.id = AnXml.@id;					
-		obj_props.location.x = AnXml.@x;
-		obj_props.location.y = AnXml.@y;
-		let str_free = AnXml.@free;
-		obj_props.is_free = Instruments.str2Bool(str_free);
+		//TODO: xml
+		// obj_props.id = AnXml.@id;					
+		// obj_props.location.x = AnXml.@x;
+		// obj_props.location.y = AnXml.@y;
+		// let str_free = AnXml.@free;
+		// obj_props.is_free = Instruments.str_to_bool(str_free);
 		return obj_props;
 	}
 }
@@ -4069,7 +4128,7 @@ class Airport
 	get cloud_probability() {return this.#cloud_probability;	}	
 	get current_wind() {return this.#current_wind;}	
 	get gates() {return this.#gates;}
-	get is_thumbnail_mode() {return this.#thumbnail_mode;}
+	get is_thumbnail_mode() {return this.#is_thumbnail_mode;}
 
 //methods
 
@@ -4150,9 +4209,9 @@ class Airport
 	make_level_xml() //: XML
 	{
 		let xml_doc = new XML('<level></level>');
-		this.#saveGates(xml_doc);
-		this.#saveAirfields(xml_doc);
-		this.#saveAprons(xml_doc);
+		this.#save_gates(xml_doc);
+		this.#save_airfields(xml_doc);
+		this.#save_aprons(xml_doc);
 		return xml_doc;
 	}	
 	
@@ -4176,12 +4235,13 @@ class Airport
 //private methods
 	#load_airport(xml) //
 	{
-		this.resize(
-			new Point(xml.@left, xml.@top), 
-			new Size(xml.@width, xml.@height)
-		);
+		//TODO: xml
+		// this.resize(
+		// 	new Point(xml.@left, xml.@top), 
+		// 	new Size(xml.@width, xml.@height)
+		// );
 		
-		if (!this.#thumbnail_mode)
+		if (!this.#is_thumbnail_mode)
 		{
 			this.#load_gates(xml.gates[0]);
 			this.#load_helipads(xml.helipads[0]);
@@ -4238,7 +4298,7 @@ class Airport
 			return;
 		}
 		
-		if (!this.#thumbnail_mode)
+		if (!this.#is_thumbnail_mode)
 		{
 			this.#load_weather(xml_doc.weather[0]);
 		}
@@ -4259,14 +4319,15 @@ class Airport
 	
 	#load_weather(xml)
 	{
-		let dbl_cloud_probability = xml.clouds[0].@probability;
-		let xml_wind = xml.wind[0];
-		let dbl_wind_letiability = xml_wind.@letiability;
-		let dbl_wind_min_speed = xml_wind.@minSpeed;
-		let dbl_wind_max_speed = xml_wind.@maxSpeed;
+		//TODO: xml
+		// let dbl_cloud_probability = xml.clouds[0].@probability;
+		// let xml_wind = xml.wind[0];
+		// let dbl_wind_letiability = xml_wind.@letiability;
+		// let dbl_wind_min_speed = xml_wind.@minSpeed;
+		// let dbl_wind_max_speed = xml_wind.@maxSpeed;
 		
-		this.#current_wind = new Wind(dbl_wind_min_speed, dbl_wind_max_speed, dbl_wind_letiability);
-		this.#cloud_probability = dbl_cloud_probability;
+		// this.#current_wind = new Wind(dbl_wind_min_speed, dbl_wind_max_speed, dbl_wind_letiability);
+		// this.#cloud_probability = dbl_cloud_probability;
 	}
 	
 	#save_airfields(xml_node) //
@@ -4381,7 +4442,7 @@ class ScreenManager //static
 		text, 
 		rect, 
 		font_size=16, 
-		color=0x_ffffff, 
+		color=0xffffff, 
 		to_show_background=false, 
 		is_input_field=false, 
 		is_multiline=true)		
@@ -4466,16 +4527,6 @@ class ScreenManager //static
 	}
 }
 
-class Controllers extends Enum 
-{
-	static GAME_CONTROLLER = new Controllers("GAME_CONTROLLER", 0);
-	static EDIT_CONTROLLER = new Controllers("EDIT_CONTROLLER", 1);
-	static MENU_CONTROLLER = new Controllers("MENU_CONTROLLER", 2);
-
-	static values() {
-	  return [this.GAME_CONTROLLER, this.EDIT_CONTROLLER, this.MENU_CONTROLLER];
-	}
-}
 
 class DisplayMode extends Enum
 {
@@ -4523,52 +4574,52 @@ class DisplayMode extends Enum
 //properties
 	get airport_shown() //: Boolean
     {
-    	return !!DisplayMode.#AIRPORT_SHOWN[this.#value];
+    	return !!DisplayMode.#AIRPORT_SHOWN[this.value_of()];
     }
 
 	get banner_shown() //: Boolean
     {
-    	return !!DisplayMode.#BANNER_SHOWN[this.#value];
+    	return !!DisplayMode.#BANNER_SHOWN[this.value_of()];
     }	
 	
     get color() 
     {
-		return DisplayMode.TITLE_COLORS[this.#value];
+		return DisplayMode.TITLE_COLORS[this.value_of()];
     }
 	
 	get id() //: int
     {
-    	return 1 << this.#value;
+    	return 1 << this.value_of();
     }
 	
     get index() //: int
     {
-    	return this.#value;
+    	return this.value_of();
     }
 
 	get is_splash_screen() //: Boolean
     {
-    	return !!DisplayMode.#SPLASH_SCREEN[this.#value];
+    	return !!DisplayMode.#SPLASH_SCREEN[this.value_of()];
     }		
 	
 	get menu_shown() //: Boolean
     {
-    	return !!DisplayMode.#MENU_SHOWN[this.#value];
+    	return !!DisplayMode.#MENU_SHOWN[this.value_of()];
     }		
 	
 	get pause() //: Number
     {
-    	return DisplayMode.#PAUSE[this.#value];
+    	return DisplayMode.#PAUSE[this.value_of()];
     }
 
     get title() //: String
     {
-    	return DisplayMode.#TITLES[this.#value];
+    	return DisplayMode.#TITLES[this.value_of()];
     }
 
 	get to_string() //: String
     {
-    	return this.#name;
+    	return this.to_string();
     }
 }
 
@@ -4759,7 +4810,7 @@ class GameProgress //static
 	static get_box_progress(box_number) //: Number
 	{
 		if (box_number < 0 || box_number >= GameProgress.BOX_COUNT) return 0;
-		if (!GameProgress.#box_first_levels || !GameProgress.#box_last_levels) GameProgress.#initBoxInfo();
+		if (!GameProgress.#box_first_levels || !GameProgress.#box_last_levels) GameProgress.#init_box_info();
 		
 		let first_level_number = GameProgress.#box_first_levels[box_number];
 		let last_level_number = GameProgress.#box_last_levels[box_number];
@@ -4815,10 +4866,10 @@ class GameProgress //static
 //  MenuController.as
 ///////////////////////////////////////////////////////////
 
-class MenuController implements IController //singleton
+class MenuController extends IController //singleton
 {
 //private fields & consts
-	thumbnail_models = []; // Vector.<Airport>;
+	#thumbnail_models = []; // Vector.<Airport>;
 	static #controller_instance = []//: MenuController;
 	
 //properties
@@ -5440,7 +5491,7 @@ class Star
 		return (this.#location.y < 0);
 	}
 		
-	public function move()
+	move()
 	{
 		this.#location.y -= this.#move_step;
 		let dbl_rot = this.#rotation_phase + this.#rotation_step;
@@ -5484,7 +5535,7 @@ class StarView //static
 	{
 		for (let i = StarView.#stars.length - 1; i >= 0; i--)
 		{
-			let star: Star = StarView.#stars[i];
+			let star = StarView.#stars[i];
 			StarView.#display_star(star);		
 			star.move();
 			//delete if flown away
@@ -5494,7 +5545,7 @@ class StarView //static
 		}
 	}
 //private methods
-	static display_star(star)
+	static #display_star(star)
 	{
 		// TODO: displaying image
 		// ScreenManager.display_image(new StarImage(), new Rect(star.location, new Size(StarView.#STAR_SIZE*star.rotation_phase, StarView.#STAR_SIZE)));		
@@ -6000,8 +6051,8 @@ class ToolBarItem extends Rect
 	#pressed = false;
 	
 //other fields
-	#normalImage = null; //: Sprite;
-	#pressedImage = null; //: Sprite;
+	#normal_image = null; //: Sprite;
+	#pressed_image = null; //: Sprite;
 
 //properties
 	get alignment () //: int
@@ -6057,11 +6108,11 @@ class ToolBarItem extends Rect
 		let sp_image = null; //: Sprite;
 		if (n_state == 0) 
 		{
-			sp_image = this.#pressed ? this.#pressedImage : this.#normalImage;
+			sp_image = this.#pressed ? this.#pressed_image : this.#normal_image;
 		}
 		else 
 		{
-			sp_image = (n_state > 0) ? this.#pressedImage : this.#normalImage;
+			sp_image = (n_state > 0) ? this.#pressed_image : this.#normal_image;
 		}
 		
 		if (sp_image)
@@ -6140,7 +6191,7 @@ class ToolBar extends Rect
 	#right_aligned_items = [] //new Vector.<ToolBarItem>;
 
 //constructor
-	constructors (location=null, extent=null)
+	constructor (location=null, extent=null)
 	{
 		super(location, extent);
 	}		
@@ -6181,8 +6232,9 @@ class ToolBar extends Rect
 	
 	process_event(event) //: Boolean
 	{
-		if (event is MouseEvent)
-		{
+		// TODO type based condition
+		// if (event is MouseEvent)
+		// {
 			// TODO: events
 			// let mouse_event = MouseEvent(event);
 			// let pnt_screen = new Point(mouse_event.stageX, mouse_event.stageY);
@@ -6207,7 +6259,7 @@ class ToolBar extends Rect
 			// 	tbi_item.process_event(str_event_type, pnt_client);
 			// }
 			// return true;
-		}
+		//}
 		return false;
 	}	
 	
@@ -6231,7 +6283,7 @@ class ToolBar extends Rect
 		let dbl_total_width = margin.width;
 		let dbl_bound = 0;
 		let tbi_item = null;
-		let vector = items.sort(this.#compareItems);
+		let vector = items.sort(this.#compare_items);
 		
 		for (let i = 0; i < vector.length; i++)
 		{
@@ -6266,8 +6318,8 @@ class ToolBar extends Rect
 	
 	#arrange_items()
 	{
-		let sz_margin = new Size(extent.height*ToolBar.#HORIZONTAL_MARGIN, extent.height*ToolBar.#VERTICAL_MARGIN);
-		let dbl_height = extent.height*(1 - ToolBar.#VERTICAL_MARGIN*2);
+		let sz_margin = new Size(this.extent.height*ToolBar.#HORIZONTAL_MARGIN, this.extent.height*ToolBar.#VERTICAL_MARGIN);
+		let dbl_height = this.extent.height*(1 - ToolBar.#VERTICAL_MARGIN*2);
 		
 		this.#arrange_aligned_items(ToolBar.ALIGNMENT_LEFT, this.#left_aligned_items, sz_margin, dbl_height); 
 
@@ -6365,7 +6417,7 @@ class ToolBarToggleButton extends ToolBarItem
 
 	//public methods
 
-	BannerView.process_event(event_type, location)
+	process_event(event_type, location)
 	{
 		super.process_event(event_type, location);
 	}
@@ -6390,9 +6442,7 @@ class ToolBarToggleButton extends ToolBarItem
 class IController //interface
 {
 	get_controller_type() {return 0};
-
 	process_dispatcher_event(type, param_obj=null) {return false;}
-
 	run() {}
 }
 
@@ -6401,7 +6451,7 @@ class IController //interface
 //  GameController.as
 ///////////////////////////////////////////////////////////
 
-class GameController implements IController //Singleton
+class GameController extends IController //Singleton
 {
 //private consts
 	static #CLOSE_ARRIVAL = 1000;
@@ -6435,7 +6485,7 @@ class GameController implements IController //Singleton
 	#airport = null;
 	static #controller_instance = null;
 	#previous_simulation_rate = 0;
-	#waypoint_created: = null;
+	#waypoint_created = null;
 	#is_creating_path = false;
 	#is_loading_level = false;
 	#is_new_path = false;
@@ -6572,33 +6622,33 @@ class GameController implements IController //Singleton
 		return false;
 	}
 
-	run()
-    {
-		let n_frames = int(this.#simulation_rate*2);
+// 	run()
+//     {
+// 		let n_frames = int(this.#simulation_rate*2);
 		
-		for (let j = 0; j < n_frames; j++)
-		{
-			if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
-			{
-				this.#detect_collisions();
-				this.#detect_collisions();
-			}
+// 		for (let j = 0; j < n_frames; j++)
+// 		{
+// 			if (ControlDispatcher.current_display_mode == DisplayMode.PLAY)
+// 			{
+// 				this.#detect_collisions();
+// 				this.#detect_collisions();
+// 			}
 			
-			if (ControlDispatcher.current_display_mode != DisplayMode.PLAY) return;
+// 			if (ControlDispatcher.current_display_mode != DisplayMode.PLAY) return;
 				
-			this.airport.update_wind();
+// 			this.airport.update_wind();
 			
-			for (let airfield of this.airport.airfields)
-			{
-				airfield.update_wind(this.airport.current_wind.direction);
-			}
+// 			for (let airfield of this.airport.airfields)
+// 			{
+// 				airfield.update_wind(this.airport.current_wind.direction);
+// 			}
 			
-			this.#control_aircraft_quantity(this.#move_aircrafts());
-			this.#control_clouds();
-		}
-    }
+// 			this.#control_aircraft_quantity(this.#move_aircrafts());
+// 			this.#control_clouds();
+// 		}
+//     }
 
-//private methods
+// //private methods
 	#accelerate()
 	{
 		if (this.#simulation_rate == 0) {
@@ -6619,7 +6669,7 @@ class GameController implements IController //Singleton
 		}
 		
 		//проверяем на принадлежность ВВП
-		for each (let airfield of this.airport.airfields)
+		for (let airfield of this.airport.airfields)
 		{
 			if (this.#check_airfield_capture(airfield, position, aircraft)) return;
 		}
@@ -6642,8 +6692,9 @@ class GameController implements IController //Singleton
 	
 	#check_airfield_capture(airfield, position, aircraft) //: Boolean
 	{
-		if (Instruments.xor(aircraft.type == AircraftType.COPTER, airfield is Runway) && airfield.in_area(position))
-		{
+		// TODO: type based condition
+		// if (Instruments.xor(aircraft.type == AircraftType.COPTER, airfield is Runway) && airfield.in_area(position))
+		// {
 			let to_capture = false;
 			if (airfield.is_runway)
 			{
@@ -6660,7 +6711,7 @@ class GameController implements IController //Singleton
 				this.#select_airfield(airfield);
 				return true;
 			}
-		}
+		// }
 		return false;
 	}
 	
@@ -6680,49 +6731,49 @@ class GameController implements IController //Singleton
 		return false;
 	}
 	
-	#control_aircraft_quantity(aircraft_quantity)
-	{
-		this.#emit_frames_interval += 1;
-		if (this.#landings_done + aircraft_quantity < this.#landings_to_do)
-		{
-			if (aircraft_quantity < GameController.#MIN_ACTIVE_AIRCRAFT_COUNT)
-			{
-				this.#emit_frames_interval = GameController.#MIN_EMIT_INTERVAL;
-				this.#emit_aircrafts(false);
-			}
-			else
-			{
-				if (Math.random() < this.airport.TrafficIntensity && aircraft_quantity < GameController.#MAX_ACTIVE_AIRCRAFT_COUNT)
-					this.#emit_aircrafts(true); 
-			}
-		}
-	}
+// 	#control_aircraft_quantity(aircraft_quantity)
+// 	{
+// 		this.#emit_frames_interval += 1;
+// 		if (this.#landings_done + aircraft_quantity < this.#landings_to_do)
+// 		{
+// 			if (aircraft_quantity < GameController.#MIN_ACTIVE_AIRCRAFT_COUNT)
+// 			{
+// 				this.#emit_frames_interval = GameController.#MIN_EMIT_INTERVAL;
+// 				this.#emit_aircrafts(false);
+// 			}
+// 			else
+// 			{
+// 				if (Math.random() < this.airport.traffic_intensity && aircraft_quantity < GameController.#MAX_ACTIVE_AIRCRAFT_COUNT)
+// 					this.#emit_aircrafts(true); 
+// 			}
+// 		}
+// 	}
 
-	#control_clouds()
-	{
-		if (this.airport.current_wind.speed > GameController.#MIN_CLOUD_SPEED && Math.random() < this.airport.cloud_probability)
-		{
-			this.#emit_cloud();
-		}
+// 	#control_clouds()
+// 	{
+// 		if (this.airport.current_wind.speed > GameController.#MIN_CLOUD_SPEED && Math.random() < this.airport.cloud_probability)
+// 		{
+// 			this.#emit_cloud();
+// 		}
 		
-		for (let i; i < this.airport.clouds.length; i++)
-		{
-			let cloud = this.airport.Clouds[i];
-			cloud.move(this.airport.current_wind);
-			if (this.#is_cloud_left(cloud))
-			{
-				this.airport.clouds.splice(i, 1);
-			}
-		}
-	}		
+// 		for (let i; i < this.airport.clouds.length; i++)
+// 		{
+// 			let cloud = this.airport.clouds[i];
+// 			cloud.move(this.airport.current_wind);
+// 			if (this.#is_cloud_left(cloud))
+// 			{
+// 				this.airport.clouds.splice(i, 1);
+// 			}
+// 		}
+// 	}		
 
-	#create_aircraft(aircraft_type, location, course, airport_rect, aircraft_state, fuel_residue, gate=null) //: Aircraft
-	{
-		if (aircraft_type == AircraftType.COPTER)
-			return new Copter(aircraft_type, location, course, airport_rect, aircraft_state, fuel_residue, gate);
-		else
-			return new Plane(aircraft_type, location, course, airport_rect, aircraft_state, fuel_residue, gate);
-	}
+// 	#create_aircraft(aircraft_type, location, course, airport_rect, aircraft_state, fuel_residue, gate=null) //: Aircraft
+// 	{
+// 		if (aircraft_type == AircraftType.COPTER)
+// 			return new Copter(aircraft_type, location, course, airport_rect, aircraft_state, fuel_residue, gate);
+// 		else
+// 			return new Plane(aircraft_type, location, course, airport_rect, aircraft_state, fuel_residue, gate);
+// 	}
 
 	#decelerate()
 	{
@@ -6747,60 +6798,60 @@ class GameController implements IController //Singleton
 		}
 	}
 
-	#detect_close_arrivals(location)
-	{
-		for (let aircraft of this.airport.aircrafts)
-		{
-			if (Math.abs(aircraft.location.x - location.x) < GameController.#CLOSE_ARRIVAL 
-				|| Math.abs(aircraft.location.y - location.y) < GameController.#CLOSE_ARRIVAL)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+// 	#detect_close_arrivals(location)
+// 	{
+// 		for (let aircraft of this.airport.aircrafts)
+// 		{
+// 			if (Math.abs(aircraft.location.x - location.x) < GameController.#CLOSE_ARRIVAL 
+// 				|| Math.abs(aircraft.location.y - location.y) < GameController.#CLOSE_ARRIVAL)
+// 			{
+// 				return true;
+// 			}
+// 		}
+// 		return false;
+// 	}
 	
-	#detect_collisions()
-	{
-		for (let i = 0; i < this.airport.aircrafts.length; i++)
-		{
-			for (let j = i + 1; j < this.airport.aircrafts.length; j++)
-			{
-				if (this.airport.aircrafts[i].check_collision(this.airport.aircrafts[j]))
-					ControlDispatcher.current_display_mode = DisplayMode.CRASH_PAUSE;
-			}
-		}		
-	}
+// 	#detect_collisions()
+// 	{
+// 		for (let i = 0; i < this.airport.aircrafts.length; i++)
+// 		{
+// 			for (let j = i + 1; j < this.airport.aircrafts.length; j++)
+// 			{
+// 				if (this.airport.aircrafts[i].check_collision(this.airport.aircrafts[j]))
+// 					ControlDispatcher.current_display_mode = DisplayMode.CRASH_PAUSE;
+// 			}
+// 		}		
+// 	}
 	
-	#emit_aircrafts(is_arriving)
-	{
-		if (this.#emit_frames_interval < GameController.#MIN_EMIT_INTERVAL || this.#landings_done == this.#landings_to_do) {
-			return;
-		}
+// 	#emit_aircrafts(is_arriving)
+// 	{
+// 		if (this.#emit_frames_interval < GameController.#MIN_EMIT_INTERVAL || this.#landings_done == this.#landings_to_do) {
+// 			return;
+// 		}
 		
-		let mo_place = null;
-		let i = 0;
-		do 
-		{
-			mo_place = this.#get_random_boundary_position(new Angle(Math.random()*360 - 180, Angle.DEGREE));		
-		} while (this.#detect_close_arrivals(mo_place.location) && ++i < 20);		
-		if (!mo_place) {
-			return;
-		}
-		let dbl_wind_koef = 1 + (this.airport.current_wind.maximal_speed - GameController.#NORMAL_WIND_SPEED) 
-			/ (this.airport.current_wind.MAX_WIND_SPEED - GameController.#NORMAL_WIND_SPEED);
-		if (dbl_wind_koef < 1) dbl_wind_koef = 1;
-		let aircraft = this.#create_aircraft(this.#pick_aircraft_type(), mo_place.location, mo_place.course, this.airport, 
-			is_arriving ? AircraftState.ARRIVING : AircraftState.UNDIRECTED, 
-			Math.random()*(1 - GameController.#MIN_FUEL*dbl_wind_koef) + GameController.#MIN_FUEL*dbl_wind_koef);
+// 		let mo_place = null;
+// 		let i = 0;
+// 		do 
+// 		{
+// 			mo_place = this.#get_random_boundary_position(new Angle(Math.random()*360 - 180, Angle.DEGREE));		
+// 		} while (this.#detect_close_arrivals(mo_place.location) && ++i < 20);		
+// 		if (!mo_place) {
+// 			return;
+// 		}
+// 		let dbl_wind_koef = 1 + (this.airport.current_wind.maximal_speed - GameController.#NORMAL_WIND_SPEED) 
+// 			/ (this.airport.current_wind.MAX_WIND_SPEED - GameController.#NORMAL_WIND_SPEED);
+// 		if (dbl_wind_koef < 1) dbl_wind_koef = 1;
+// 		let aircraft = this.#create_aircraft(this.#pick_aircraft_type(), mo_place.location, mo_place.course, this.airport, 
+// 			is_arriving ? AircraftState.ARRIVING : AircraftState.UNDIRECTED, 
+// 			Math.random()*(1 - GameController.#MIN_FUEL*dbl_wind_koef) + GameController.#MIN_FUEL*dbl_wind_koef);
 		
 		
-		aircraft.on_landed.add_event_listener(CustomDispatcher.ON_LANDED, this.#aircraft_on_landed);
+// 		aircraft.on_landed.add_event_listener(CustomDispatcher.ON_LANDED, this.#aircraft_on_landed);
 
-		this.airport.aircrafts.push(aircraft);
+// 		this.airport.aircrafts.push(aircraft);
 				
-		this.#emit_frames_interval = 0;
-	}
+// 		this.#emit_frames_interval = 0;
+// 	}
 
 	#emit_cloud(on_boundary_only=true)
 	{
@@ -6843,20 +6894,20 @@ class GameController implements IController //Singleton
 		return false;
 	}
 	
-	#get_cloud_density(aircraft) //: int
-	{
-		let n_clouds = 0;
-		for (let cloud of this.airport.clouds)
-		{
-			let pnt_diff = cloud.location.sub(aircraft.location);
-			if ((Math.max(Math.abs(pnt_diff.x), Math.abs(pnt_diff.y)) <= Math.max(cloud.extent.width/2, cloud.extent.height/2))
-				&& cloud.in_area(aircraft.location))
-			{
-				n_clouds += cloud.density;
-			}
-		}
-		return n_clouds;
-	}
+// 	#get_cloud_density(aircraft) //: int
+// 	{
+// 		let n_clouds = 0;
+// 		for (let cloud of this.airport.clouds)
+// 		{
+// 			let pnt_diff = cloud.location.sub(aircraft.location);
+// 			if ((Math.max(Math.abs(pnt_diff.x), Math.abs(pnt_diff.y)) <= Math.max(cloud.extent.width/2, cloud.extent.height/2))
+// 				&& cloud.in_area(aircraft.location))
+// 			{
+// 				n_clouds += cloud.density;
+// 			}
+// 		}
+// 		return n_clouds;
+// 	}
 		
 	#get_random_boundary_position(course) //: SelectableObject
 	{		
@@ -6881,22 +6932,22 @@ class GameController implements IController //Singleton
 		this.#landings_done = 0;
 	}
 
-	#is_cloud_left(cloud) //: Boolean
-	{
-		//если центр облака ушел
-		if (this.airport.isInside(cloud.location)) return false;
+// 	#is_cloud_left(cloud) //: Boolean
+// 	{
+// 		//если центр облака ушел
+// 		if (this.airport.isInside(cloud.location)) return false;
 
-		//смотрим ушли ли угловые точки
-		let apnt = cloud.corner_points;
-		for (let i = 0; i < apnt.length; i++)
-		{
-			if (this.airport.is_inside(apnt[i]))
-			{
-				return false;
-			}				
-		}
-		return true;
-	}	
+// 		//смотрим ушли ли угловые точки
+// 		let apnt = cloud.corner_points;
+// 		for (let i = 0; i < apnt.length; i++)
+// 		{
+// 			if (this.airport.is_inside(apnt[i]))
+// 			{
+// 				return false;
+// 			}				
+// 		}
+// 		return true;
+// 	}	
 		
 	#load_level()
     {
@@ -6938,32 +6989,32 @@ class GameController implements IController //Singleton
 		// this.airport.load_level("levels/Level" + GameProgress.level.to_string() + ".xml");		
 	}
 
-	#move_aircrafts() //: int
-    {
-		let n_aircrafts_count = 0;
-		for (let i = 0; i < this.airport.aircrafts.length; i++)
-		{
-			let aircraft = this.airport.aircrafts[i];
-			//проверяем попадание в облако
-			aircraft.move(this.airport.current_wind, this.#get_cloud_density(aircraft));
+// 	#move_aircrafts() //: int
+//     {
+// 		let n_aircrafts_count = 0;
+// 		for (let i = 0; i < this.airport.aircrafts.length; i++)
+// 		{
+// 			let aircraft = this.airport.aircrafts[i];
+// 			//проверяем попадание в облако
+// 			aircraft.move(this.airport.current_wind, this.#get_cloud_density(aircraft));
 			
-			if (aircraft.state == AircraftState.TAKING_OFF
-				&& (
-					aircraft.location.x - this.airport.location.x < GameController.#LEAVE_BOUND 
-					|| this.airport.location.x + this.airport.extent.width - aircraft.location.x < GameController.#LEAVE_BOUND 
-					|| aircraft.location.y - this.airport.location.y < GameController.#LEAVE_BOUND 
-					|| this.airport.location.y + this.airport.extent.height - aircraft.location.y < GameController.#LEAVE_BOUND
-				)
-			)
-			{
-				this.airport.aircrafts.splice(i, 1);
-			}
-			else
-				if (aircraft.state.is_coming || aircraft.state == AircraftState.TAXIING_TO_GATE || aircraft.state == AircraftState.ARRIVING)
-					n_aircrafts_count++;
-		}
-		return n_aircrafts_count;
-	}	
+// 			if (aircraft.state == AircraftState.TAKING_OFF
+// 				&& (
+// 					aircraft.location.x - this.airport.location.x < GameController.#LEAVE_BOUND 
+// 					|| this.airport.location.x + this.airport.extent.width - aircraft.location.x < GameController.#LEAVE_BOUND 
+// 					|| aircraft.location.y - this.airport.location.y < GameController.#LEAVE_BOUND 
+// 					|| this.airport.location.y + this.airport.extent.height - aircraft.location.y < GameController.#LEAVE_BOUND
+// 				)
+// 			)
+// 			{
+// 				this.airport.aircrafts.splice(i, 1);
+// 			}
+// 			else
+// 				if (aircraft.state.is_coming || aircraft.state == AircraftState.TAXIING_TO_GATE || aircraft.state == AircraftState.ARRIVING)
+// 					n_aircrafts_count++;
+// 		}
+// 		return n_aircrafts_count;
+// 	}	
 
 	#next_level() //
     {
@@ -6977,21 +7028,21 @@ class GameController implements IController //Singleton
 		this.#simulation_rate = 0;
 	}
 
-	#pick_aircraft_type(can_pick_copter=true) //: AircraftType
-	{
-		let dbl_random = Math.random();
-		let dbl_copter = this.airport.copter_rate;
-		let dbl_prop = this.airport.prop_rate;
+// 	#pick_aircraft_type(can_pick_copter=true) //: AircraftType
+// 	{
+// 		let dbl_random = Math.random();
+// 		let dbl_copter = this.airport.copter_rate;
+// 		let dbl_prop = this.airport.prop_rate;
 		
-		if (can_pick_copter && dbl_random < dbl_copter)
-			return AircraftType.COPTER;		
-		if (dbl_random < dbl_copter + dbl_prop)
-			return AircraftType.PROPELLER;
-		else if (dbl_random < dbl_copter + dbl_prop + this.airport.LinerRate)
-			return AircraftType.LINER;
-		else
-			return AircraftType.SUPERSONIC;
-	}
+// 		if (can_pick_copter && dbl_random < dbl_copter)
+// 			return AircraftType.COPTER;		
+// 		if (dbl_random < dbl_copter + dbl_prop)
+// 			return AircraftType.PROPELLER;
+// 		else if (dbl_random < dbl_copter + dbl_prop + this.airport.LinerRate)
+// 			return AircraftType.LINER;
+// 		else
+// 			return AircraftType.SUPERSONIC;
+// 	}
 
 	#play_level()
 	{
@@ -7116,7 +7167,7 @@ class GameController implements IController //Singleton
 		return is_traced;
 	}	
 	
-//event handlers
+// //event handlers
 	#airport_on_gate_loaded(event)
 	{
 		//TODO: Event processing
@@ -7169,7 +7220,7 @@ class GameController implements IController //Singleton
 //  EditController.as
 ///////////////////////////////////////////////////////////
 
-class EditController implements IController //Singleton
+class EditController extends IController //Singleton
 {
 	//private consts
 	#AIRPORT_ZOOM_EXPANSION = 200;
@@ -7250,7 +7301,7 @@ class EditController implements IController //Singleton
 	
 	run() {} 
 	
-	resizeAirport(is_expanding)
+	resize_airport(is_expanding)
 	{
 		this.#airport.resize(
 			new Point(
@@ -7424,10 +7475,10 @@ class EditController implements IController //Singleton
 				this.#resize_object(0, +1);
 				break;			
 			case Keys.X:
-				this.#resize_airport(true);
+				this.resize_airport(true);
 				break;		
 			case Keys.Z:
-				this.#resize_airport(false);
+				this.resize_airport(false);
 				break;				
 			case Keys.BROCKET_LEFT:
 				this.#rotate_object(false);					
@@ -7540,7 +7591,7 @@ class InfoPanelView //static
 		InfoPanelView.#play_only, 
 		InfoPanelView.#play_only, 
 		DisplayMode.PLAY.value | DisplayMode.LEVEL_MENU.value, 
-		DisplayMode.BOX_MENU.value);
+		DisplayMode.BOX_MENU.value];
 	static #TOOLBAR_ITEMS_NUMBER = 10;
 	static #ITEMS = [];
 	static #BUTTON_SIZE = new Size(20, 20);
@@ -8329,7 +8380,7 @@ class AirportView //static
 		Profiler.checkout("airport");
 	}	
 
-	static AirportView.processEvent(event) //: Boolean
+	static process_event(event) //: Boolean
 	{
 		//TODO: event type by class type!
 		// if (event is MouseEvent)
@@ -8590,7 +8641,7 @@ class Core //static
 
 		//stgStage = AStage;
 		
-		this.#resume();
+		this.resume();
 	}
 		
 	static suspend()
@@ -8623,7 +8674,7 @@ class Core //static
 		if (!(EditController.get_instance().level_config))
 		{
 			if (!HintPanelView.is_shown)
-				this.#resume();
+				this.resume();
 		}
 	}					
 	//event handlers
@@ -8686,7 +8737,7 @@ class ControlDispatcher //static
 
 //methods
 	//public methods
-	static dispatch_view_event(event_type, param_obj=null): //Boolean
+	static dispatch_view_event(event_type, param_obj=null) //: Boolean
 	{
 		switch (event_type)
 		{
@@ -9012,75 +9063,75 @@ class FrameBuilder //static
 		}
 	}
 	
-	static center_in_frame(rect): //Rect
-	{
-		let rect_result = rect.clone();
-		rect_result.location.x = (FrameBuilder.#frame_rect.extent.width - rect_result.extent.width) / 2;
-		rect_result.location.y = (FrameBuilder.#frame_rect.extent.height - rect_result.extent.height) / 2;
-		return rect_result;
-	}
+// 	static center_in_frame(rect) //: Rect
+// 	{
+// 		let rect_result = rect.clone();
+// 		rect_result.location.x = (FrameBuilder.#frame_rect.extent.width - rect_result.extent.width) / 2;
+// 		rect_result.location.y = (FrameBuilder.#frame_rect.extent.height - rect_result.extent.height) / 2;
+// 		return rect_result;
+// 	}
 
-	static convert_to_model_length(length): //Number 
-	{
-		return length * FrameBuilder.#zoom;
-	}
+// 	static convert_to_model_length(length) //: Number 
+// 	{
+// 		return length * FrameBuilder.#zoom;
+// 	}
 	
-	static convert_to_model_point(point)
-	{
-		return new Point((point.x - FrameBuilder.#origin.x) * FrameBuilder.#zoom, (point.y - FrameBuilder.#origin.y - FrameBuilder.#info_panel_rect.extent.height) * FrameBuilder.#zoom);
-	}
+// 	static convert_to_model_point(point)
+// 	{
+// 		return new Point((point.x - FrameBuilder.#origin.x) * FrameBuilder.#zoom, (point.y - FrameBuilder.#origin.y - FrameBuilder.#info_panel_rect.extent.height) * FrameBuilder.#zoom);
+// 	}
 	
-	static convert_to_model_rect(rect): //Rect
-	{
-		return new Rect(FrameBuilder.convert_to_model_point(rect.location), FrameBuilder.convert_to_model_size(rect.extent));
-	}
+// 	static convert_to_model_rect(rect) //: Rect
+// 	{
+// 		return new Rect(FrameBuilder.convert_to_model_point(rect.location), FrameBuilder.convert_to_model_size(rect.extent));
+// 	}
 	
-	static convert_to_model_size(size) //: Size 
-	{
-		return new Size(FrameBuilder.convert_to_model_length(size.width), FrameBuilder.convert_to_model_length(size.height));
-	}
+// 	static convert_to_model_size(size) //: Size 
+// 	{
+// 		return new Size(FrameBuilder.convert_to_model_length(size.width), FrameBuilder.convert_to_model_length(size.height));
+// 	}
 	
-	static convert_to_screen_length(length): //Number
-	{
-		return length / FrameBuilder.#zoom;
-	}
+// 	static convert_to_screen_length(length) //: Number
+// 	{
+// 		return length / FrameBuilder.#zoom;
+// 	}
 	
-	static convert_to_screen_point(point) //: Point
-	{
-		return new Point(point.x / FrameBuilder.#zoom + FrameBuilder.#origin.x, point.y / FrameBuilder.#zoom + FrameBuilder.#origin.y + FrameBuilder.#info_panel_rect.extent.height);
-	}
+// 	static convert_to_screen_point(point) //: Point
+// 	{
+// 		return new Point(point.x / FrameBuilder.#zoom + FrameBuilder.#origin.x, point.y / FrameBuilder.#zoom + FrameBuilder.#origin.y + FrameBuilder.#info_panel_rect.extent.height);
+// 	}
 	
-	static convert_to_screen_rect(rect) //: Rect 
-	{
-		return new Rect (FrameBuilder.convert_to_screen_point(rect.location), FrameBuilder.convert_to_screen_size(rect.extent));
-	}
+// 	static convert_to_screen_rect(rect) //: Rect 
+// 	{
+// 		return new Rect (FrameBuilder.convert_to_screen_point(rect.location), FrameBuilder.convert_to_screen_size(rect.extent));
+// 	}
 	
-	static convert_to_screen_size(size) //: Size
-	{
-		return new Size(FrameBuilder.convert_to_screen_length(size.width), FrameBuilder.convert_to_screen_length(size.height));
-	}		
+// 	static convert_to_screen_size(size) //: Size
+// 	{
+// 		return new Size(FrameBuilder.convert_to_screen_length(size.width), FrameBuilder.convert_to_screen_length(size.height));
+// 	}		
 				
-	static init(airport)		
-	{
-		FrameBuilder.#airport = airport;		
+// 	static init(airport)		
+// 	{
+// 		FrameBuilder.#airport = airport;		
 
-		FrameBuilder.#origin = new Point();
-		// TODO: event
-		// FrameBuilder.#airport.on_resized.add_event_listener(CustomDispatcher.ON_RESIZED, airport_on_resized);
-	}
+// 		FrameBuilder.#origin = new Point();
+// 		// TODO: event
+// 		// FrameBuilder.#airport.on_resized.add_event_listener(CustomDispatcher.ON_RESIZED, airport_on_resized);
+// 	}
 
-	static fit_to_frame(rect) //: Rect
-	{
-		let rect_result = rect.clone();
-		let dbl_hor_scale = FrameBuilder.#frame_rect.extent.width / rect.extent.width;    //10x50 / 500x100 //50
-		let dbl_ver_scale = FrameBuilder.#frame_rect.extent.height / rect.extent.height;//2
-		let dbl_scale = Math.min(dbl_hor_scale, dbl_ver_scale);
-		rect_result.extent.width *= dbl_scale; 
-		rect_result.extent.height *= dbl_scale;			
+// 	static fit_to_frame(rect) //: Rect
+// 	{
+// 		let rect_result = rect.clone();
+// 		let dbl_hor_scale = FrameBuilder.#frame_rect.extent.width / rect.extent.width;    //10x50 / 500x100 //50
+// 		let dbl_ver_scale = FrameBuilder.#frame_rect.extent.height / rect.extent.height;//2
+// 		let dbl_scale = Math.min(dbl_hor_scale, dbl_ver_scale);
+// 		rect_result.extent.width *= dbl_scale; 
+// 		rect_result.extent.height *= dbl_scale;			
 		
-		return FrameBuilder.center_in_frame(rect_result);
-	}
-//private methods
+// 		return FrameBuilder.center_in_frame(rect_result);
+// 	}
+// //private methods
 
 	static #display_frame_margins()
 	{
@@ -9114,14 +9165,14 @@ class FrameBuilder //static
 	static #display_margin(x, y)
 	{
 		let dbl_margin_width = FrameBuilder.adapt_to_frame(FrameBuilder.MARGIN_WIDTH);
-		let x = x ? ((x < 0) ? -dbl_margin_width : FrameBuilder.frame_rect.extent.width): 0;
-		let y = y ? ((y < 0) ? -dbl_margin_width : FrameBuilder.frame_rect.extent.height): 0;
-		let cx = x ? dbl_margin_width : FrameBuilder.frame_rect.extent.width;
-		let cy = y ? dbl_margin_width : FrameBuilder.frame_rect.extent.height;		
+		let pos_x = x ? ((x < 0) ? -dbl_margin_width : FrameBuilder.#frame_rect.extent.width): 0;
+		let pos_y = y ? ((y < 0) ? -dbl_margin_width : FrameBuilder.#frame_rect.extent.height): 0;
+		let cx = x ? dbl_margin_width : FrameBuilder.#frame_rect.extent.width;
+		let cy = y ? dbl_margin_width : FrameBuilder.#frame_rect.extent.height;		
 	
 
 		// TODO: creating and displaying image
-		// ScreenManager.display_image(new MarginImage(), new Rect(new Point(x, y), new Size(cx, cy)));
+		// ScreenManager.display_image(new MarginImage(), new Rect(new Point(pos_x, pos_y), new Size(cx, cy)));
 	}
 
 	static #display_performance_metrics() 
