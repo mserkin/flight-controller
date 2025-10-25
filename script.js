@@ -47,14 +47,6 @@ THREE.Quaternion.prototype.setFromBasis = function(e1, e2, e3) {
     return this;
 }
 
-const renderer = new THREE.WebGLRenderer({antialias: true}); //THREE.WebGLRenderer({ stencil: true});
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(canvasWidth, canvasHeight); 
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type =  THREE.PCFSoftShadowMap; //THREE.PCFShadowMap; //THREE.VSMShadowMap;
-renderer.setAnimationLoop(render);
-document.body.appendChild(renderer.domElement);
-
 //===Scene===
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
@@ -858,6 +850,14 @@ function action() {
 	}
 }
 
+const renderer = new THREE.WebGLRenderer({antialias: true}); //THREE.WebGLRenderer({ stencil: true});
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(canvasWidth, canvasHeight); 
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type =  THREE.PCFSoftShadowMap; //THREE.PCFShadowMap; //THREE.VSMShadowMap;
+//renderer.setAnimationLoop(render);
+document.body.appendChild(renderer.domElement);
+
 let render = function() {
     setTimeout(function() {
         requestAnimationFrame(render);
@@ -869,51 +869,6 @@ let render = function() {
 render();
 
 //=========
-
-//u˙=X/m−g⋅sin(θ)+r⋅v−q⋅w
-//v˙=y/m−g⋅sin(ϕ)⋅cos(θ)−r⋅u+p⋅w
-//w˙=Z/m−g⋅cos(ϕ) cos(θ)−q⋅u−p⋅v
-
-//const planeShape = new THREE.Shape();
-//planeShape.moveTo(-0.3, -2);
-//planeShape.lineTo(-0.2, -2.7);
-//planeShape.lineTo(-1.8, -4);
-//planeShape.lineTo(-2, -4.5);
-//planeShape.lineTo(-0.1, -3.7);
-//planeShape.lineTo(0, -5);
-//planeShape.lineTo(0.1, -3.7);
-//planeShape.lineTo(2, -4.5);
-//planeShape.lineTo(1.8, -4);
-//planeShape.lineTo(0.2, -2.7);
-//planeShape.lineTo(0.3, -2);
-//planeShape.lineTo(0.3, 0);
-//planeShape.lineTo(0.5, 0);
-
-//planeShape.lineTo(0.5, 0.5);
-//planeShape.lineTo(1.3, 0.3);
-//planeShape.lineTo(5.1, -1.3);
-//planeShape.lineTo(5, -0.7);
-//planeShape.lineTo(0.5, 2.7);
-
-//planeShape.lineTo(0.5, 3);
-//planeShape.lineTo(0.3, 3);
-//planeShape.lineTo(0.3, 4);
-//planeShape.bezierCurveTo(0.3, 4, 0.3, 5, 0, 5);
-//planeShape.bezierCurveTo(0, 5, -0.3, 5, -0.3, 4);
-//planeShape.lineTo(-0.3, 4);
-//planeShape.lineTo(-0.3, 3);
-//planeShape.lineTo(-0.5, 3);
-
-//planeShape.lineTo(-0.5, 2.7);
-//planeShape.lineTo(-5, -0.7);
-//planeShape.lineTo(-5.1, -1.3);
-//planeShape.lineTo(-1.3, 0.3);
-//planeShape.lineTo(-0.5, 0.5);
-
-//planeShape.lineTo(-0.5, 0);
-//planeShape.lineTo(-0.3, 0);
-//planeShape.lineTo(-0.3, -2);
-
 
 //////////////////////////////////////////////////
 // Logic
