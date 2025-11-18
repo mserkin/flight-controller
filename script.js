@@ -1,7 +1,3 @@
-//import * as THREE from "three.moin.js";
-//import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
-//const loader = new SVGLoader();
-
 let canvasWidth = window.innerWidth;
 let canvasHeight = window.innerHeight;
 
